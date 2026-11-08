@@ -9,7 +9,8 @@
 AGENTS.md
 .github/copilot-instructions.md
 
-
+# Local tests
+Tests/
 
 # User-specific files
 *.rsuser
