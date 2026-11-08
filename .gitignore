@@ -6,6 +6,11 @@
 # dotenv files
 .env
 
+AGENTS.md
+.github/copilot-instructions.md
+
+
+
 # User-specific files
 *.rsuser
 *.suo

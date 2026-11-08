@@ -1,0 +1,427 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace RentRoad.Data.Migrations
+{
+    /// <summary>
+    /// Adds the RentRoad schema while preserving the existing Identity tables and records.
+    /// </summary>
+    public partial class AddRentRoadSchema : Migration
+    {
+        /// <summary>
+        /// Creates application tables and adds profile columns with a safe display name for existing users.
+        /// </summary>
+        /// <param name="migrationBuilder">The builder used to define the schema upgrade.</param>
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "DisplayName",
+                table: "AspNetUsers",
+                type: "TEXT",
+                maxLength: 100,
+                nullable: false,
+                defaultValue: "RentRoad member");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Location",
+                table: "AspNetUsers",
+                type: "TEXT",
+                maxLength: 150,
+                nullable: true);
+
+            migrationBuilder.CreateTable(
+                name: "Listings",
+                columns: table => new
+                {
+                    ListingId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OwnerId = table.Column<string>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", maxLength: 150, nullable: true),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
+                    Category = table.Column<int>(type: "INTEGER", nullable: true),
+                    Condition = table.Column<int>(type: "INTEGER", nullable: true),
+                    DailyPriceCents = table.Column<long>(type: "INTEGER", nullable: true),
+                    PickupArea = table.Column<string>(type: "TEXT", maxLength: 150, nullable: true),
+                    Latitude = table.Column<double>(type: "REAL", nullable: true),
+                    Longitude = table.Column<double>(type: "REAL", nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    PublishedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Listings", x => x.ListingId);
+                    table.CheckConstraint("CK_Listings_Category", "\"Category\" IN (0, 1, 2, 3, 4, 5)");
+                    table.CheckConstraint("CK_Listings_Condition", "\"Condition\" IN (0, 1, 2, 3)");
+                    table.CheckConstraint("CK_Listings_DailyPriceCents", "\"DailyPriceCents\" >= 0");
+                    table.CheckConstraint("CK_Listings_PublishedPrice", "\"Status\" <> 1 OR (\"DailyPriceCents\" IS NOT NULL AND \"DailyPriceCents\" > 0)");
+                    table.CheckConstraint("CK_Listings_Status", "\"Status\" IN (0, 1, 2, 3)");
+                    table.ForeignKey(
+                        name: "FK_Listings_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AvailabilityBlocks",
+                columns: table => new
+                {
+                    AvailabilityBlockId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ListingId = table.Column<int>(type: "INTEGER", nullable: false),
+                    StartDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    Reason = table.Column<string>(type: "TEXT", maxLength: 250, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AvailabilityBlocks", x => x.AvailabilityBlockId);
+                    table.CheckConstraint("CK_AvailabilityBlocks_DateRange", "\"StartDate\" < \"EndDate\"");
+                    table.ForeignKey(
+                        name: "FK_AvailabilityBlocks_Listings_ListingId",
+                        column: x => x.ListingId,
+                        principalTable: "Listings",
+                        principalColumn: "ListingId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AvailabilityWindows",
+                columns: table => new
+                {
+                    AvailabilityWindowId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ListingId = table.Column<int>(type: "INTEGER", nullable: false),
+                    StartDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AvailabilityWindows", x => x.AvailabilityWindowId);
+                    table.CheckConstraint("CK_AvailabilityWindows_DateRange", "\"StartDate\" < \"EndDate\"");
+                    table.ForeignKey(
+                        name: "FK_AvailabilityWindows_Listings_ListingId",
+                        column: x => x.ListingId,
+                        principalTable: "Listings",
+                        principalColumn: "ListingId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Conversations",
+                columns: table => new
+                {
+                    ConversationId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ListingId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RenterId = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Conversations", x => x.ConversationId);
+                    table.ForeignKey(
+                        name: "FK_Conversations_AspNetUsers_RenterId",
+                        column: x => x.RenterId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Conversations_Listings_ListingId",
+                        column: x => x.ListingId,
+                        principalTable: "Listings",
+                        principalColumn: "ListingId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ListingImages",
+                columns: table => new
+                {
+                    ListingImageId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ListingId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ContainerName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    BlobName = table.Column<string>(type: "TEXT", maxLength: 1024, nullable: false),
+                    OriginalFileName = table.Column<string>(type: "TEXT", maxLength: 255, nullable: true),
+                    ContentType = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    SizeBytes = table.Column<long>(type: "INTEGER", nullable: false),
+                    AltText = table.Column<string>(type: "TEXT", maxLength: 250, nullable: true),
+                    IsPrimary = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
+                    DisplayOrder = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ListingImages", x => x.ListingImageId);
+                    table.CheckConstraint("CK_ListingImages_SizeBytes", "\"SizeBytes\" >= 0");
+                    table.ForeignKey(
+                        name: "FK_ListingImages_Listings_ListingId",
+                        column: x => x.ListingId,
+                        principalTable: "Listings",
+                        principalColumn: "ListingId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RentalRequests",
+                columns: table => new
+                {
+                    RentalRequestId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ListingId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RenterId = table.Column<string>(type: "TEXT", nullable: false),
+                    StartDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    PickupTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
+                    ReturnTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
+                    DailyPriceAtRequestCents = table.Column<long>(type: "INTEGER", nullable: false),
+                    TotalPriceCents = table.Column<long>(type: "INTEGER", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DecisionAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CompletedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RentalRequests", x => x.RentalRequestId);
+                    table.CheckConstraint("CK_RentalRequests_DailyPriceAtRequestCents", "\"DailyPriceAtRequestCents\" >= 0");
+                    table.CheckConstraint("CK_RentalRequests_DateRange", "\"StartDate\" < \"EndDate\"");
+                    table.CheckConstraint("CK_RentalRequests_Status", "\"Status\" IN (0, 1, 2, 3, 4, 5)");
+                    table.CheckConstraint("CK_RentalRequests_TotalPriceCents", "\"TotalPriceCents\" >= 0");
+                    table.ForeignKey(
+                        name: "FK_RentalRequests_AspNetUsers_RenterId",
+                        column: x => x.RenterId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_RentalRequests_Listings_ListingId",
+                        column: x => x.ListingId,
+                        principalTable: "Listings",
+                        principalColumn: "ListingId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserActivities",
+                columns: table => new
+                {
+                    UserActivityId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    ListingId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Category = table.Column<int>(type: "INTEGER", nullable: true),
+                    ActivityType = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserActivities", x => x.UserActivityId);
+                    table.CheckConstraint("CK_UserActivities_ActivityType", "\"ActivityType\" IN (0, 1)");
+                    table.CheckConstraint("CK_UserActivities_Category", "\"Category\" IN (0, 1, 2, 3, 4, 5)");
+                    table.ForeignKey(
+                        name: "FK_UserActivities_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserActivities_Listings_ListingId",
+                        column: x => x.ListingId,
+                        principalTable: "Listings",
+                        principalColumn: "ListingId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    MessageId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ConversationId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SenderId = table.Column<string>(type: "TEXT", nullable: false),
+                    Content = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: false),
+                    SentAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ReadAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.MessageId);
+                    table.ForeignKey(
+                        name: "FK_Messages_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Messages_Conversations_ConversationId",
+                        column: x => x.ConversationId,
+                        principalTable: "Conversations",
+                        principalColumn: "ConversationId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    ReviewId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    RentalRequestId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Rating = table.Column<int>(type: "INTEGER", nullable: false),
+                    Comment = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.ReviewId);
+                    table.CheckConstraint("CK_Reviews_Rating", "\"Rating\" BETWEEN 1 AND 5");
+                    table.ForeignKey(
+                        name: "FK_Reviews_RentalRequests_RentalRequestId",
+                        column: x => x.RentalRequestId,
+                        principalTable: "RentalRequests",
+                        principalColumn: "RentalRequestId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AvailabilityBlocks_ListingId_StartDate_EndDate",
+                table: "AvailabilityBlocks",
+                columns: new[] { "ListingId", "StartDate", "EndDate" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AvailabilityWindows_ListingId_StartDate_EndDate",
+                table: "AvailabilityWindows",
+                columns: new[] { "ListingId", "StartDate", "EndDate" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Conversations_ListingId_RenterId",
+                table: "Conversations",
+                columns: new[] { "ListingId", "RenterId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Conversations_RenterId",
+                table: "Conversations",
+                column: "RenterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ListingImages_ContainerName_BlobName",
+                table: "ListingImages",
+                columns: new[] { "ContainerName", "BlobName" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ListingImages_ListingId",
+                table: "ListingImages",
+                column: "ListingId",
+                unique: true,
+                filter: "\"IsPrimary\" = 1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ListingImages_ListingId_IsPrimary",
+                table: "ListingImages",
+                columns: new[] { "ListingId", "IsPrimary" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Listings_OwnerId_Status",
+                table: "Listings",
+                columns: new[] { "OwnerId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Listings_PickupArea",
+                table: "Listings",
+                column: "PickupArea");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Listings_Status_Category",
+                table: "Listings",
+                columns: new[] { "Status", "Category" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ConversationId_SentAtUtc",
+                table: "Messages",
+                columns: new[] { "ConversationId", "SentAtUtc" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderId",
+                table: "Messages",
+                column: "SenderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RentalRequests_ListingId_Status_StartDate_EndDate",
+                table: "RentalRequests",
+                columns: new[] { "ListingId", "Status", "StartDate", "EndDate" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RentalRequests_RenterId_Status",
+                table: "RentalRequests",
+                columns: new[] { "RenterId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_RentalRequestId",
+                table: "Reviews",
+                column: "RentalRequestId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActivities_ListingId_ActivityType",
+                table: "UserActivities",
+                columns: new[] { "ListingId", "ActivityType" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActivities_UserId_CreatedAtUtc",
+                table: "UserActivities",
+                columns: new[] { "UserId", "CreatedAtUtc" });
+        }
+
+        /// <summary>
+        /// Removes the application tables and profile columns, retaining the original Identity schema.
+        /// </summary>
+        /// <param name="migrationBuilder">The builder used to define the schema downgrade.</param>
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "AvailabilityBlocks");
+
+            migrationBuilder.DropTable(
+                name: "AvailabilityWindows");
+
+            migrationBuilder.DropTable(
+                name: "ListingImages");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "Reviews");
+
+            migrationBuilder.DropTable(
+                name: "UserActivities");
+
+            migrationBuilder.DropTable(
+                name: "Conversations");
+
+            migrationBuilder.DropTable(
+                name: "RentalRequests");
+
+            migrationBuilder.DropTable(
+                name: "Listings");
+
+            migrationBuilder.DropColumn(
+                name: "DisplayName",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "Location",
+                table: "AspNetUsers");
+        }
+    }
+}
