@@ -10,7 +10,8 @@ public enum ListingServiceStatus
     Forbidden,
     NotFound,
     ValidationFailed,
-    InvalidState
+    InvalidState,
+    Conflict
 }
 
 /// <summary>

@@ -11,9 +11,47 @@ namespace RentRoad.Services.Listings;
 /// Public search and details require no principal and return projections that exclude private account data.
 /// Expected validation, authorization, and missing-record failures are returned as structured results.
 /// Cancellation and unexpected persistence failures propagate to the application's error handling.
+/// Availability writes, bulk window replacement, and publication use independent transactions and return detached entities.
+/// Save or discard pending listing/availability changes and finish caller transactions before invoking these operations.
 /// </remarks>
 public interface IListingService
 {
+    /// <summary>
+    /// Adds an owner's availability window without invalidating approved or active reservations.
+    /// </summary>
+    Task<ListingServiceResult<AvailabilityWindow>> CreateAvailabilityWindowAsync(int listingId, ClaimsPrincipal? user,
+        ListingAvailabilityPeriod? period, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Changes an owner's availability window while preserving reservation coverage.
+    /// </summary>
+    Task<ListingServiceResult<AvailabilityWindow>> UpdateAvailabilityWindowAsync(int listingId, int windowId,
+        ClaimsPrincipal? user, ListingAvailabilityPeriod? period, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a window only if remaining windows preserve reservations and publication requirements.
+    /// </summary>
+    Task<ListingServiceResult<AvailabilityWindow>> RemoveAvailabilityWindowAsync(int listingId, int windowId,
+        ClaimsPrincipal? user, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds an owner's unavailable period without overlapping approved or active reservations.
+    /// </summary>
+    Task<ListingServiceResult<AvailabilityBlock>> CreateAvailabilityBlockAsync(int listingId, ClaimsPrincipal? user,
+        ListingAvailabilityBlockUpdate? details, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Changes an owner's unavailable period and private reason while protecting reservations.
+    /// </summary>
+    Task<ListingServiceResult<AvailabilityBlock>> UpdateAvailabilityBlockAsync(int listingId, int blockId,
+        ClaimsPrincipal? user, ListingAvailabilityBlockUpdate? details, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes an owner's unavailable period without deleting listing or rental history.
+    /// </summary>
+    Task<ListingServiceResult<AvailabilityBlock>> RemoveAvailabilityBlockAsync(int listingId, int blockId,
+        ClaimsPrincipal? user, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Searches published listings or browses them with default filters and pagination when parameters are omitted.
     /// </summary>

@@ -10,7 +10,7 @@ namespace RentRoad.Services.Listings;
 /// <summary>
 /// Applies owner listing rules and retrieves published listing data without exposing private accounts.
 /// </summary>
-public sealed class ListingService : IListingService
+public sealed partial class ListingService : IListingService
 {
     private const string SIGN_IN_MESSAGE = "Sign in to manage your listings.";
     private readonly ApplicationDbContext context;
@@ -58,10 +58,25 @@ public sealed class ListingService : IListingService
     }
 
     /// <summary>
-    /// Validates and updates an owner's editable details without changing ownership or historical records.
+    /// Updates an owner's editable details, protecting historical records and reservations during window replacement.
     /// </summary>
-    public async Task<ListingServiceResult<Listing>> UpdateAsync(int listingId, ClaimsPrincipal? user,
+    public Task<ListingServiceResult<Listing>> UpdateAsync(int listingId, ClaimsPrincipal? user,
         ListingUpdate? details, CancellationToken cancellationToken = default)
+    {
+        if (details?.AvailabilityWindows is null)
+        {
+            return UpdateListingDetailsAsync(listingId, user, details, cancellationToken);
+        }
+        var snapshot = details with { AvailabilityWindows = details.AvailabilityWindows.ToArray() };
+        return ExecuteAvailabilityMutationAsync(listingId, user,
+            (service, token) => service.UpdateListingDetailsAsync(listingId, user, snapshot, token), cancellationToken);
+    }
+
+    /// <summary>
+    /// Applies validated scalar and optional window changes inside the caller's availability transaction when needed.
+    /// </summary>
+    private async Task<ListingServiceResult<Listing>> UpdateListingDetailsAsync(int listingId, ClaimsPrincipal? user,
+        ListingUpdate? details, CancellationToken cancellationToken)
     {
         var owned = await GetOwnedListingAsync(listingId, user, cancellationToken);
         if (!owned.IsSuccess)
@@ -90,6 +105,17 @@ public sealed class ListingService : IListingService
         if (errors.Count > 0)
         {
             return ListingServiceResult<Listing>.Failure(ListingServiceStatus.ValidationFailed, errors.ToArray());
+        }
+
+        if (windows is not null)
+        {
+            var blocks = await context.AvailabilityBlocks.AsNoTracking()
+                .Where(block => block.ListingId == listingId).ToListAsync(cancellationToken);
+            var availability = await ValidateAvailabilityStateAsync(listingId, listing.Status, windows, blocks, cancellationToken);
+            if (!availability.IsSuccess)
+            {
+                return ListingServiceResult<Listing>.Failure(availability.Status, availability.Errors.ToArray());
+            }
         }
 
         ApplyEditableDetails(details, listing);
@@ -137,8 +163,16 @@ public sealed class ListingService : IListingService
     /// <summary>
     /// Publishes a valid listing, preserving its creation time and any original publication time.
     /// </summary>
-    public async Task<ListingServiceResult<Listing>> PublishAsync(int listingId, ClaimsPrincipal? user,
-        CancellationToken cancellationToken = default)
+    public Task<ListingServiceResult<Listing>> PublishAsync(int listingId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default) =>
+        ExecuteAvailabilityMutationAsync(listingId, user,
+            (service, token) => service.PublishListingAsync(listingId, user, token), cancellationToken);
+
+    /// <summary>
+    /// Validates and publishes within the availability transaction, preserving the original publication timestamp.
+    /// </summary>
+    private async Task<ListingServiceResult<Listing>> PublishListingAsync(int listingId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken)
     {
         var validated = await ValidateForPublicationAsync(listingId, user, cancellationToken);
         if (!validated.IsSuccess || validated.Value!.Status == ListingStatus.Published)
@@ -175,7 +209,7 @@ public sealed class ListingService : IListingService
     }
 
     /// <summary>
-    /// Retrieves detached listings for the authenticated owner in most-recently-updated order.
+    /// Retrieves detached owner listings with image and editable availability metadata in most-recently-updated order.
     /// </summary>
     public async Task<ListingServiceResult<IReadOnlyList<Listing>>> GetOwnerListingsAsync(ClaimsPrincipal? user,
         CancellationToken cancellationToken = default)
@@ -191,6 +225,7 @@ public sealed class ListingService : IListingService
             .Where(listing => listing.OwnerId == ownerId)
             .Include(listing => listing.Images)
             .Include(listing => listing.AvailabilityWindows)
+            .Include(listing => listing.AvailabilityBlocks)
             .AsSplitQuery()
             .OrderByDescending(listing => listing.UpdatedAtUtc)
             .ThenByDescending(listing => listing.ListingId)
@@ -503,16 +538,21 @@ public sealed class ListingService : IListingService
     }
 
     /// <summary>
-    /// Rejects unspecified or non-positive half-open availability ranges without forbidding adjacent windows.
+    /// Rejects invalid or exact duplicate ranges while allowing adjacent and overlapping windows.
     /// </summary>
     private static IEnumerable<ListingValidationError> ValidateAvailabilityWindows(IReadOnlyList<ListingAvailabilityPeriod> windows)
     {
+        var seen = new HashSet<ListingAvailabilityPeriod>();
         for (var index = 0; index < windows.Count; index++)
         {
             var window = windows[index];
             if (window is null || window.StartDate == default || window.EndDate == default || window.StartDate >= window.EndDate)
             {
                 yield return new($"{nameof(Listing.AvailabilityWindows)}[{index}]", "Choose availability dates with the start before the end.");
+            }
+            else if (!seen.Add(window))
+            {
+                yield return new($"{nameof(Listing.AvailabilityWindows)}[{index}]", "An availability window with these dates already exists.");
             }
         }
     }
