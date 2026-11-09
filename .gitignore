@@ -12,6 +12,10 @@ AGENTS.md
 # Local tests
 Tests/
 Services/Storage/README.md
+Services/Listings/ListingImages.md
+
+# Local documentation
+Services/Listings/ListingImages.md
 
 # User-specific files
 *.rsuser

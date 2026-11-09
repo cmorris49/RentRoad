@@ -23,6 +23,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IListingService, ListingService>();
+builder.Services.AddScoped<IListingImageService, ListingImageService>();
 builder.Services.AddBlobImageStorage(builder.Configuration);
 
 var app = builder.Build();

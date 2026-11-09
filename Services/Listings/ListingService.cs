@@ -421,31 +421,8 @@ public sealed partial class ListingService : IListingService
     /// <summary>
     /// Loads a listing only after authenticating the caller and verifies immutable ownership.
     /// </summary>
-    private async Task<ListingServiceResult<Listing>> GetOwnedListingAsync(int listingId, ClaimsPrincipal? user,
-        CancellationToken cancellationToken)
-    {
-        var ownerId = GetAuthenticatedOwnerId(user);
-        if (ownerId is null)
-        {
-            return ListingServiceResult<Listing>.Failure(ListingServiceStatus.Unauthenticated,
-                new ListingValidationError(nameof(Listing.OwnerId), SIGN_IN_MESSAGE));
-        }
-
-        var listing = await context.Listings.SingleOrDefaultAsync(item => item.ListingId == listingId, cancellationToken);
-        if (listing is null)
-        {
-            return ListingServiceResult<Listing>.Failure(ListingServiceStatus.NotFound,
-                new ListingValidationError(nameof(Listing.ListingId), "The listing could not be found."));
-        }
-
-        if (!string.Equals(listing.OwnerId, ownerId, StringComparison.Ordinal))
-        {
-            return ListingServiceResult<Listing>.Failure(ListingServiceStatus.Forbidden,
-                new ListingValidationError(nameof(Listing.OwnerId), "Only the listing owner can perform this action."));
-        }
-
-        return ListingServiceResult<Listing>.Success(listing);
-    }
+    private Task<ListingServiceResult<Listing>> GetOwnedListingAsync(int listingId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken) => ListingOperationScope.GetOwnedListingAsync(context, listingId, user, cancellationToken);
 
     /// <summary>
     /// Collects all required field, stored image, and availability errors before publication.
@@ -481,9 +458,7 @@ public sealed partial class ListingService : IListingService
 
         var images = await context.ListingImages.AsNoTracking()
             .Where(image => image.ListingId == listing.ListingId).ToListAsync(cancellationToken);
-        if (!images.Any(image => !string.IsNullOrWhiteSpace(image.ContainerName)
-            && !string.IsNullOrWhiteSpace(image.BlobName) && image.SizeBytes > 0
-            && image.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)))
+        if (!images.Any(HasStoredImageMetadata))
         {
             errors.Add(new(nameof(Listing.Images), "Add at least one stored listing image before publishing."));
         }
@@ -575,12 +550,14 @@ public sealed partial class ListingService : IListingService
     /// <summary>
     /// Reads the owner identifier only from an authenticated Identity claims identity.
     /// </summary>
-    private static string? GetAuthenticatedOwnerId(ClaimsPrincipal? user)
-    {
-        var ownerId = user?.Identities.FirstOrDefault(identity => identity.IsAuthenticated)
-            ?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return string.IsNullOrWhiteSpace(ownerId) ? null : ownerId;
-    }
+    private static string? GetAuthenticatedOwnerId(ClaimsPrincipal? user) => ListingOperationScope.GetOwnerId(user);
+
+    /// <summary>
+    /// Identifies stored image metadata that satisfies the existing listing publication requirement.
+    /// </summary>
+    internal static bool HasStoredImageMetadata(ListingImage image) => !string.IsNullOrWhiteSpace(image.ContainerName)
+        && !string.IsNullOrWhiteSpace(image.BlobName) && image.SizeBytes > 0
+        && image.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Explains why an archived listing cannot be edited or republished.

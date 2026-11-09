@@ -1,9 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using System.Data;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using RentRoad.Data;
 using RentRoad.Models;
 using RentRoad.Models.Enums;
 
@@ -67,49 +64,13 @@ public sealed partial class ListingService
     /// </summary>
     /// <remarks>
     /// A separate change tracker prevents failed retries from leaking mutations into the scoped context.
-    /// Successful writes invalidate only unchanged tracked listing/availability records for this listing.
+    /// Successful writes invalidate unchanged tracked listing, availability, and image records for this listing.
     /// Callers must save or discard pending changes before starting an independent availability unit of work.
     /// </remarks>
-    private async Task<ListingServiceResult<T>> ExecuteAvailabilityMutationAsync<T>(int listingId, ClaimsPrincipal? user,
+    private Task<ListingServiceResult<T>> ExecuteAvailabilityMutationAsync<T>(int listingId, ClaimsPrincipal? user,
         Func<ListingService, CancellationToken, Task<ListingServiceResult<T>>> operation, CancellationToken cancellationToken)
-    {
-        if (GetAuthenticatedOwnerId(user) is null)
-        {
-            return ListingServiceResult<T>.Failure(ListingServiceStatus.Unauthenticated,
-                new ListingValidationError(nameof(Listing.OwnerId), SIGN_IN_MESSAGE));
-        }
-        var tracked = context.ChangeTracker.Entries().Where(entry =>
-            entry.Entity is Listing listing && listing.ListingId == listingId
-            || entry.Entity is AvailabilityWindow window && window.ListingId == listingId
-            || entry.Entity is AvailabilityBlock block && block.ListingId == listingId).ToArray();
-        if (context.Database.CurrentTransaction is not null || tracked.Any(entry => entry.State != EntityState.Unchanged))
-        {
-            return ListingServiceResult<T>.Failure(ListingServiceStatus.Conflict,
-                new ListingValidationError(nameof(Listing.ListingId), "Save or discard pending listing changes and complete the current transaction before modifying availability or publishing."));
-        }
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>(
-            (DbContextOptions<ApplicationDbContext>)context.GetService<IDbContextOptions>()).UseModel(context.Model).Options;
-        var result = await context.Database.CreateExecutionStrategy().ExecuteAsync(async token =>
-        {
-            await using var writeContext = new ApplicationDbContext(options);
-            await using var transaction = await writeContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, token);
-            var outcome = await operation(new ListingService(writeContext, timeProvider), token);
-            if (outcome.IsSuccess)
-            {
-                await transaction.CommitAsync(token);
-            }
-            return outcome;
-        }, cancellationToken);
-        if (result.IsSuccess)
-        {
-            foreach (var entry in tracked)
-            {
-                entry.State = EntityState.Detached;
-            }
-        }
-        return result;
-    }
+        => ListingOperationScope.ExecuteAsync(context, listingId, user,
+            (writeContext, token) => operation(new ListingService(writeContext, timeProvider), token), cancellationToken, includeImageChanges: false);
 
     /// <summary>
     /// Validates a proposed window set before applying a single atomic availability and timestamp save.

@@ -11,7 +11,11 @@ public enum ListingServiceStatus
     NotFound,
     ValidationFailed,
     InvalidState,
-    Conflict
+    Conflict,
+    StorageFailed,
+    PersistenceFailed,
+    CleanupPending,
+    ReconciliationRequired
 }
 
 /// <summary>
