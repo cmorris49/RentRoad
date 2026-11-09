@@ -26,6 +26,7 @@ public sealed class ListingSearchResultsViewModel : ListingSearchInputViewModel
 /// </summary>
 public sealed class ListingPaginationViewModel
 {
+    private const int VISIBLE_PAGE_COUNT = 5;
     public int TotalCount { get; }
     public int PageNumber { get; }
     public int PageSize { get; }
@@ -34,6 +35,24 @@ public sealed class ListingPaginationViewModel
     public bool HasNextPage => PageNumber < TotalPages;
     public int? PreviousPageNumber => HasPreviousPage ? PageNumber - 1 : null;
     public int? NextPageNumber => HasNextPage ? PageNumber + 1 : null;
+
+    /// <summary>
+    /// Supplies a bounded set of page buttons without enumerating every result page or overflowing large page numbers.
+    /// </summary>
+    public IEnumerable<int> VisiblePageNumbers
+    {
+        get
+        {
+            if (TotalPages == 0)
+            {
+                return Array.Empty<int>();
+            }
+            var last = (int)Math.Min(TotalPages, (long)Math.Min(PageNumber, TotalPages) + VISIBLE_PAGE_COUNT / 2);
+            var first = Math.Max(1, last - VISIBLE_PAGE_COUNT + 1);
+            last = (int)Math.Min(TotalPages, (long)first + VISIBLE_PAGE_COUNT - 1);
+            return Enumerable.Range(first, last - first + 1);
+        }
+    }
 
     /// <summary>
     /// Copies validated pagination information from the existing service result without clamping requested pages.

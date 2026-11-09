@@ -1,0 +1,205 @@
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@using RentRoad.Models.Enums
+@using RentRoad.Services.Listings
+@using RentRoad.ViewModels.Listings
+@model ListingSearchResultsViewModel
+@{
+    ViewData["Title"] = "Browse rentals";
+    var pagination = Model.Pagination;
+    var minimumPriceInvalid = ViewData.ModelState.GetFieldValidationState(nameof(Model.MinimumDailyPriceCad)) == ModelValidationState.Invalid
+        || ViewData.ModelState.GetFieldValidationState(nameof(Model.MinimumDailyPriceCents)) == ModelValidationState.Invalid;
+    var maximumPriceInvalid = ViewData.ModelState.GetFieldValidationState(nameof(Model.MaximumDailyPriceCad)) == ModelValidationState.Invalid
+        || ViewData.ModelState.GetFieldValidationState(nameof(Model.MaximumDailyPriceCents)) == ModelValidationState.Invalid;
+}
+
+<div class="browse-page">
+<header class="page-header browse-heading">
+    <p class="eyebrow">The RentRoad marketplace</p>
+    <h1>Find your next rental.</h1>
+    <p>Something for your plans, without the commitment of owning it.</p>
+</header>
+
+@if (!Model.HasValidSearch)
+{
+    <div class="alert alert-danger" role="alert" aria-labelledby="search-error-heading">
+        <h2 id="search-error-heading" class="h5">We couldn’t use those search filters.</h2>
+        <p>Check the values below and apply your filters again, or <a asp-controller="Listings" asp-action="Index">reset your search</a>.</p>
+        <div asp-validation-summary="All"></div>
+    </div>
+}
+
+<div class="browse-layout">
+    <aside class="browse-sidebar" aria-labelledby="filters-heading">
+        <button class="btn btn-outline-primary filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filter-panel" aria-controls="filter-panel" aria-expanded="@(!Model.HasValidSearch ? "true" : "false")">Refine search <span aria-hidden="true">⌄</span></button>
+        <div class="collapse d-lg-block @(!Model.HasValidSearch ? "show" : null)" id="filter-panel">
+            <form id="listing-filters" class="card filter-panel" method="get" asp-controller="Listings" asp-action="Index">
+                <div class="filter-heading">
+                    <h2 id="filters-heading" class="h5">Refine your search</h2>
+                    <a asp-controller="Listings" asp-action="Index">Reset</a>
+                </div>
+                <div>
+                    <label asp-for="Category" class="form-label">Category</label>
+                    <select asp-for="Category" class="form-select" aria-describedby="category-error">
+                        <option value="">All categories</option>
+                        @foreach (var category in Enum.GetValues<ListingCategory>())
+                        {
+                            <option value="@category">@ListingDisplayText.Category(category)</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Category" id="category-error"></span>
+                </div>
+                <div>
+                    <label asp-for="Condition" class="form-label">Item condition</label>
+                    <select asp-for="Condition" class="form-select" aria-describedby="condition-error">
+                        <option value="">Any condition</option>
+                        @foreach (var condition in Enum.GetValues<ItemCondition>())
+                        {
+                            <option value="@condition">@ListingDisplayText.Condition(condition)</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Condition" id="condition-error"></span>
+                </div>
+                <fieldset>
+                    <legend class="form-label">Daily price (CAD)</legend>
+                    <div class="price-filter-grid">
+                        <div>
+                            <label asp-for="MinimumDailyPriceCad" class="price-bound-label">Minimum</label>
+                            <div class="input-group">
+                                <span class="input-group-text" aria-hidden="true">$</span>
+                                <input asp-for="MinimumDailyPriceCad" asp-format="{0:0.00}" type="number" min="0" step="0.01" class="form-control @(minimumPriceInvalid ? "input-validation-error" : null)" placeholder="Any" aria-invalid="@(minimumPriceInvalid ? "true" : null)" aria-describedby="price-help minimum-price-errors" />
+                            </div>
+                        </div>
+                        <div>
+                            <label asp-for="MaximumDailyPriceCad" class="price-bound-label">Maximum</label>
+                            <div class="input-group">
+                                <span class="input-group-text" aria-hidden="true">$</span>
+                                <input asp-for="MaximumDailyPriceCad" asp-format="{0:0.00}" type="number" min="0" step="0.01" class="form-control @(maximumPriceInvalid ? "input-validation-error" : null)" placeholder="Any" aria-invalid="@(maximumPriceInvalid ? "true" : null)" aria-describedby="price-help maximum-price-errors" />
+                            </div>
+                        </div>
+                    </div>
+                    <div id="price-help" class="form-text">Per day, with up to two decimal places.</div>
+                    <div id="minimum-price-errors">
+                        <span asp-validation-for="MinimumDailyPriceCad"></span>
+                        <span asp-validation-for="MinimumDailyPriceCents"></span>
+                    </div>
+                    <div id="maximum-price-errors">
+                        <span asp-validation-for="MaximumDailyPriceCad"></span>
+                        <span asp-validation-for="MaximumDailyPriceCents"></span>
+                    </div>
+                </fieldset>
+                <div>
+                    <label asp-for="PickupArea" class="form-label">Pickup area</label>
+                    <input asp-for="PickupArea" class="form-control" placeholder="e.g. Kitsilano, Vancouver" maxlength="@ListingSearchParameters.MAX_PICKUP_AREA_LENGTH" aria-describedby="pickup-error" />
+                    <span asp-validation-for="PickupArea" id="pickup-error"></span>
+                </div>
+                <div>
+                    <label asp-for="PageSize" class="form-label">Results per page</label>
+                    <input asp-for="PageSize" type="number" min="1" max="@ListingSearchParameters.MAX_PAGE_SIZE" step="1" class="form-control" aria-describedby="page-size-error" required />
+                    <span asp-validation-for="PageSize" id="page-size-error"></span>
+                </div>
+                <button class="btn btn-primary" type="submit">Apply filters</button>
+            </form>
+        </div>
+    </aside>
+
+    <section class="browse-results" aria-labelledby="results-heading">
+        <div class="browse-search" role="search" aria-label="Search rental listings">
+            <label asp-for="SearchText" class="form-label">Search rentals</label>
+            <div class="browse-search-controls">
+                <input asp-for="SearchText" type="search" form="listing-filters" class="form-control" placeholder="What are you looking for?" maxlength="@ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH" aria-describedby="keyword-error" />
+                <button class="btn btn-primary" type="submit" form="listing-filters">Search</button>
+            </div>
+            <span asp-validation-for="SearchText" id="keyword-error"></span>
+        </div>
+        <div class="results-toolbar">
+            <div>
+                <h2 id="results-heading" class="h4">@(string.IsNullOrWhiteSpace(Model.SearchText) ? "Explore the marketplace" : $"Results for “{Model.SearchText}”")</h2>
+                @if (pagination is not null)
+                {
+                    <p class="results-count">@pagination.TotalCount.ToString("N0") @(pagination.TotalCount == 1 ? "rental" : "rentals") found <span aria-hidden="true">·</span> Prices per day in CAD</p>
+                }
+            </div>
+            <div class="sort-controls">
+                <label asp-for="SortOrder" class="form-label">Sort by</label>
+                <div class="sort-inputs">
+                    <select asp-for="SortOrder" class="form-select" form="listing-filters" aria-describedby="sort-error">
+                        <option value="@ListingSortOrder.NewestFirst">Newest first</option>
+                        <option value="@ListingSortOrder.PriceLowToHigh">Price: low to high</option>
+                        <option value="@ListingSortOrder.PriceHighToLow">Price: high to low</option>
+                    </select>
+                    <button class="btn btn-outline-primary" type="submit" form="listing-filters">Update</button>
+                </div>
+                <span asp-validation-for="SortOrder" id="sort-error"></span>
+            </div>
+        </div>
+
+        @if (Model.HasValidSearch)
+        {
+            @if (Model.Listings.Count > 0)
+            {
+                <div class="listing-grid">
+                    @foreach (var listing in Model.Listings)
+                    {
+                        <partial name="_ListingCard" model="listing" />
+                    }
+                </div>
+            }
+            else if (pagination!.TotalCount > 0)
+            {
+                <div class="empty-state">
+                    <p class="eyebrow">Let’s get you back on track</p>
+                    <h3>That page has no rentals.</h3>
+                    <p>Your search has matches, but this page is beyond the results.</p>
+                    <a class="btn btn-primary" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(1)">Back to the first page</a>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <svg class="empty-state-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                        <circle cx="14" cy="14" r="9" /><path d="m21 21 7 7M10 14h8" stroke-linecap="round" />
+                    </svg>
+                    <h3>No rentals to show just yet.</h3>
+                    <p>Try a different keyword, category, or price range. New listings will appear as owners publish them.</p>
+                    <a class="btn btn-outline-primary" asp-controller="Listings" asp-action="Index">Reset filters</a>
+                </div>
+            }
+
+            @if (pagination!.TotalPages > 1 && Model.Listings.Count > 0)
+            {
+                <nav class="results-pagination" aria-label="Listing result pages">
+                    <p class="results-count">Page @pagination.PageNumber.ToString("N0") of @pagination.TotalPages.ToString("N0")</p>
+                    <ul class="pagination">
+                        @if (pagination.PreviousPageNumber is int previous)
+                        {
+                            <li class="page-item"><a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(previous)" rel="prev" aria-label="Previous page">←</a></li>
+                        }
+                        @foreach (var pageNumber in pagination.VisiblePageNumbers)
+                        {
+                            <li class="page-item @(pageNumber == pagination.PageNumber ? "active" : null)">
+                                @if (pageNumber == pagination.PageNumber)
+                                {
+                                    <span class="page-link" aria-current="page">@pageNumber</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(pageNumber)" aria-label="Page @pageNumber">@pageNumber</a>
+                                }
+                            </li>
+                        }
+                        @if (pagination.NextPageNumber is int next)
+                        {
+                            <li class="page-item"><a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(next)" rel="next" aria-label="Next page">→</a></li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+    </section>
+</div>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/listing-images.js" asp-append-version="true" defer></script>
+}

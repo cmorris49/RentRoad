@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.ComponentModel.DataAnnotations;
 using RentRoad.Models.Enums;
 using RentRoad.Services.Listings;
 
@@ -19,6 +20,41 @@ public class ListingSearchInputViewModel
     public ListingSortOrder SortOrder { get; set; } = ListingSortOrder.NewestFirst;
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = ListingSearchParameters.DEFAULT_PAGE_SIZE;
+
+    [Display(Name = "Minimum daily price")]
+    public decimal? MinimumDailyPriceCad
+    {
+        get => MinimumDailyPriceCents / 100m;
+        set => MinimumDailyPriceCents = ConvertCadToCents(value);
+    }
+
+    [Display(Name = "Maximum daily price")]
+    public decimal? MaximumDailyPriceCad
+    {
+        get => MaximumDailyPriceCents / 100m;
+        set => MaximumDailyPriceCents = ConvertCadToCents(value);
+    }
+
+    /// <summary>
+    /// Converts dollar input without rounding fractional cents or exceeding the existing storage range.
+    /// </summary>
+    private static long? ConvertCadToCents(decimal? amount)
+    {
+        if (!amount.HasValue)
+        {
+            return null;
+        }
+        if (amount > long.MaxValue / 100m || amount < long.MinValue / 100m)
+        {
+            throw new FormatException("Enter a price within the supported range.");
+        }
+        var cents = amount.Value * 100m;
+        if (cents != decimal.Truncate(cents))
+        {
+            throw new FormatException("Enter a price with no more than two decimal places.");
+        }
+        return (long)cents;
+    }
 
     /// <summary>
     /// Initializes the same browsing defaults as the public listing service.

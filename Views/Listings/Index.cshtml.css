@@ -1,0 +1,184 @@
+.browse-page ::deep .browse-heading {
+    max-width: 48rem;
+}
+
+.browse-page ::deep .browse-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+}
+
+.browse-page ::deep .filter-panel {
+    padding: 1.25rem;
+    gap: 1.25rem;
+}
+
+.browse-page ::deep .filter-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.browse-page ::deep .filter-heading h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.browse-page ::deep .filter-heading a {
+    font-size: .875rem;
+}
+
+.browse-page ::deep .filter-panel legend {
+    float: none;
+    width: auto;
+    font-size: 1rem;
+}
+
+.browse-page ::deep .price-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .625rem;
+}
+
+.browse-page ::deep .price-bound-label {
+    font-size: .85rem;
+    color: var(--rr-muted);
+    margin-bottom: .375rem;
+}
+
+.browse-page ::deep .price-filter-grid .input-group-text {
+    padding-inline: .5rem;
+}
+
+.browse-page ::deep .price-filter-grid .form-control {
+    min-width: 0;
+    padding-inline: .5rem;
+    border-top-right-radius: var(--rr-radius-sm);
+    border-bottom-right-radius: var(--rr-radius-sm);
+}
+
+.browse-page ::deep .browse-search {
+    margin-bottom: 1.75rem;
+}
+
+.browse-page ::deep .browse-search-controls {
+    display: flex;
+    gap: .75rem;
+}
+
+.browse-page ::deep .browse-search-controls input {
+    min-width: 0;
+}
+
+.browse-page ::deep .results-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.browse-page ::deep .results-toolbar > div {
+    min-width: 0;
+}
+
+.browse-page ::deep .results-toolbar h2 {
+    overflow-wrap: anywhere;
+    margin-bottom: .375rem;
+}
+
+.browse-page ::deep .results-count {
+    color: var(--rr-muted);
+    font-size: .85rem;
+    margin: 0;
+}
+
+.browse-page ::deep .sort-controls .form-label {
+    font-size: .85rem;
+    margin-bottom: .375rem;
+}
+
+.browse-page ::deep .sort-inputs {
+    display: flex;
+    gap: .5rem;
+}
+
+.browse-page ::deep .sort-inputs select {
+    width: auto;
+    min-width: 0;
+}
+
+.browse-page ::deep .results-pagination {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.browse-page ::deep .results-pagination .pagination {
+    margin: 0;
+    gap: .35rem;
+    flex-wrap: wrap;
+}
+
+.browse-page ::deep .results-pagination .page-link {
+    border-radius: var(--rr-radius-sm);
+}
+
+.browse-page ::deep .empty-state-icon {
+    display: block;
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 1.25rem;
+    color: var(--rr-secondary);
+}
+
+.browse-page ::deep .filter-toggle {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    .browse-page ::deep .browse-layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .browse-page ::deep .filter-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: .75rem;
+    }
+
+    .browse-page ::deep .filter-panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .browse-page ::deep .filter-heading, .browse-page ::deep .filter-panel > button {
+        grid-column: 1 / -1;
+    }
+
+}
+
+@media (max-width: 575.98px) {
+    .browse-page ::deep .filter-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .browse-page ::deep .results-pagination {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .browse-page ::deep .sort-controls, .browse-page ::deep .sort-inputs select {
+        width: 100%;
+    }
+
+}

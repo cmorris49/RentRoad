@@ -1,8 +1,95 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@using Microsoft.AspNetCore.Identity
+@using RentRoad.Models.Enums
+@using RentRoad.Services.Listings
+@using RentRoad.ViewModels.Listings
+@inject SignInManager<ApplicationUser> SignInManager
+@model ListingSearchInputViewModel
+@{
+    ViewData["Title"] = "Rent more. Own less.";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="home-page">
+<section class="home-hero page-section" aria-labelledby="home-heading">
+    <div class="hero-copy">
+        <p class="eyebrow">A little closer. A lot more possible.</p>
+        <h1 id="home-heading">Big plans.<br /><span>Less to own.</span></h1>
+        <p class="hero-introduction">For the project, the weekend, and everything in between. Rent tools, gear, and everyday essentials from people around you.</p>
+        <form class="hero-search" method="get" asp-controller="Listings" asp-action="Index" role="search" aria-label="Find a rental">
+            <label asp-for="SearchText" class="form-label">What would you like to rent?</label>
+            <div class="hero-search-controls">
+                <input asp-for="SearchText" type="search" class="form-control" placeholder="Try camera, drill, or camping gear" maxlength="@ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH" />
+                <button type="submit" class="btn btn-primary">Find rentals <span aria-hidden="true">↗</span></button>
+            </div>
+        </form>
+        <div class="hero-actions">
+            <a class="hero-browse-link" asp-controller="Listings" asp-action="Index">Browse all rentals <span aria-hidden="true">→</span></a>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <a class="btn btn-outline-primary" asp-controller="MyListings" asp-action="Create">Create Listing</a>
+            }
+        </div>
+        <p class="hero-location">Starting in Vancouver, British Columbia <span aria-hidden="true">·</span> Prices in CAD</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+        <span class="hero-art-label">Make room for more doing.</span>
+        <svg class="rental-illustration" viewBox="0 0 460 410" fill="none" focusable="false">
+            <circle class="illustration-halo" cx="230" cy="198" r="166" />
+            <path class="illustration-route" d="M49 295C-10 180 97 72 215 80c161 11 262 100 187 200-55 74-282 99-324-5" stroke-width="2" stroke-dasharray="5 10" />
+            <g class="illustration-tent">
+                <path class="illustration-fill-secondary" d="m75 179 91-128 93 128Z" />
+                <path class="illustration-fill-primary" d="m75 179 60-10L166 51Z" />
+                <path class="illustration-fill-background" d="m142 179 24-59 25 59Z" />
+                <path class="illustration-line" d="m62 179 104-136 104 136M62 179h208" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+            <g transform="rotate(10 335 155)">
+                <rect class="illustration-fill-highlight" x="277" y="104" width="104" height="22" rx="8" />
+                <path class="illustration-fill-accent" d="M301 118h66v31h-33v37h-27v-37h-6Z" />
+                <path class="illustration-fill-primary" d="M295 185h49v18h-49zM368 109h28v12h-28z" />
+                <path class="illustration-line" d="M290 113h48m-31 72h27" stroke-width="4" stroke-linecap="round" />
+            </g>
+            <g transform="rotate(-9 220 271)">
+                <path class="illustration-fill-primary" d="M114 231a17 17 0 0 1 17-17h28l12-19h74l12 19h38a17 17 0 0 1 17 17v88a17 17 0 0 1-17 17H131a17 17 0 0 1-17-17Z" />
+                <path class="illustration-fill-secondary" d="M114 248h198v59H114z" />
+                <circle class="illustration-fill-background" cx="217" cy="276" r="48" />
+                <circle class="illustration-fill-primary" cx="217" cy="276" r="35" />
+                <circle class="illustration-fill-secondary" cx="217" cy="276" r="22" />
+                <circle class="illustration-fill-background" cx="225" cy="267" r="7" />
+                <rect class="illustration-fill-background" x="137" y="227" width="22" height="10" rx="3" />
+                <circle class="illustration-fill-highlight" cx="283" cy="233" r="6" />
+            </g>
+            <path class="illustration-spark" d="M69 228v20m-10-10h20m287 51v24m-12-12h24M276 51v16m-8-8h16" stroke-width="3" stroke-linecap="round" />
+        </svg>
+        <span class="hero-art-caption">Useful things. Shared locally.</span>
+    </div>
+</section>
+
+<section class="home-categories page-section" aria-labelledby="categories-heading">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Find your next possibility</p>
+            <h2 id="categories-heading">What have you got planned?</h2>
+        </div>
+        <p>Start with a category. See what’s out there.</p>
+    </div>
+    <nav class="category-grid" aria-label="Browse rentals by category">
+        @foreach (var category in Enum.GetValues<ListingCategory>())
+        {
+            <a class="category-link" asp-controller="Listings" asp-action="Index" asp-route-Category="@category">
+                <svg class="category-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                    <use href="@Url.Content($"~/images/listing-categories.svg#{category}")" />
+                </svg>
+                <span>@ListingDisplayText.Category(category)</span>
+                <span class="category-arrow" aria-hidden="true">↗</span>
+            </a>
+        }
+    </nav>
+</section>
+
+<section class="marketplace-introduction page-section" aria-labelledby="sharing-heading">
+    <div>
+        <p class="eyebrow">Good things go further when shared</p>
+        <h2 id="sharing-heading">Your neighbourhood has a lot to offer.</h2>
+    </div>
+    <p>Find something useful for a little while, or let someone make use of the things you already own. RentRoad brings renters and owners together, one listing at a time.</p>
+</section>
 </div>
