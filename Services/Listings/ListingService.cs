@@ -28,7 +28,13 @@ public sealed partial class ListingService : IListingService
     /// <summary>
     /// Creates an empty draft associated with the authenticated, existing owner.
     /// </summary>
-    public async Task<ListingServiceResult<Listing>> CreateDraftAsync(ClaimsPrincipal? user,
+    public Task<ListingServiceResult<Listing>> CreateDraftAsync(ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default) => CreateDraftAsync(user, new ListingUpdate(), cancellationToken);
+
+    /// <summary>
+    /// Creates a draft with validated details in one save, using the existing draft rules and immutable owner association.
+    /// </summary>
+    public async Task<ListingServiceResult<Listing>> CreateDraftAsync(ClaimsPrincipal? user, ListingUpdate? details,
         CancellationToken cancellationToken = default)
     {
         var ownerId = GetAuthenticatedOwnerId(user);
@@ -44,6 +50,12 @@ public sealed partial class ListingService : IListingService
                 new ListingValidationError(nameof(Listing.OwnerId), "Your account could not be found."));
         }
 
+        if (details is null)
+        {
+            return ListingServiceResult<Listing>.Failure(ListingServiceStatus.ValidationFailed,
+                new ListingValidationError(string.Empty, "Listing details are required."));
+        }
+
         var now = timeProvider.GetUtcNow().UtcDateTime;
         var listing = new Listing
         {
@@ -52,9 +64,32 @@ public sealed partial class ListingService : IListingService
             CreatedAtUtc = now,
             UpdatedAtUtc = now
         };
+        ApplyEditableDetails(details, listing);
+        var windows = details.AvailabilityWindows?.ToArray();
+        var errors = ValidateDraft(listing, windows);
+        if (errors.Count > 0)
+        {
+            return ListingServiceResult<Listing>.Failure(ListingServiceStatus.ValidationFailed, errors.ToArray());
+        }
+        if (windows is not null)
+        {
+            listing.AvailabilityWindows = windows.Select(window => new AvailabilityWindow
+                { StartDate = window.StartDate, EndDate = window.EndDate }).ToList();
+        }
         context.Listings.Add(listing);
         await context.SaveChangesAsync(cancellationToken);
         return ListingServiceResult<Listing>.Success(listing);
+    }
+
+    /// <summary>
+    /// Reads one owned listing with a separate tracker, without loading every owned listing or validating publication.
+    /// </summary>
+    public async Task<ListingServiceResult<Listing>> GetOwnerListingAsync(int listingId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default)
+    {
+        await using var readContext = ListingOperationScope.CreateContext(context);
+        readContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+        return await ListingOperationScope.GetOwnedListingAsync(readContext, listingId, user, cancellationToken);
     }
 
     /// <summary>
@@ -121,15 +156,7 @@ public sealed partial class ListingService : IListingService
         ApplyEditableDetails(details, listing);
         if (windows is not null)
         {
-            var storedWindows = await context.AvailabilityWindows
-                .Where(window => window.ListingId == listingId).ToListAsync(cancellationToken);
-            context.AvailabilityWindows.RemoveRange(storedWindows);
-            context.AvailabilityWindows.AddRange(windows.Select(window => new AvailabilityWindow
-            {
-                ListingId = listingId,
-                StartDate = window.StartDate,
-                EndDate = window.EndDate
-            }));
+            await ReplaceStoredWindowsAsync(listingId, windows, cancellationToken);
         }
 
         listing.UpdatedAtUtc = timeProvider.GetUtcNow().UtcDateTime;

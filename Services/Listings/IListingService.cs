@@ -17,6 +17,18 @@ namespace RentRoad.Services.Listings;
 public interface IListingService
 {
     /// <summary>
+    /// Retrieves one owner's listing with ordered windows and private blocks for availability management.
+    /// </summary>
+    Task<ListingServiceResult<Listing>> GetOwnerAvailabilityAsync(int listingId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Replaces only availability windows through existing transactional validation, preserving listing scalar details.
+    /// </summary>
+    Task<ListingServiceResult<Listing>> ReplaceAvailabilityWindowsAsync(int listingId, ClaimsPrincipal? user,
+        IReadOnlyList<ListingAvailabilityPeriod>? windows, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Adds an owner's availability window without invalidating approved or active reservations.
     /// </summary>
     Task<ListingServiceResult<AvailabilityWindow>> CreateAvailabilityWindowAsync(int listingId, ClaimsPrincipal? user,
@@ -69,6 +81,18 @@ public interface IListingService
     /// Creates an incomplete draft owned by the authenticated user.
     /// </summary>
     Task<ListingServiceResult<Listing>> CreateDraftAsync(ClaimsPrincipal? user, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Validates supplied draft details and creates the owned draft in one save, allowing incomplete fields.
+    /// </summary>
+    Task<ListingServiceResult<Listing>> CreateDraftAsync(ClaimsPrincipal? user, ListingUpdate? details,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves one detached listing after verifying the authenticated owner, including drafts and archived listings.
+    /// </summary>
+    Task<ListingServiceResult<Listing>> GetOwnerListingAsync(int listingId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates editable details while preserving ownership, creation time, and rental history.

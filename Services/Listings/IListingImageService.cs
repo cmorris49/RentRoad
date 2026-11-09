@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using RentRoad.Models;
+using RentRoad.Services.Storage;
 
 namespace RentRoad.Services.Listings;
 
@@ -41,6 +42,13 @@ public interface IListingImageService
     /// Retrieves ordered image metadata, including original filenames, only for the authenticated listing owner.
     /// </summary>
     Task<ListingServiceResult<IReadOnlyList<ListingImage>>> GetImagesAsync(int listingId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Opens a private-storage image for a published listing or its authenticated owner, resolving storage names server-side.
+    /// </summary>
+    /// <remarks>The successful result owns a stream that the caller must dispose after delivery.</remarks>
+    Task<ListingServiceResult<BlobImageDownload>> DownloadAsync(int listingId, int imageId, ClaimsPrincipal? user,
         CancellationToken cancellationToken = default);
 }
 

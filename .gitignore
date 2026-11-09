@@ -16,6 +16,10 @@ Services/Listings/ListingImages.md
 
 # Local documentation
 Services/Listings/ListingImages.md
+ViewModels/Listings/README.md
+ViewModels/Listings/OwnerManagement.md
+ViewModels/Listings/ImageManagement.md
+ViewModels/Listings/AvailabilityManagement.md
 
 # User-specific files
 *.rsuser

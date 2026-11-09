@@ -279,6 +279,110 @@ public sealed class ListingImageService : IListingImageService
     }
 
     /// <summary>
+    /// Opens an authorized stored image and rechecks visibility and association after storage access, disposing rejected streams.
+    /// </summary>
+    public async Task<ListingServiceResult<BlobImageDownload>> DownloadAsync(int listingId, int imageId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default)
+    {
+        if (listingId <= 0 || imageId <= 0)
+        {
+            return Failure<BlobImageDownload>(ListingServiceStatus.ValidationFailed, "Listing and image IDs must be positive.");
+        }
+        BlobImageDownload? opened = null;
+        try
+        {
+            await using var database = ListingOperationScope.CreateContext(context);
+            var reference = await ReadImageReferenceAsync(database, listingId, imageId, cancellationToken);
+            var denied = ImageAccessFailure(reference, user);
+            if (denied is not null)
+            {
+                return denied;
+            }
+            if (!string.Equals(reference!.ContainerName, containerName, StringComparison.Ordinal) || string.IsNullOrWhiteSpace(reference.BlobName))
+            {
+                return Failure<BlobImageDownload>(ListingServiceStatus.StorageFailed, "The image's storage configuration is unavailable.");
+            }
+            opened = await storage.DownloadAsync(reference.BlobName, cancellationToken);
+            var current = await ReadImageReferenceAsync(database, listingId, imageId, cancellationToken);
+            denied = ImageAccessFailure(current, user);
+            if (denied is not null || current!.ContainerName != reference.ContainerName || current.BlobName != reference.BlobName)
+            {
+                await opened.DisposeAsync();
+                opened = null;
+                return denied ?? Failure<BlobImageDownload>(ListingServiceStatus.NotFound, "The image could not be found.");
+            }
+            return ListingServiceResult<BlobImageDownload>.Success(opened);
+        }
+        catch (OperationCanceledException)
+        {
+            if (opened is not null)
+            {
+                await opened.DisposeAsync();
+            }
+            throw;
+        }
+        catch (BlobImageStorageException exception)
+        {
+            if (opened is not null)
+            {
+                await opened.DisposeAsync();
+            }
+            LogFailure("DownloadStorage", listingId, imageId, exception);
+            return Failure<BlobImageDownload>(exception.Failure switch
+            {
+                BlobImageStorageFailure.NotFound => ListingServiceStatus.NotFound,
+                BlobImageStorageFailure.Conflict => ListingServiceStatus.Conflict,
+                _ => ListingServiceStatus.StorageFailed
+            }, "The image could not be retrieved from storage.");
+        }
+        catch (Exception exception)
+        {
+            if (opened is not null)
+            {
+                await opened.DisposeAsync();
+            }
+            LogFailure("DownloadImage", listingId, imageId, exception);
+            return Failure<BlobImageDownload>(ListingServiceStatus.PersistenceFailed, "The image could not be loaded. Try again later.");
+        }
+    }
+
+    /// <summary>
+    /// Projects only the server-resolved storage reference and fields needed to authorize this selected image.
+    /// </summary>
+    private static Task<ImageReference?> ReadImageReferenceAsync(ApplicationDbContext database, int listingId, int imageId,
+        CancellationToken cancellationToken) => database.ListingImages.AsNoTracking()
+        .Where(image => image.ListingId == listingId && image.ListingImageId == imageId)
+        .Select(image => new ImageReference(image.ContainerName, image.BlobName, image.Listing.OwnerId, image.Listing.Status))
+        .SingleOrDefaultAsync(cancellationToken);
+
+    /// <summary>
+    /// Allows anonymous published access and reserves every other listing status for its authenticated owner.
+    /// </summary>
+    private static ListingServiceResult<BlobImageDownload>? ImageAccessFailure(ImageReference? reference, ClaimsPrincipal? user)
+    {
+        if (reference is null)
+        {
+            return Failure<BlobImageDownload>(ListingServiceStatus.NotFound, "The image could not be found for this listing.");
+        }
+        if (reference.Status == ListingStatus.Published)
+        {
+            return null;
+        }
+        var ownerId = ListingOperationScope.GetOwnerId(user);
+        if (ownerId is null)
+        {
+            return Failure<BlobImageDownload>(ListingServiceStatus.Unauthenticated, "Sign in to view this image.");
+        }
+        return string.Equals(reference.OwnerId, ownerId, StringComparison.Ordinal) ? null
+            : Failure<BlobImageDownload>(ListingServiceStatus.Forbidden, "Only the listing owner can view this image.");
+    }
+
+    /// <summary>
+    /// Contains server-only lookup data that is never returned to MVC as image metadata.
+    /// </summary>
+    private sealed record ImageReference(string ContainerName, string BlobName, string OwnerId, ListingStatus Status);
+
+    /// <summary>
     /// Shares owner and archived-state checks across serializable metadata mutations without invoking blob storage in retries.
     /// </summary>
     private async Task<ListingServiceResult<T>> MutateAsync<T>(int listingId, ClaimsPrincipal? user,

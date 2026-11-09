@@ -12,6 +12,72 @@ namespace RentRoad.Services.Listings;
 public sealed partial class ListingService
 {
     /// <summary>
+    /// Loads ordered owner-only availability without images, Identity entities, or loading every owned listing.
+    /// </summary>
+    public async Task<ListingServiceResult<Listing>> GetOwnerAvailabilityAsync(int listingId, ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default)
+    {
+        await using var database = ListingOperationScope.CreateContext(context);
+        database.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+        var owned = await ListingOperationScope.GetOwnedListingAsync(database, listingId, user, cancellationToken);
+        if (!owned.IsSuccess)
+        {
+            return owned;
+        }
+        owned.Value!.AvailabilityWindows = await database.AvailabilityWindows.AsNoTracking().Where(window => window.ListingId == listingId)
+            .OrderBy(window => window.StartDate).ThenBy(window => window.EndDate).ThenBy(window => window.AvailabilityWindowId)
+            .ToListAsync(cancellationToken);
+        owned.Value.AvailabilityBlocks = await database.AvailabilityBlocks.AsNoTracking().Where(block => block.ListingId == listingId)
+            .OrderBy(block => block.StartDate).ThenBy(block => block.EndDate).ThenBy(block => block.AvailabilityBlockId)
+            .ToListAsync(cancellationToken);
+        return owned;
+    }
+
+    /// <summary>
+    /// Replaces windows inside the existing serializable unit of work without writing unrelated scalar fields.
+    /// </summary>
+    public Task<ListingServiceResult<Listing>> ReplaceAvailabilityWindowsAsync(int listingId, ClaimsPrincipal? user,
+        IReadOnlyList<ListingAvailabilityPeriod>? windows, CancellationToken cancellationToken = default)
+    {
+        var snapshot = windows?.ToArray();
+        return ExecuteAvailabilityMutationAsync(listingId, user, async (service, token) =>
+        {
+            var owned = await service.GetEditableAvailabilityListingAsync(listingId, user, token);
+            if (!owned.IsSuccess)
+            {
+                return owned;
+            }
+            if (snapshot is null)
+            {
+                return ListingServiceResult<Listing>.Failure(ListingServiceStatus.ValidationFailed,
+                    new ListingValidationError(nameof(Listing.AvailabilityWindows), "Supply the replacement windows, or an empty collection to clear them."));
+            }
+            var listing = owned.Value!;
+            var blocks = await service.context.AvailabilityBlocks.AsNoTracking().Where(block => block.ListingId == listingId).ToListAsync(token);
+            var validation = await service.ValidateAvailabilityStateAsync(listingId, listing.Status, snapshot, blocks, token);
+            if (!validation.IsSuccess)
+            {
+                return ListingServiceResult<Listing>.Failure(validation.Status, validation.Errors.ToArray());
+            }
+            await service.ReplaceStoredWindowsAsync(listingId, snapshot, token);
+            listing.UpdatedAtUtc = service.timeProvider.GetUtcNow().UtcDateTime;
+            await service.context.SaveChangesAsync(token);
+            return ListingServiceResult<Listing>.Success(listing);
+        }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Replaces tracked window records after the caller validates the final configuration, leaving save/commit to the caller.
+    /// </summary>
+    private async Task ReplaceStoredWindowsAsync(int listingId, IReadOnlyList<ListingAvailabilityPeriod> windows, CancellationToken cancellationToken)
+    {
+        var stored = await context.AvailabilityWindows.Where(window => window.ListingId == listingId).ToListAsync(cancellationToken);
+        context.AvailabilityWindows.RemoveRange(stored);
+        context.AvailabilityWindows.AddRange(windows.Select(window => new AvailabilityWindow
+            { ListingId = listingId, StartDate = window.StartDate, EndDate = window.EndDate }));
+    }
+
+    /// <summary>
     /// Creates a valid, nonduplicate availability window for the authenticated listing owner.
     /// </summary>
     public Task<ListingServiceResult<AvailabilityWindow>> CreateAvailabilityWindowAsync(int listingId, ClaimsPrincipal? user,
