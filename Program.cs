@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RentRoad.Data;
 using RentRoad.Models;
 using RentRoad.Services.Listings;
+using RentRoad.Services.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IListingService, ListingService>();
+builder.Services.AddBlobImageStorage(builder.Configuration);
 
 var app = builder.Build();
 
