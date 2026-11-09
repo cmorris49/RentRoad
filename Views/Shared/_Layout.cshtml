@@ -1,51 +1,95 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var isHome = controller == "Home" && action == "Index";
+    var isBrowsing = controller == "Listings";
+    var isCreating = controller == "MyListings" && action == "Create";
+    var isManaging = (controller == "MyListings" && !isCreating)
+        || controller is "ListingImages" or "ListingAvailability";
+}
+<!DOCTYPE html>
+<html lang="en-CA">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - RentRoad</title>
+    <meta name="color-scheme" content="light dark" />
+    <title>@ViewData["Title"] · RentRoad</title>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RentRoad.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RentRoad</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+<body class="site-shell">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="site-header">
+        <nav class="navbar navbar-expand-xl" aria-label="Main navigation">
+            <div class="container site-nav-container">
+                <a class="navbar-brand brand" asp-area="" asp-controller="Home" asp-action="Index" aria-label="RentRoad home">
+                    <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+                        <rect class="brand-mark-background" width="40" height="40" rx="13" />
+                        <path d="M12 29 17 11h6l5 18M20 14v4m0 5v4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span>RentRoad<span class="brand-dot" aria-hidden="true">.</span></span>
+                </a>
+                <button class="theme-toggle btn" type="button" data-theme-toggle aria-label="Dark mode" aria-pressed="false" title="Toggle dark mode" hidden>
+                    <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true" focusable="false">
+                        <path d="M20.5 13A8.6 8.6 0 0 1 11 3.5 8.6 8.6 0 1 0 20.5 13Z" stroke-linejoin="round" />
+                    </svg>
+                    <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true" focusable="false">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" stroke-linecap="round" />
+                    </svg>
+                    <span class="theme-toggle-label">Dark mode</span>
+                </button>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation"
+                        aria-controls="main-navigation" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="main-navigation">
+                    <ul class="navbar-nav primary-navigation">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link @(isHome ? "active" : null)" aria-current="@(isHome ? "page" : null)" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link @(isBrowsing ? "active" : null)" aria-current="@(isBrowsing ? "page" : null)" asp-area="" asp-controller="Listings" asp-action="Index">Browse Listings</a>
                         </li>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(isManaging ? "active" : null)" aria-current="@(isManaging ? "page" : null)" asp-area="" asp-controller="MyListings" asp-action="Index">My Listings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(isCreating ? "active" : null)" aria-current="@(isCreating ? "page" : null)" asp-area="" asp-controller="MyListings" asp-action="Create">Create Listing</a>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - RentRoad - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <main id="main-content" class="container site-main" tabindex="-1">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div>
+                <a class="footer-brand" asp-area="" asp-controller="Home" asp-action="Index">RentRoad<span class="brand-dot" aria-hidden="true">.</span></a>
+                <p class="footer-tagline">More possibilities. Less to own.</p>
+            </div>
+            <div class="footer-meta">
+                <span>Vancouver, BC · Prices in CAD</span>
+                <span>&copy; @DateTime.UtcNow.Year RentRoad <span class="footer-separator" aria-hidden="true">/</span> <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></span>
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
