@@ -83,11 +83,12 @@ public sealed record OwnerAvailabilityWindowViewModel(int WindowId, ListingAvail
 public sealed record OwnerAvailabilityBlockViewModel(int BlockId, ListingAvailabilityViewModel Period, string? Reason);
 
 /// <summary>
-/// Supplies trusted availability display data and flat form values for a future owner-only management page.
+/// Supplies trusted availability display data and isolates submitted inputs for the owner-only management page.
 /// </summary>
 public sealed class ListingAvailabilityManagementViewModel : ListingAvailabilityBlockInputViewModel
 {
     public int ListingId { get; }
+    public string? ListingTitle { get; }
     public ListingStatus Status { get; }
     public bool CanEdit => Status != ListingStatus.Archived;
     public IReadOnlyList<OwnerAvailabilityWindowViewModel> AvailabilityWindows { get; }
@@ -96,16 +97,45 @@ public sealed class ListingAvailabilityManagementViewModel : ListingAvailability
     public ListingAvailabilityFeedbackViewModel? Feedback { get; }
 
     /// <summary>
+    /// Identifies the submitted operation so only its form receives attempted values and validation messages.
+    /// </summary>
+    public bool IsSubmitted(ListingAvailabilityOperation operation, int? recordId = null) =>
+        Feedback?.Operation == operation && Feedback.RecordId == recordId;
+
+    /// <summary>
+    /// Supplies a new or saved window form, preserving attempted dates only for the matching failed submission.
+    /// </summary>
+    public ListingAvailabilityFormViewModel WindowForm(OwnerAvailabilityWindowViewModel? window = null)
+    {
+        var submitted = IsSubmitted(window is null ? ListingAvailabilityOperation.CreateWindow : ListingAvailabilityOperation.UpdateWindow, window?.WindowId);
+        var input = submitted ? this : new ListingAvailabilityWindowInputViewModel { StartDate = window?.Period.StartDate, EndDate = window?.Period.EndDate };
+        return new(ListingId, false, window?.WindowId, submitted, input);
+    }
+
+    /// <summary>
+    /// Supplies a new or saved private block form without copying another form's rejected dates or reason.
+    /// </summary>
+    public ListingAvailabilityFormViewModel BlockForm(OwnerAvailabilityBlockViewModel? block = null)
+    {
+        var submitted = IsSubmitted(block is null ? ListingAvailabilityOperation.CreateBlock : ListingAvailabilityOperation.UpdateBlock, block?.BlockId);
+        var input = submitted ? this : new ListingAvailabilityBlockInputViewModel { StartDate = block?.Period.StartDate, EndDate = block?.Period.EndDate, Reason = block?.Reason };
+        return new(ListingId, true, block?.BlockId, submitted, input);
+    }
+
+    /// <summary>
     /// Maps owner-authorized data and preserves submitted dates/reasons/replacement rows without exposing other listing fields.
     /// </summary>
     public ListingAvailabilityManagementViewModel(Listing listing, ListingAvailabilityWindowInputViewModel? input = null,
         ListingAvailabilityReplacementViewModel? replacement = null, ListingAvailabilityFeedbackViewModel? feedback = null)
     {
         ListingId = listing.ListingId;
+        ListingTitle = listing.Title;
         Status = listing.Status;
-        AvailabilityWindows = listing.AvailabilityWindows.Select(window => new OwnerAvailabilityWindowViewModel(window.AvailabilityWindowId,
+        AvailabilityWindows = listing.AvailabilityWindows.OrderBy(window => window.StartDate).ThenBy(window => window.EndDate).ThenBy(window => window.AvailabilityWindowId)
+            .Select(window => new OwnerAvailabilityWindowViewModel(window.AvailabilityWindowId,
             new ListingAvailabilityViewModel(window.StartDate, window.EndDate))).ToArray();
-        AvailabilityBlocks = listing.AvailabilityBlocks.Select(block => new OwnerAvailabilityBlockViewModel(block.AvailabilityBlockId,
+        AvailabilityBlocks = listing.AvailabilityBlocks.OrderBy(block => block.StartDate).ThenBy(block => block.EndDate).ThenBy(block => block.AvailabilityBlockId)
+            .Select(block => new OwnerAvailabilityBlockViewModel(block.AvailabilityBlockId,
             new ListingAvailabilityViewModel(block.StartDate, block.EndDate), block.Reason)).ToArray();
         StartDate = input?.StartDate;
         EndDate = input?.EndDate;

@@ -1,0 +1,201 @@
+@model ListingImageManagementViewModel
+@{
+    ViewData["Title"] = "Manage listing images";
+    var title = string.IsNullOrWhiteSpace(Model.ListingTitle) ? "Untitled listing" : Model.ListingTitle;
+    var success = TempData["ListingImageSuccess"] as string;
+    var incomplete = Model.Outcome?.Status is ListingServiceStatus.CleanupPending or ListingServiceStatus.ReconciliationRequired;
+}
+<div class="owner-page image-manager">
+    <nav class="owner-listing-actions mb-4" aria-label="Listing management">
+        <a class="owner-back-link mb-0" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId">← Back to Edit Listing</a>
+        <a class="btn btn-outline-primary" asp-controller="ListingAvailability" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.CanEdit ? "Manage availability" : "View availability")</a>
+    </nav>
+    <header class="page-header owner-page-heading">
+        <div>
+            <p class="eyebrow">Give renters a closer look</p>
+            <h1>Listing images</h1>
+            <p class="image-listing-title">@title</p>
+        </div>
+        <partial name="~/Views/MyListings/_ListingStatus.cshtml" model="Model.Status" />
+    </header>
+    @if (Model.Outcome is null && !string.IsNullOrWhiteSpace(success))
+    {
+        <div class="alert alert-success" role="status">@success</div>
+    }
+    @if (incomplete)
+    {
+        <div class="alert alert-warning" role="alert" aria-labelledby="image-operation-heading">
+            <h2 id="image-operation-heading" class="h5">The image operation did not fully complete.</h2>
+            @if (Model.Outcome!.Status == ListingServiceStatus.CleanupPending && Model.Outcome.MetadataRemoved == true)
+            {
+                <p>The image was removed from this listing, but its file could not be fully removed from storage. Cleanup is pending.</p>
+                <p>Do not repeat this deletion. The remaining storage file needs cleanup review.</p>
+            }
+            else if (Model.Outcome!.Status == ListingServiceStatus.CleanupPending)
+            {
+                <p>Storage cleanup is pending after an unsuccessful image operation. A file may remain without an associated listing image. Avoid uploading it again until cleanup has been reviewed.</p>
+            }
+            else
+            {
+                <p>This operation needs reconciliation. Its final outcome could not be confirmed. Review the current images and contact support before repeating the operation.</p>
+            }
+            <div asp-validation-summary="All"></div>
+        </div>
+    }
+    else if (!ViewData.ModelState.IsValid || Model.Outcome is not null)
+    {
+        <div class="alert alert-danger" role="alert" aria-labelledby="image-error-heading">
+            <h2 id="image-error-heading" class="h5">We couldn’t complete that image action.</h2>
+            <p>Review the messages below. If an upload failed, choose the file again before retrying.</p>
+            <div asp-validation-summary="All"></div>
+        </div>
+    }
+    @if (!Model.CanEdit)
+    {
+        <div class="alert alert-info">This listing is archived. Its images are available to you for reference and cannot be changed.</div>
+    }
+    <div class="image-management-layout">
+        <aside class="image-upload-panel" aria-labelledby="upload-heading">
+            <div class="card">
+                <div class="card-body">
+                    <h2 id="upload-heading" class="h4">@(Model.CanEdit ? "Add an image" : "Listing photos")</h2>
+                    <p>At least one stored listing image is required before publication. A clear primary photo helps renters recognize your item.</p>
+                    @if (Model.CanEdit)
+                    {
+                        <form asp-action="Upload" asp-route-listingId="@Model.ListingId" method="post" enctype="multipart/form-data" data-image-upload>
+                            <div class="mb-3">
+                                <label asp-for="File" class="form-label">Choose an image</label>
+                                <input asp-for="File" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="form-control" aria-describedby="upload-help file-error" required data-image-file />
+                                <div id="upload-help" class="form-text">JPEG, PNG or WebP. Maximum @Model.MaxImageSizeLabel per image. Files are checked securely on the server.</div>
+                                <span asp-validation-for="File" id="file-error"></span>
+                            </div>
+                            <figure class="image-upload-preview" data-upload-preview hidden>
+                                <img alt="Preview of the selected upload" data-upload-preview-image />
+                                <figcaption class="form-text" data-upload-preview-caption></figcaption>
+                            </figure>
+                            <p class="form-text" role="status" aria-live="polite" data-upload-preview-status></p>
+                            <div class="mb-3">
+                                <label asp-for="AltText" class="form-label">Image description <span class="text-muted">(optional)</span></label>
+                                <input asp-for="AltText" maxlength="250" class="form-control" aria-describedby="alt-help alt-error" placeholder="e.g. Drill and accessories in a carry case" />
+                                <div id="alt-help" class="form-text">Briefly describe the photo for people using a screen reader. Up to 250 characters.</div>
+                                <span asp-validation-for="AltText" id="alt-error"></span>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" data-upload-submit>Upload image</button>
+                            <p class="form-text mt-3 mb-0">Upload one image at a time. Selecting a file only previews it; uploading sends it through RentRoad.</p>
+                        </form>
+                    }
+                </div>
+            </div>
+            <div class="image-management-tip">
+                <h3 class="h6">A useful first impression</h3>
+                <p>Choose a clear view of the whole item as your primary image. Use the remaining photos to show details and included accessories.</p>
+                <p>Moving images changes their display order. Choosing a primary image is a separate action.</p>
+            </div>
+        </aside>
+        <section class="image-collection" aria-labelledby="images-heading">
+            <div class="owner-section-heading">
+                <h2 id="images-heading" class="h4">Your images <span class="owner-listing-count">(@Model.Images.Count)</span></h2>
+                <p class="text-muted">In saved display order</p>
+            </div>
+            @Html.ValidationMessage("ImageIds")
+            @Html.ValidationMessage("Images")
+            @if (Model.Images.Count == 0)
+            {
+                <div class="empty-state">
+                    <h3 class="h5">@(Model.CanEdit ? "Give your listing its first photo." : "No listing images")</h3>
+                    <p>@(Model.CanEdit ? "Choose a photo and upload it to get started. Your first image will become the primary image." : "There are no images attached to this archived listing.")</p>
+                </div>
+            }
+            else
+            {
+                @if (!Model.CanDeleteImages && Model.CanEdit)
+                {
+                    <div class="alert alert-info">Published and unavailable listings must keep at least one stored image. Upload another image before removing this one.</div>
+                }
+                <div class="managed-image-grid">
+                    @for (var index = 0; index < Model.Images.Count; index++)
+                    {
+                        var photo = Model.Images[index];
+                        var image = photo.Image;
+                        var imageUrl = Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = image.ListingImageId });
+                        var photoNumber = index + 1;
+                        <article class="card managed-image-card" aria-labelledby="image-heading-@image.ListingImageId">
+                            <a class="listing-card-media managed-image-preview" href="@imageUrl" target="_blank" rel="noopener" aria-label="Open full image @photoNumber in a new tab">
+                                <div class="listing-image-fallback" data-image-fallback aria-hidden="true">
+                                    <span>Photo unavailable</span>
+                                </div>
+                                <img class="listing-card-image" data-listing-image src="@imageUrl" alt="@(string.IsNullOrWhiteSpace(image.AltText) ? $"Listing photo {photoNumber}" : image.AltText)" width="640" height="480" loading="lazy" decoding="async" />
+                            </a>
+                            <div class="card-body managed-image-body">
+                                <div class="owner-listing-title-row">
+                                    <h3 id="image-heading-@image.ListingImageId" class="h5">Image @photoNumber</h3>
+                                    @if (image.IsPrimary)
+                                    {
+                                        <span class="badge-soft">Primary image</span>
+                                    }
+                                </div>
+                                <p class="managed-image-name">@photo.OriginalFileName</p>
+                                <p class="listing-card-meta">@((photo.SizeBytes / 1024m).ToString("0.#")) KiB <span aria-hidden="true">·</span> @image.ContentType</p>
+                                @if (!string.IsNullOrWhiteSpace(image.AltText))
+                                {
+                                    <p class="managed-image-description">@image.AltText</p>
+                                }
+                                @if (Model.CanEdit)
+                                {
+                                    @if (!image.IsPrimary)
+                                    {
+                                        <form asp-action="SetPrimary" asp-route-listingId="@Model.ListingId" asp-route-imageId="@image.ListingImageId" method="post">
+                                            <button type="submit" class="btn btn-outline-primary w-100">Set as primary<span class="visually-hidden">: image @photoNumber</span></button>
+                                        </form>
+                                    }
+                                    <div class="image-order-controls" role="group" aria-label="Display order for image @photoNumber">
+                                        @foreach (var offset in new[] { -1, 1 })
+                                        {
+                                            var label = offset == -1 ? "Move up" : "Move down";
+                                            @if (index + offset >= 0 && index + offset < Model.Images.Count)
+                                            {
+                                                <form asp-action="SetDisplayOrder" asp-route-listingId="@Model.ListingId" method="post">
+                                                    @foreach (var imageId in Model.GetOrderAfterMove(index, offset))
+                                                    {
+                                                        <input type="hidden" name="ImageIds" value="@imageId" />
+                                                    }
+                                                    <button type="submit" class="btn btn-outline-primary w-100">@label<span class="visually-hidden">: image @photoNumber</span></button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-outline-primary" disabled>@label<span class="visually-hidden">: image @photoNumber</span></button>
+                                            }
+                                        }
+                                    </div>
+                                    @if (Model.CanDeleteImages)
+                                    {
+                                        <details class="owner-archive image-delete-confirmation">
+                                            <summary class="btn btn-outline-danger">Delete image<span class="visually-hidden"> @photoNumber</span></summary>
+                                            <div class="owner-archive-confirmation">
+                                                <p>Delete image @photoNumber from this listing and storage? This cannot be undone. Removing a primary image makes another remaining image primary.</p>
+                                                <form asp-action="Delete" asp-route-listingId="@Model.ListingId" asp-route-imageId="@image.ListingImageId" method="post">
+                                                    <button type="submit" class="btn btn-outline-danger">Confirm delete<span class="visually-hidden">: image @photoNumber</span></button>
+                                                </form>
+                                                <p class="form-text">Close “Delete image” to cancel.</p>
+                                            </div>
+                                        </details>
+                                    }
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/owner-listings.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/listing-image-management.css" asp-append-version="true" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/listing-images.js" asp-append-version="true"></script>
+    <script src="~/js/listing-image-management.js" asp-append-version="true"></script>
+}

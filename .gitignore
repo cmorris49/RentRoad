@@ -515,3 +515,5 @@ $RECYCLE.BIN/
 
 # Local owner listing page documentation
 Views/MyListings/README.md
+Views/ListingImages/README.md
+Views/ListingAvailability/README.md

@@ -65,13 +65,15 @@
                 <a class="btn btn-outline-primary w-100" asp-controller="Listings" asp-action="Details" asp-route-id="@Model.ListingId">View public listing</a>
             }
             <div class="owner-next-step" id="listing-photos">
-                <h3 class="h6">Listing photos <span class="owner-coming-next">Coming next</span></h3>
-                <p>Image upload and management will be available in the next update. Existing stored photos stay attached to your listing.</p>
+                <h3 class="h6">Listing photos</h3>
+                <p>At least one stored photo is required before publication. Choose a clear primary photo and add detail shots.</p>
+                <a class="btn btn-outline-primary" asp-controller="ListingImages" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.Publication.CanEdit ? "Manage images" : "View images")</a>
                 @Html.ValidationMessage("Images")
             </div>
             <div class="owner-next-step" id="listing-availability">
-                <h3 class="h6">Availability <span class="owner-coming-next">Coming next</span></h3>
-                <p>Date-window and unavailable-date management will be available in the next update. Saving item details keeps your existing availability.</p>
+                <h3 class="h6">Availability</h3>
+                <p>At least one valid availability window is required before publication. Set your available dates and block any exceptions.</p>
+                <a class="btn btn-outline-primary" asp-controller="ListingAvailability" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.Publication.CanEdit ? "Manage availability" : "View availability")</a>
                 @Html.ValidationMessage("AvailabilityWindows")
             </div>
             @if (Model.Publication.CanEdit)

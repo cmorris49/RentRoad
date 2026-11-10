@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using RentRoad.Models.Enums;
 using RentRoad.Models;
 using RentRoad.Services.Listings;
 
@@ -44,14 +46,36 @@ public sealed record ListingImageOperationViewModel(ListingServiceStatus Status,
     IReadOnlyList<ListingValidationError> Errors);
 
 /// <summary>
-/// Combines owner-safe image metadata with form values and explicit operation outcomes for the future management view.
+/// Combines owner-safe image metadata with form values and explicit operation outcomes for the image management view.
 /// </summary>
 public sealed class ListingImageManagementViewModel : ListingImageUploadViewModel
 {
     public int ListingId { get; }
+    public string? ListingTitle { get; init; }
+    public ListingStatus Status { get; init; }
+    public int MaxImageSizeBytes { get; init; }
+    public string MaxImageSizeLabel => MaxImageSizeBytes >= 1024 * 1024
+        ? (MaxImageSizeBytes / (1024m * 1024m)).ToString("0.##", CultureInfo.GetCultureInfo("en-CA")) + " MiB"
+        : MaxImageSizeBytes.ToString("N0", CultureInfo.GetCultureInfo("en-CA")) + " bytes";
+    public bool CanEdit => Status != ListingStatus.Archived;
+    public bool CanDeleteImages => CanEdit && (Images.Count > 1 || Status is not (ListingStatus.Published or ListingStatus.Unavailable));
     public IReadOnlyList<ListingManagedImageViewModel> Images { get; }
     public IReadOnlyList<int> ImageIds { get; }
     public ListingImageOperationViewModel? Outcome { get; }
+
+    /// <summary>
+    /// Builds a neighbouring visual-order permutation from current server metadata, independently of any rejected submitted order.
+    /// </summary>
+    public IReadOnlyList<int> GetOrderAfterMove(int imageIndex, int offset)
+    {
+        if (offset is not (-1 or 1) || imageIndex < 0 || imageIndex >= Images.Count || imageIndex + offset < 0 || imageIndex + offset >= Images.Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(imageIndex));
+        }
+        var order = Images.Select(image => image.Image.ListingImageId).ToArray();
+        (order[imageIndex], order[imageIndex + offset]) = (order[imageIndex + offset], order[imageIndex]);
+        return order;
+    }
 
     /// <summary>
     /// Maps authorized metadata and retains alt text/order inputs while requiring file reselection after an unsuccessful upload.
@@ -60,7 +84,7 @@ public sealed class ListingImageManagementViewModel : ListingImageUploadViewMode
         ListingImageUploadViewModel? upload = null, ListingImageOrderViewModel? order = null, ListingImageOperationViewModel? outcome = null)
     {
         ListingId = listingId;
-        Images = images.Select(ListingManagedImageViewModel.FromListing).ToArray();
+        Images = images.OrderBy(image => image.DisplayOrder).ThenBy(image => image.ListingImageId).Select(ListingManagedImageViewModel.FromListing).ToArray();
         AltText = upload?.AltText;
         ImageIds = order?.ImageIds?.ToArray() ?? images.Select(image => image.ListingImageId).ToArray();
         Outcome = outcome;

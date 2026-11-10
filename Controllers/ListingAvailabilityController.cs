@@ -111,6 +111,16 @@ public sealed class ListingAvailabilityController : Controller
             var result = await submit();
             if (result.IsSuccess)
             {
+                TempData["ListingAvailabilitySuccess"] = operation switch
+                {
+                    ListingAvailabilityOperation.CreateWindow => "Your availability window was added.",
+                    ListingAvailabilityOperation.UpdateWindow => "Your availability window was updated.",
+                    ListingAvailabilityOperation.RemoveWindow => "Your availability window was removed.",
+                    ListingAvailabilityOperation.ReplaceWindows => "Your availability windows were replaced.",
+                    ListingAvailabilityOperation.CreateBlock => "Your unavailable dates were added.",
+                    ListingAvailabilityOperation.UpdateBlock => "Your unavailable dates were updated.",
+                    _ => "Your unavailable dates were removed."
+                };
                 return RedirectToAction("Index", new { listingId });
             }
             status = result.Status;

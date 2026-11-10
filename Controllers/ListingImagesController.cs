@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Options;
+using RentRoad.Models;
 using RentRoad.Services.Listings;
 using RentRoad.Services.Storage;
 using RentRoad.ViewModels.Listings;
@@ -16,13 +18,17 @@ public sealed class ListingImagesController : Controller
 {
     private const long MAX_UPLOAD_REQUEST_BYTES = BlobImageStorageOptions.MAX_ALLOWED_IMAGE_SIZE_BYTES + 1024 * 1024;
     private readonly IListingImageService images;
+    private readonly IListingService listings;
+    private readonly int maxImageSizeBytes;
 
     /// <summary>
-    /// Initializes owner endpoints with the existing image orchestration service.
+    /// Initializes owner endpoints with image operations, authorized listing context, and the configured upload limit.
     /// </summary>
-    public ListingImagesController(IListingImageService images)
+    public ListingImagesController(IListingImageService images, IListingService listings, IOptions<BlobImageStorageOptions> storageOptions)
     {
         this.images = images;
+        this.listings = listings;
+        maxImageSizeBytes = storageOptions.Value.MaxImageSizeBytes;
     }
 
     /// <summary>
@@ -33,7 +39,7 @@ public sealed class ListingImagesController : Controller
     {
         var result = await images.GetImagesAsync(listingId, User, cancellationToken);
         return result.IsSuccess
-            ? View("Index", new ListingImageManagementViewModel(listingId, result.Value!))
+            ? await ManagementViewAsync(listingId, result.Value!, null, null, null, null, cancellationToken)
             : TerminalFailure(result.Status) ?? Problem(statusCode: StatusCodeFor(result.Status), title: "Listing images could not be loaded.");
     }
 
@@ -60,6 +66,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.UploadAsync(listingId, User, stream, input.File.ContentType, input.File.FileName, input.AltText, cancellationToken);
         if (result.IsSuccess)
         {
+            TempData["ListingImageSuccess"] = "Your image was uploaded and added to the listing.";
             return RedirectToAction("Index", new { listingId });
         }
         return await FailureAsync(listingId, result.Status, result.Errors, input, null, null, cancellationToken);
@@ -80,6 +87,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.DeleteAsync(listingId, imageId, User, cancellationToken);
         if (result.IsSuccess)
         {
+            TempData["ListingImageSuccess"] = "The image was removed from your listing and storage.";
             return RedirectToAction("Index", new { listingId });
         }
         return await FailureAsync(listingId, result.Status, result.Errors, null, null, result.Value, cancellationToken);
@@ -100,6 +108,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.SetPrimaryAsync(listingId, imageId, User, cancellationToken);
         if (result.IsSuccess)
         {
+            TempData["ListingImageSuccess"] = "Your primary image has been updated.";
             return RedirectToAction("Index", new { listingId });
         }
         return await FailureAsync(listingId, result.Status, result.Errors, null, null, null, cancellationToken);
@@ -125,6 +134,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.SetDisplayOrderAsync(listingId, input.ImageIds, User, cancellationToken);
         if (result.IsSuccess)
         {
+            TempData["ListingImageSuccess"] = "Your image display order has been saved.";
             return RedirectToAction("Index", new { listingId });
         }
         return await FailureAsync(listingId, result.Status, result.Errors, null, input, null, cancellationToken);
@@ -162,8 +172,32 @@ public sealed class ListingImagesController : Controller
                 title: "The image operation did not fully complete and image metadata could not be refreshed.",
                 extensions: new Dictionary<string, object?> { ["operation"] = outcome });
         }
-        var view = View("Index", new ListingImageManagementViewModel(listingId, current.Value!, upload, order, outcome));
-        view.StatusCode = StatusCodeFor(status);
+        return await ManagementViewAsync(listingId, current.Value!, upload, order, outcome, StatusCodeFor(status), cancellationToken);
+    }
+
+    /// <summary>
+    /// Adds separately authorized listing context and the configured byte limit without exposing Identity or storage configuration.
+    /// </summary>
+    private async Task<IActionResult> ManagementViewAsync(int listingId, IReadOnlyList<ListingImage> metadata,
+        ListingImageUploadViewModel? upload, ListingImageOrderViewModel? order, ListingImageOperationViewModel? outcome,
+        int? statusCode, CancellationToken cancellationToken)
+    {
+        var listing = await listings.GetOwnerListingAsync(listingId, User, cancellationToken);
+        if (!listing.IsSuccess)
+        {
+            if (outcome?.Status is ListingServiceStatus.CleanupPending or ListingServiceStatus.ReconciliationRequired)
+            {
+                return Problem(statusCode: StatusCodes.Status409Conflict,
+                    title: "The image operation did not fully complete and listing information could not be refreshed.",
+                    extensions: new Dictionary<string, object?> { ["operation"] = outcome });
+            }
+            return TerminalFailure(listing.Status) ?? Problem(statusCode: StatusCodeFor(listing.Status), title: "The listing could not be loaded.");
+        }
+        var view = View("Index", new ListingImageManagementViewModel(listingId, metadata, upload, order, outcome)
+        {
+            ListingTitle = listing.Value!.Title, Status = listing.Value.Status, MaxImageSizeBytes = maxImageSizeBytes
+        });
+        view.StatusCode = statusCode;
         return view;
     }
 

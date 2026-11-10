@@ -1,0 +1,115 @@
+/* Listing image management uses shared owner components and theme tokens. */
+.image-listing-title {
+    overflow-wrap: anywhere;
+}
+
+.image-manager .btn {
+    transition: none;
+}
+
+.image-management-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-items: start;
+}
+
+.image-upload-panel,
+.image-collection {
+    min-width: 0;
+}
+
+.image-upload-panel input[type="file"] {
+    font-size: .875rem;
+}
+
+.image-upload-preview {
+    margin-block: 1rem;
+}
+
+.image-upload-preview img {
+    display: block;
+    width: 100%;
+    max-height: 240px;
+    object-fit: contain;
+    border-radius: var(--rr-radius-sm);
+    background: var(--rr-surface-muted);
+}
+
+.image-management-tip {
+    margin-top: 1.5rem;
+    padding-inline: .5rem;
+    color: var(--rr-muted);
+    font-size: .9rem;
+}
+
+.managed-image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.managed-image-card {
+    overflow: hidden;
+    align-self: start;
+}
+
+.managed-image-preview {
+    display: block;
+}
+
+.managed-image-preview:focus-visible {
+    outline-offset: -4px;
+}
+
+.managed-image-body {
+    display: grid;
+    gap: .875rem;
+    overflow-wrap: anywhere;
+}
+
+.managed-image-body p,
+.managed-image-body h3 {
+    margin: 0;
+}
+
+.managed-image-name,
+.managed-image-description {
+    font-size: .875rem;
+}
+
+.managed-image-name {
+    color: var(--rr-muted);
+}
+
+.image-order-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+}
+
+.image-order-controls .btn {
+    padding-inline: .5rem;
+    font-size: .875rem;
+}
+
+.image-delete-confirmation {
+    border-top: 1px solid var(--rr-border);
+    padding-top: 1rem;
+}
+
+@media (max-width: 991.98px) {
+    .image-management-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .image-upload-panel {
+        max-width: 640px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .managed-image-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -1,0 +1,141 @@
+@model ListingAvailabilityManagementViewModel
+@{
+    ViewData["Title"] = "Manage listing availability";
+    var title = string.IsNullOrWhiteSpace(Model.ListingTitle) ? "Untitled listing" : Model.ListingTitle;
+    var success = TempData["ListingAvailabilitySuccess"] as string;
+}
+<div class="owner-page availability-manager">
+    <nav class="availability-navigation" aria-label="Listing management">
+        <a class="owner-back-link" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId">← Back to Edit Listing</a>
+        <a class="btn btn-outline-primary" asp-controller="ListingImages" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.CanEdit ? "Manage images" : "View images")</a>
+    </nav>
+    <header class="page-header owner-page-heading">
+        <div>
+            <p class="eyebrow">Make time for sharing</p>
+            <h1>Listing availability</h1>
+            <p class="availability-listing-title">@title</p>
+        </div>
+        <partial name="~/Views/MyListings/_ListingStatus.cshtml" model="Model.Status" />
+    </header>
+    @if (Model.Feedback is null && !string.IsNullOrWhiteSpace(success))
+    {
+        <div class="alert alert-success" role="status">@success</div>
+    }
+    @if (!ViewData.ModelState.IsValid || Model.Feedback is not null)
+    {
+        <div class="alert @(Model.Feedback?.Status == ListingServiceStatus.Conflict ? "alert-warning" : "alert-danger")" role="alert" aria-labelledby="availability-error-heading">
+            <h2 id="availability-error-heading" class="h5">Your availability change was not saved.</h2>
+            <p>Review the messages below before trying again.</p>
+            <div asp-validation-summary="All"></div>
+        </div>
+    }
+    @if (!Model.CanEdit)
+    {
+        <div class="alert alert-info">This listing is archived. Its availability and private notes are read-only.</div>
+    }
+    <div class="availability-explanation" aria-labelledby="date-convention-heading">
+        <h2 id="date-convention-heading" class="h5">The first day counts. The end date does not.</h2>
+        <p>A start of November 10 and an end of November 15 includes November 10–14. November 15 is excluded.</p>
+        <p>Windows describe when your item can be rented. Blocks mark exceptions. Adjacent and overlapping periods are allowed; exact duplicate windows or blocks are rejected. Approved and active rental reservations are always protected.</p>
+        <p class="mb-0">At least one valid availability window is required before publishing. Drafts can be saved without availability.</p>
+    </div>
+    <div class="availability-sections">
+        <section aria-labelledby="windows-heading">
+            <div class="owner-section-heading">
+                <h2 id="windows-heading" class="h3">Available to rent <span class="owner-listing-count">(@Model.AvailabilityWindows.Count)</span></h2>
+            </div>
+            <p class="text-muted">Your availability windows, in chronological order.</p>
+            @if (Model.CanEdit)
+            {
+                <div class="card availability-add-card">
+                    <div class="card-body">
+                        <h3 class="h5">Add an availability window</h3>
+                        <partial name="_AvailabilityForm" model="Model.WindowForm()" />
+                    </div>
+                </div>
+            }
+            @if (Model.AvailabilityWindows.Count == 0)
+            {
+                <div class="empty-state">
+                    <h3 class="h5">No availability windows</h3>
+                    <p>@(Model.CanEdit ? "Add the dates when your item can be rented. Your draft can remain unfinished until you are ready to publish." : "No availability windows are saved with this archived listing.")</p>
+                </div>
+            }
+            <div class="availability-periods">
+                @foreach (var window in Model.AvailabilityWindows)
+                {
+                    var form = Model.WindowForm(window);
+                    <article class="card availability-period" id="availability-window-@window.WindowId" aria-labelledby="window-heading-@window.WindowId">
+                        <div class="card-body">
+                            <p class="eyebrow">Available dates</p>
+                            <h3 id="window-heading-@window.WindowId" class="h5">@window.Period.DisplayRange</h3>
+                            <p class="form-text">End boundary: <time datetime="@window.Period.EndDate.ToString("yyyy-MM-dd")">@window.Period.EndDate.ToString("MMM d, yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-CA"))</time> (excluded).</p>
+                            @if (Model.CanEdit)
+                            {
+                                <details class="availability-edit" open="@form.IsSubmitted">
+                                    <summary>Edit window<span class="visually-hidden"> @window.WindowId</span></summary>
+                                    <partial name="_AvailabilityForm" model="form" />
+                                </details>
+                                <partial name="_RemoveAvailability" model="form" />
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+        <section aria-labelledby="blocks-heading">
+            <div class="owner-section-heading">
+                <h2 id="blocks-heading" class="h3">Unavailable dates <span class="owner-listing-count">(@Model.AvailabilityBlocks.Count)</span></h2>
+            </div>
+            <p class="text-muted">Block dates when you can’t share your item. Reasons are visible only to you.</p>
+            @if (Model.CanEdit)
+            {
+                <div class="card availability-add-card">
+                    <div class="card-body">
+                        <h3 class="h5">Add blocked dates</h3>
+                        <partial name="_AvailabilityForm" model="Model.BlockForm()" />
+                    </div>
+                </div>
+            }
+            @if (Model.AvailabilityBlocks.Count == 0)
+            {
+                <div class="empty-state">
+                    <h3 class="h5">No blocked dates</h3>
+                    <p>You have no exceptions saved for this listing. Reservations are protected separately and do not need to be entered as blocks.</p>
+                </div>
+            }
+            <div class="availability-periods">
+                @foreach (var block in Model.AvailabilityBlocks)
+                {
+                    var form = Model.BlockForm(block);
+                    <article class="card availability-period" id="availability-block-@block.BlockId" aria-labelledby="block-heading-@block.BlockId">
+                        <div class="card-body">
+                            <p class="eyebrow">Blocked dates</p>
+                            <h3 id="block-heading-@block.BlockId" class="h5">@block.Period.DisplayRange</h3>
+                            <p class="form-text">End boundary: <time datetime="@block.Period.EndDate.ToString("yyyy-MM-dd")">@block.Period.EndDate.ToString("MMM d, yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-CA"))</time> (excluded).</p>
+                            @if (!string.IsNullOrWhiteSpace(block.Reason))
+                            {
+                                <p class="availability-reason"><span class="text-muted">Private reason:</span> @block.Reason</p>
+                            }
+                            @if (Model.CanEdit)
+                            {
+                                <details class="availability-edit" open="@form.IsSubmitted">
+                                    <summary>Edit block<span class="visually-hidden"> @block.BlockId</span></summary>
+                                    <partial name="_AvailabilityForm" model="form" />
+                                </details>
+                                <partial name="_RemoveAvailability" model="form" />
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    </div>
+</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/owner-listings.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/listing-availability.css" asp-append-version="true" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

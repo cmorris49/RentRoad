@@ -1,0 +1,101 @@
+/* Availability management reuses owner components and the Warm Evergreen theme. */
+.availability-listing-title,
+.availability-reason {
+    overflow-wrap: anywhere;
+}
+
+.availability-manager .btn {
+    transition: none;
+}
+
+.availability-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.availability-navigation .owner-back-link {
+    margin-bottom: 0;
+}
+
+.availability-explanation {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    margin-bottom: 2rem;
+    border: 1px solid var(--rr-border);
+    border-radius: var(--rr-radius);
+    background: var(--rr-surface-muted);
+}
+
+.availability-sections {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.availability-sections > section,
+.availability-date-fields > div {
+    min-width: 0;
+}
+
+.availability-add-card {
+    margin-bottom: 1.5rem;
+}
+
+.availability-periods {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.availability-date-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.availability-date-fields input {
+    min-width: 0;
+    width: 100%;
+}
+
+.availability-edit > summary {
+    width: fit-content;
+    color: var(--rr-primary);
+    font-weight: 600;
+    cursor: pointer;
+    padding-block: .5rem;
+}
+
+.availability-edit[open] > summary {
+    margin-bottom: .75rem;
+}
+
+.availability-edit > summary:focus-visible {
+    outline: 3px solid var(--rr-focus);
+    outline-offset: 3px;
+}
+
+.availability-remove {
+    padding-top: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--rr-border);
+}
+
+.availability-reason {
+    white-space: pre-wrap;
+}
+
+@media (max-width: 991.98px) {
+    .availability-sections {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .availability-date-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
