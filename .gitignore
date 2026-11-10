@@ -8,7 +8,7 @@
 
 AGENTS.md
 .github/copilot-instructions.md
-
+Development/
 # Local tests
 Tests/
 Services/Storage/README.md
@@ -505,3 +505,13 @@ $RECYCLE.BIN/
 # Local environment files
 .env
 .env.*
+
+# Local sample-seeder documentation, approved photos, manifests, and recovery receipts
+/Development/SampleSeeder/README.md
+/Development/SampleSeeder/Local/
+
+# Keep all development seed and photo tooling local
+/Development/
+
+# Local owner listing page documentation
+Views/MyListings/README.md

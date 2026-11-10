@@ -14,6 +14,16 @@ public class ListingFormViewModel
     public ListingCategory? Category { get; set; }
     public ItemCondition? Condition { get; set; }
     public long? DailyPriceCents { get; set; }
+
+    /// <summary>
+    /// Presents CAD dollars while retaining exact integer cents and rejecting fractional cents or overflow during binding.
+    /// </summary>
+    public decimal? DailyPriceCad
+    {
+        get => DailyPriceCents / 100m;
+        set => DailyPriceCents = ConvertCadToCents(value);
+    }
+
     public string? PickupArea { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
@@ -23,6 +33,27 @@ public class ListingFormViewModel
     /// </summary>
     public ListingFormViewModel()
     {
+    }
+
+    /// <summary>
+    /// Converts optional dollar input without rounding or exceeding the integer-cent storage range.
+    /// </summary>
+    private static long? ConvertCadToCents(decimal? amount)
+    {
+        if (!amount.HasValue)
+        {
+            return null;
+        }
+        if (amount > long.MaxValue / 100m || amount < long.MinValue / 100m)
+        {
+            throw new FormatException("Enter a daily price within the supported range.");
+        }
+        var cents = amount.Value * 100m;
+        if (cents != decimal.Truncate(cents))
+        {
+            throw new FormatException("Enter a daily price with no more than two decimal places.");
+        }
+        return (long)cents;
     }
 
     /// <summary>

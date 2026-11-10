@@ -13,6 +13,12 @@ public sealed record ListingDetailsViewModel(int ListingId, string? Title, strin
     IReadOnlyList<ListingAvailabilityViewModel> AvailabilityBlocks)
 {
     /// <summary>
+    /// Places the primary image first and retains configured display order, with a stable ID tie-breaker, for remaining photos.
+    /// </summary>
+    public IReadOnlyList<ListingImageViewModel> GalleryImages => Images.OrderByDescending(image => image.IsPrimary)
+        .ThenBy(image => image.DisplayOrder).ThenBy(image => image.ListingImageId).ToArray();
+
+    /// <summary>
     /// Maps the existing public-only service projection without introducing Identity fields or private availability notes.
     /// </summary>
     public static ListingDetailsViewModel FromResult(ListingDetails listing) => new(listing.ListingId, listing.Title,

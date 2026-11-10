@@ -1,0 +1,11 @@
+@model int
+<details class="owner-archive">
+    <summary class="btn btn-outline-danger">Archive listing</summary>
+    <div class="owner-archive-confirmation">
+        <p><strong>Archive this listing?</strong> It will leave public browsing and become read-only. Your rental history and listing information will be kept.</p>
+        <form asp-controller="MyListings" asp-action="Archive" asp-route-id="@Model" method="post">
+            <button type="submit" class="btn btn-outline-danger">Confirm archive</button>
+        </form>
+        <p class="form-text mb-0">Close “Archive listing” above to keep it as it is.</p>
+    </div>
+</details>

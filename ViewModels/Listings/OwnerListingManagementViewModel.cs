@@ -25,6 +25,8 @@ public sealed class OwnerListingManagementViewModel
 public sealed record OwnerListingSummaryViewModel(int ListingId, string? Title, string? PickupArea,
     ListingPriceViewModel? DailyPrice, ListingStatus Status, DateTime CreatedAtUtc, DateTime UpdatedAtUtc, DateTime? PublishedAtUtc)
 {
+    public ListingImageViewModel? CoverImage { get; init; }
+
     public bool CanEdit => Status != ListingStatus.Archived;
 
     /// <summary>
@@ -32,5 +34,10 @@ public sealed record OwnerListingSummaryViewModel(int ListingId, string? Title, 
     /// </summary>
     public static OwnerListingSummaryViewModel FromListing(Listing listing) => new(listing.ListingId, listing.Title,
         listing.PickupArea, listing.DailyPriceCents.HasValue ? new ListingPriceViewModel(listing.DailyPriceCents.Value) : null,
-        listing.Status, listing.CreatedAtUtc, listing.UpdatedAtUtc, listing.PublishedAtUtc);
+        listing.Status, listing.CreatedAtUtc, listing.UpdatedAtUtc, listing.PublishedAtUtc)
+        {
+            CoverImage = listing.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.DisplayOrder)
+                .ThenBy(image => image.ListingImageId).Select(image => new ListingImageViewModel(image.ListingImageId,
+                    image.ContentType, image.AltText, image.DisplayOrder, image.IsPrimary)).FirstOrDefault()
+        };
 }

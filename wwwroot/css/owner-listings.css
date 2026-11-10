@@ -1,0 +1,329 @@
+/* Owner management extends the shared Warm Evergreen components and theme tokens. */
+.owner-page {
+    padding-block: .5rem 2rem;
+}
+
+.owner-page-heading,
+.owner-section-heading,
+.owner-listing-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.owner-page-heading {
+    align-items: flex-start;
+}
+
+.owner-page-heading .btn {
+    flex-shrink: 0;
+    margin-top: .5rem;
+}
+
+.owner-page-heading p:last-child,
+.owner-listing-content p,
+.owner-listing-title-row h3 {
+    margin-bottom: 0;
+}
+
+.owner-back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.owner-section-heading {
+    margin-bottom: 1rem;
+}
+
+.owner-section-heading h2,
+.owner-section-heading p {
+    margin: 0;
+}
+
+.owner-listing-count {
+    color: var(--rr-muted);
+    font-weight: 500;
+}
+
+.owner-listings {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.owner-listing {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    padding: 1.25rem;
+    gap: 1.5rem;
+}
+
+.owner-listing-media {
+    align-self: start;
+    overflow: hidden;
+    border-radius: var(--rr-radius-sm);
+}
+
+.owner-listing-content {
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.owner-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .75rem;
+    border: 1px solid currentColor;
+    border-radius: 100px;
+    font-size: .8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.owner-status-draft {
+    color: var(--rr-warning);
+    background: var(--rr-warning-bg);
+}
+
+.owner-status-published {
+    color: var(--rr-success);
+    background: var(--rr-success-bg);
+}
+
+.owner-status-unavailable {
+    color: var(--rr-info);
+    background: var(--rr-info-bg);
+}
+
+.owner-status-archived {
+    color: var(--rr-muted);
+    background: var(--rr-surface-muted);
+}
+
+.owner-listing-price {
+    color: var(--rr-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.owner-listing-price span {
+    color: var(--rr-muted);
+    font-size: .875rem;
+    font-weight: 400;
+}
+
+.owner-listing-actions,
+.owner-form-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+
+.owner-listing-actions {
+    margin-top: .5rem;
+}
+
+.owner-editor-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+    align-items: start;
+    gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+.owner-editor-card .card-body {
+    padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.owner-form-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.owner-field-wide {
+    grid-column: 1 / -1;
+}
+
+.owner-form-fields .input-group > .form-control {
+    border-start-end-radius: var(--rr-radius-sm);
+    border-end-end-radius: var(--rr-radius-sm);
+}
+
+.owner-form-fields textarea {
+    resize: vertical;
+    min-height: 180px;
+}
+
+.owner-form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rr-border);
+}
+
+.owner-guidance {
+    padding-block: 1rem;
+    color: var(--rr-muted);
+}
+
+.owner-guidance h2 {
+    margin-top: 1rem;
+}
+
+.owner-steps {
+    list-style: none;
+    counter-reset: owner-step;
+    padding: 0;
+    margin-top: 1.5rem;
+}
+
+.owner-steps li {
+    position: relative;
+    padding-left: 2.75rem;
+    margin-block: 1.5rem;
+    counter-increment: owner-step;
+}
+
+.owner-steps li::before {
+    content: counter(owner-step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--rr-surface-muted);
+    color: var(--rr-primary);
+    font-weight: 700;
+}
+
+.owner-steps strong,
+.owner-steps span {
+    display: block;
+}
+
+.owner-steps strong {
+    color: var(--rr-text);
+}
+
+.owner-steps span {
+    margin-top: .25rem;
+}
+
+.owner-requirements {
+    padding-left: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.owner-requirements li + li {
+    margin-top: .5rem;
+}
+
+.owner-next-step,
+.owner-archive-section {
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rr-border);
+}
+
+.owner-coming-next {
+    display: block;
+    margin-top: .5rem;
+    color: var(--rr-secondary);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: normal;
+}
+
+.owner-next-step p {
+    font-size: .9rem;
+}
+
+.owner-archive {
+    margin-top: .25rem;
+}
+
+.owner-archive > summary {
+    width: fit-content;
+    list-style: none;
+}
+
+.owner-archive > summary::-webkit-details-marker {
+    display: none;
+}
+
+.owner-archive[open] > summary {
+    background: var(--rr-danger-bg);
+    color: var(--rr-danger);
+}
+
+.owner-archive-confirmation {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    margin-top: .75rem;
+    border: 1px solid var(--rr-border);
+    border-radius: var(--rr-radius-sm);
+    color: var(--rr-text);
+    background: var(--rr-surface-muted);
+}
+
+.owner-archive-confirmation p {
+    margin: 0;
+}
+
+@media (max-width: 991.98px) {
+    .owner-editor-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .owner-guidance {
+        max-width: 640px;
+    }
+
+    .owner-listing {
+        grid-template-columns: 160px minmax(0, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .owner-page-heading,
+    .owner-section-heading,
+    .owner-listing-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .owner-listing,
+    .owner-form-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .owner-listing {
+        gap: 1rem;
+    }
+
+    .owner-listing-media {
+        max-height: 220px;
+    }
+
+    .owner-listing-actions,
+    .owner-form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .owner-listing-actions .btn,
+    .owner-page-heading > .btn {
+        width: 100%;
+    }
+}

@@ -4,7 +4,17 @@
 
     /** Hides unavailable image bytes while retaining the listing link and its descriptive title. */
     function showImageFallback(event) {
-        event.currentTarget.hidden = true;
+        revealFallback(event.currentTarget);
+    }
+
+    /** Reveals an optional accessible fallback without changing image delivery or listing navigation. */
+    function revealFallback(image) {
+        image.hidden = true;
+        const fallback = image.parentElement?.querySelector("[data-image-fallback]");
+
+        if (fallback) {
+            fallback.removeAttribute("aria-hidden");
+        }
     }
 
     const images = document.querySelectorAll("[data-listing-image]");
@@ -13,7 +23,7 @@
         image.addEventListener("error", showImageFallback, { once: true });
 
         if (image.complete && image.naturalWidth === 0) {
-            image.hidden = true;
+            revealFallback(image);
         }
     }
 })();

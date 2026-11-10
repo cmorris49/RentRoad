@@ -1,0 +1,153 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Identity
+@using RentRoad.ViewModels.Listings
+@inject SignInManager<ApplicationUser> SignInManager
+@model ListingDetailsViewModel
+@{
+    var title = string.IsNullOrWhiteSpace(Model.Title) ? "Rental listing" : Model.Title;
+    var photos = Model.GalleryImages;
+    var displayCulture = CultureInfo.GetCultureInfo("en-CA");
+    ViewData["Title"] = title;
+}
+
+<div class="details-page">
+    <nav class="details-breadcrumb" aria-label="Breadcrumb">
+        <a asp-controller="Listings" asp-action="Index"><span aria-hidden="true">←</span> Browse Listings</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">@title</span>
+    </nav>
+
+    <div class="details-layout">
+        <section class="listing-gallery" data-listing-gallery aria-labelledby="photos-heading">
+            <h2 id="photos-heading" class="visually-hidden">Listing photos</h2>
+            @if (photos.Count == 0)
+            {
+                <div class="gallery-empty card">
+                    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                        <rect x="3" y="3" width="26" height="26" rx="4" /><circle cx="11" cy="11" r="3" /><path d="m4 25 8-8 5 5 5-7 7 10" stroke-linejoin="round" />
+                    </svg>
+                    <p>No photos available</p>
+                </div>
+            }
+            else
+            {
+                <div class="gallery-slides" id="listing-photos">
+                    @for (var index = 0; index < photos.Count; index++)
+                    {
+                        var photo = photos[index];
+                        <figure class="gallery-slide card" id="listing-photo-@photo.ListingImageId" data-gallery-slide>
+                            <div class="listing-card-media gallery-frame">
+                                <div class="listing-image-fallback" data-image-fallback role="img" aria-label="Photo unavailable" aria-hidden="true">
+                                    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                        <rect x="3" y="3" width="26" height="26" rx="4" /><circle cx="11" cy="11" r="3" /><path d="m4 25 8-8 5 5 5-7 7 10" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Photo unavailable</span>
+                                </div>
+                                <img class="listing-card-image" data-listing-image src="@Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = photo.ListingImageId })"
+                                     alt="@(string.IsNullOrWhiteSpace(photo.AltText) ? $"{title}, photo {index + 1}" : photo.AltText)"
+                                     width="1000" height="750" loading="@(index == 0 ? "eager" : "lazy")" decoding="async" />
+                            </div>
+                            <figcaption>Photo @(index + 1) of @photos.Count @if (photo.IsPrimary) { <span class="badge-soft">Primary photo</span> }</figcaption>
+                        </figure>
+                    }
+                </div>
+                @if (photos.Count > 1)
+                {
+                    <nav class="gallery-controls" data-gallery-controls aria-label="Choose a listing photo" hidden>
+                        <div class="gallery-step-controls">
+                            <button class="btn btn-outline-primary" type="button" data-gallery-previous aria-controls="listing-photos" aria-label="Previous photo">←</button>
+                            <p class="gallery-status" data-gallery-status aria-live="polite" aria-atomic="true">Photo 1 of @photos.Count</p>
+                            <button class="btn btn-outline-primary" type="button" data-gallery-next aria-controls="listing-photos" aria-label="Next photo">→</button>
+                        </div>
+                        <div class="gallery-photo-buttons">
+                            @for (var index = 0; index < photos.Count; index++)
+                            {
+                                <button class="btn btn-outline-primary" type="button" data-gallery-index="@index" aria-controls="listing-photo-@photos[index].ListingImageId"
+                                        aria-label="Show photo @(index + 1) of @photos.Count" aria-pressed="@(index == 0 ? "true" : "false")">@(index + 1)</button>
+                            }
+                        </div>
+                    </nav>
+                }
+            }
+        </section>
+
+        <section class="listing-overview" aria-labelledby="listing-title">
+            <p class="eyebrow">@ListingDisplayText.Category(Model.Category)</p>
+            <h1 id="listing-title">@title</h1>
+            <p class="details-location">@(string.IsNullOrWhiteSpace(Model.PickupArea) ? "Pickup area not specified" : Model.PickupArea)</p>
+            <dl class="listing-facts">
+                <div><dt>Condition</dt><dd>@ListingDisplayText.Condition(Model.Condition)</dd></div>
+                <div><dt>Shared by</dt><dd>@(string.IsNullOrWhiteSpace(Model.OwnerDisplayName) ? "Listing owner" : Model.OwnerDisplayName)</dd></div>
+            </dl>
+
+            <section class="card rental-summary" aria-labelledby="request-heading">
+                <p class="rental-price"><span>@Model.DailyPrice.FormattedAmount</span> <span class="rental-price-unit">/ day</span></p>
+                <p class="rental-currency">Daily rental price in Canadian dollars.</p>
+                <div class="request-heading"><h2 id="request-heading" class="h5">Request to Rent</h2><span class="badge-soft">Coming soon</span></div>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <button class="btn btn-primary" type="button" disabled aria-describedby="request-note">Request to Rent</button>
+                    <p id="request-note" class="request-note">Rental requests will be available in a later update. You can browse this listing’s photos and schedule for now.</p>
+                }
+                else
+                {
+                    <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "Listings", new { id = Model.ListingId })" aria-describedby="request-note">Log in to request a rental</a>
+                    <p id="request-note" class="request-note">Rental requests are coming soon. You can log in now and return to this listing afterward.</p>
+                }
+            </section>
+        </section>
+    </div>
+
+    <section class="details-section description-section" aria-labelledby="description-heading">
+        <p class="eyebrow">A closer look</p>
+        <h2 id="description-heading">About this item</h2>
+        <p class="listing-description">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description has been provided." : Model.Description)</p>
+    </section>
+
+    <section class="details-section" aria-labelledby="availability-heading">
+        <div class="availability-heading">
+            <div><p class="eyebrow">Plan ahead</p><h2 id="availability-heading">Availability</h2></div>
+            <p>Listed windows apply except for blocked dates below. Final availability will be confirmed when rental requests are available.</p>
+        </div>
+        <p class="date-convention">Ranges show the first and last included day. “Ends before” marks the following date, which is outside that period.</p>
+        <div class="availability-columns">
+            <section class="card availability-panel" aria-labelledby="windows-heading">
+                <h3 id="windows-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>Listed availability windows</h3>
+                @if (Model.AvailabilityWindows.Count == 0)
+                {
+                    <p class="availability-empty">No availability windows are listed.</p>
+                }
+                else
+                {
+                    <ul class="availability-periods">
+                        @foreach (var window in Model.AvailabilityWindows)
+                        {
+                            <li><span class="availability-range">@window.DisplayRange</span><span class="availability-boundary">Ends before <time datetime="@window.EndDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@window.EndDate.ToString("MMM d, yyyy", displayCulture)</time></span></li>
+                        }
+                    </ul>
+                }
+            </section>
+            <section class="card availability-panel blocked-periods" aria-labelledby="blocks-heading">
+                <h3 id="blocks-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>Blocked / unavailable dates</h3>
+                @if (Model.AvailabilityBlocks.Count == 0)
+                {
+                    <p class="availability-empty">No blocked dates are listed.</p>
+                }
+                else
+                {
+                    <ul class="availability-periods">
+                        @foreach (var block in Model.AvailabilityBlocks)
+                        {
+                            <li><span class="availability-range">@block.DisplayRange</span><span class="availability-boundary">Ends before <time datetime="@block.EndDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@block.EndDate.ToString("MMM d, yyyy", displayCulture)</time></span></li>
+                        }
+                    </ul>
+                }
+            </section>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/listing-images.js" asp-append-version="true" defer></script>
+    <script src="~/js/listing-gallery.js" asp-append-version="true" defer></script>
+}

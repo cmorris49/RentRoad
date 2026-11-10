@@ -29,6 +29,15 @@ public sealed record ListingImageViewModel(int ListingImageId, string ContentTyp
 /// </summary>
 public sealed record ListingAvailabilityViewModel(DateOnly StartDate, DateOnly EndDate)
 {
+    public DateOnly LastIncludedDate => EndDate.AddDays(-1);
+
+    /// <summary>
+    /// Formats the actual included dates without presenting the exclusive end boundary as an available day.
+    /// </summary>
+    public string DisplayRange => StartDate == LastIncludedDate
+        ? StartDate.ToString("MMM d, yyyy", CultureInfo.GetCultureInfo("en-CA"))
+        : $"{StartDate.ToString("MMM d, yyyy", CultureInfo.GetCultureInfo("en-CA"))} – {LastIncludedDate.ToString("MMM d, yyyy", CultureInfo.GetCultureInfo("en-CA"))}";
+
     /// <summary>
     /// Preserves the existing half-open availability date convention in the presentation contract.
     /// </summary>

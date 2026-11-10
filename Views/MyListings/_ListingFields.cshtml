@@ -1,0 +1,61 @@
+@model ListingFormViewModel
+@{
+    var priceInvalid = ViewData.ModelState.GetFieldValidationState(nameof(Model.DailyPriceCad)) == ModelValidationState.Invalid
+        || ViewData.ModelState.GetFieldValidationState(nameof(Model.DailyPriceCents)) == ModelValidationState.Invalid;
+}
+<input asp-for="Latitude" type="hidden" />
+<input asp-for="Longitude" type="hidden" />
+<div class="owner-form-fields">
+    <div class="owner-field-wide">
+        <label asp-for="Title" class="form-label">Listing title</label>
+        <input asp-for="Title" class="form-control" maxlength="150" placeholder="e.g. Cordless drill with carry case" aria-describedby="title-help title-error" />
+        <div id="title-help" class="form-text">Give your item a clear, descriptive name. Up to 150 characters.</div>
+        <span asp-validation-for="Title" id="title-error"></span>
+    </div>
+    <div class="owner-field-wide">
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="6" maxlength="2000" placeholder="Describe your item, what’s included, and anything a renter should know." aria-describedby="description-help description-error"></textarea>
+        <div id="description-help" class="form-text">Mention useful details, included accessories and any wear. Up to 2,000 characters.</div>
+        <span asp-validation-for="Description" id="description-error"></span>
+    </div>
+    <div>
+        <label asp-for="Category" class="form-label">Category</label>
+        <select asp-for="Category" class="form-select" aria-describedby="category-error">
+            <option value="">Choose later</option>
+            @foreach (var category in Enum.GetValues<ListingCategory>())
+            {
+                <option value="@category">@ListingDisplayText.Category(category)</option>
+            }
+        </select>
+        <span asp-validation-for="Category" id="category-error"></span>
+    </div>
+    <div>
+        <label asp-for="Condition" class="form-label">Item condition</label>
+        <select asp-for="Condition" class="form-select" aria-describedby="condition-error">
+            <option value="">Choose later</option>
+            @foreach (var condition in Enum.GetValues<ItemCondition>())
+            {
+                <option value="@condition">@ListingDisplayText.Condition(condition)</option>
+            }
+        </select>
+        <span asp-validation-for="Condition" id="condition-error"></span>
+    </div>
+    <div>
+        <label asp-for="DailyPriceCad" class="form-label">Daily price (CAD)</label>
+        <div class="input-group">
+            <span class="input-group-text" aria-hidden="true">CA$</span>
+            <input asp-for="DailyPriceCad" asp-format="{0:0.00}" type="number" step="0.01" min="0" inputmode="decimal" class="form-control @(priceInvalid ? "input-validation-error" : null)" placeholder="0.00" aria-invalid="@(priceInvalid ? "true" : null)" aria-describedby="price-help price-errors" />
+        </div>
+        <div id="price-help" class="form-text">Per day, with up to two decimal places. A price above CA$0 is needed to publish.</div>
+        <div id="price-errors">
+            <span asp-validation-for="DailyPriceCad"></span>
+            <span asp-validation-for="DailyPriceCents"></span>
+        </div>
+    </div>
+    <div>
+        <label asp-for="PickupArea" class="form-label">Pickup area</label>
+        <input asp-for="PickupArea" class="form-control" maxlength="150" placeholder="e.g. Mount Pleasant, Vancouver" aria-describedby="pickup-help pickup-error" />
+        <div id="pickup-help" class="form-text">Use a neighbourhood or general area, rather than a full street address.</div>
+        <span asp-validation-for="PickupArea" id="pickup-error"></span>
+    </div>
+</div>

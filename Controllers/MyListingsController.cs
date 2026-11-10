@@ -56,6 +56,7 @@ public sealed class MyListingsController : Controller
         var result = await listings.CreateDraftAsync(User, input.ToServiceUpdate(), cancellationToken);
         if (result.IsSuccess)
         {
+            TempData["ListingSuccess"] = "Your draft has been saved. You can keep editing it before publishing.";
             return RedirectToAction("Edit", new { id = result.Value!.ListingId });
         }
         var terminal = TerminalFailure(result.Status);
@@ -94,6 +95,7 @@ public sealed class MyListingsController : Controller
         var result = await listings.UpdateAsync(id, User, input.ToServiceUpdate(), cancellationToken);
         if (result.IsSuccess)
         {
+            TempData["ListingSuccess"] = "Your listing changes have been saved.";
             return RedirectToAction("Edit", new { id = result.Value!.ListingId });
         }
         var terminal = TerminalFailure(result.Status);
@@ -119,6 +121,7 @@ public sealed class MyListingsController : Controller
         var result = await listings.PublishAsync(id, User, cancellationToken);
         if (result.IsSuccess)
         {
+            TempData["ListingSuccess"] = "Your listing is published and visible in Browse Listings.";
             return RedirectToAction("Edit", new { id = result.Value!.ListingId });
         }
         var terminal = TerminalFailure(result.Status);
@@ -145,6 +148,7 @@ public sealed class MyListingsController : Controller
         var result = await listings.ArchiveAsync(id, User, cancellationToken);
         if (result.IsSuccess)
         {
+            TempData["ListingSuccess"] = "Your listing has been archived. Its history is preserved.";
             return RedirectToAction("Index");
         }
         var terminal = TerminalFailure(result.Status);
