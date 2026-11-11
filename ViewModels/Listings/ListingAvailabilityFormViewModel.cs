@@ -24,7 +24,7 @@ public sealed class ListingAvailabilityFormViewModel : ListingAvailabilityBlockI
         RecordId = recordId;
         IsSubmitted = isSubmitted;
         StartDate = input.StartDate;
-        EndDate = input.EndDate;
+        LastDay = input.LastDay;
         Reason = (input as ListingAvailabilityBlockInputViewModel)?.Reason;
     }
 }

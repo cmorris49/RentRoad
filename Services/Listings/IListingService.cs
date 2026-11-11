@@ -76,6 +76,16 @@ public interface IListingService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Selects up to ten newest published cards as the temporary Home popularity selection.
+    /// </summary>
+    Task<IReadOnlyList<ListingSummary>> GetPopularListingsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Selects up to ten newest public cards in a published listing's category, excluding that listing.
+    /// </summary>
+    Task<IReadOnlyList<ListingSummary>> GetSimilarListingsAsync(int listingId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Retrieves public listing details, returning NotFound for missing or unpublished listings.
     /// </summary>
     Task<ListingServiceResult<ListingDetails>> GetPublishedDetailsAsync(int listingId,

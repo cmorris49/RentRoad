@@ -22,7 +22,7 @@
         </form>
     </section>
     <section class="editor-section" id="editor-photos" aria-labelledby="editor-photos-heading">
-        <div class="editor-section-heading"><h2 id="editor-photos-heading">2. Photos</h2><span class="text-muted">Drag to reorder · buttons work too</span></div>
+        <div class="editor-section-heading"><h2 id="editor-photos-heading">2. Photos</h2><span class="text-muted">Drag photos to reorder them.</span></div>
         @if (!archived)
         {
             <form data-editor-upload class="editor-upload" enctype="multipart/form-data" method="post">
@@ -39,7 +39,7 @@
     </section>
     <section class="editor-section" id="editor-availability" aria-labelledby="editor-availability-heading">
         <div class="editor-section-heading"><h2 id="editor-availability-heading">3. Availability</h2></div>
-        <p class="text-muted">Choose a first day and an “ends before” date. For November 10–14, enter November 15 as the end.</p>
+        <p class="text-muted">Both First Day and Last Day are included.</p>
         <div class="editor-date-columns">
             @foreach (var group in new[] { "windows", "blocks" })
             {
@@ -51,10 +51,10 @@
                         <form data-editor-period data-group="@group" data-record-id="" class="editor-date-form" method="post">
                             @Html.AntiForgeryToken()
                             <div class="editor-date-inputs">
-                                <div><label for="editor-@group-start" class="form-label">First day</label><input id="editor-@group-start" name="StartDate" type="date" class="form-control" required /></div>
-                                <div><label for="editor-@group-end" class="form-label">Ends before</label><input id="editor-@group-end" name="EndDate" type="date" class="form-control" required /></div>
+                                <div><label for="editor-@group-start" class="form-label">First Day</label><input id="editor-@group-start" name="StartDate" type="date" class="form-control" required /></div>
+                                <div><label for="editor-@group-end" class="form-label">Last Day</label><input id="editor-@group-end" name="LastDay" max="9999-12-30" type="date" class="form-control" required /></div>
                             </div>
-                            <output class="form-text" data-last-day></output>
+
                             @if (block)
                             {
                                 <label for="editor-block-reason" class="form-label mt-2">Reason <span class="text-muted">(optional, private)</span></label><input id="editor-block-reason" name="Reason" maxlength="250" class="form-control" />
@@ -68,19 +68,21 @@
         </div>
     </section>
     <section class="editor-section editor-final-section" aria-labelledby="editor-preview-heading">
-        <div><h2 id="editor-preview-heading">4. Preview &amp; finish</h2><p class="text-muted">Preview current details and selected photos. Upload Listing opens a final review before anything is published.</p></div>
+        <div><h2 id="editor-preview-heading">4. Preview &amp; finish</h2></div>
+        <div class="editor-action-row">
         <div class="owner-form-actions editor-preview-actions"><button class="btn btn-outline-primary" type="button" data-editor-preview="card">Browse Card Preview</button><button class="btn btn-outline-primary" type="button" data-editor-preview="details">Listing Details Preview</button></div>
         @if (!archived)
         {
             <div class="editor-finish-actions"><button class="btn btn-primary" type="button" data-editor-review data-editor-write disabled>@(status == ListingStatus.Published ? "Review changes" : "Upload Listing")</button><button class="btn btn-outline-primary" type="submit" form="editor-fields" data-editor-save data-editor-write disabled>@(status == ListingStatus.Published ? "Save changes" : "Save Draft")</button></div>
-            @if (listingId > 0) { <div class="editor-archive"><partial name="_ArchiveListing" model="listingId" /></div> }
         }
+        </div>
+        @if (!archived && listingId > 0) { <div class="editor-archive"><partial name="_ArchiveListing" model="listingId" /></div> }
     </section>
     <partial name="_EditorPreviews" />
     <template data-photo-template>
-        <article class="editor-photo"><button type="button" class="editor-order-handle btn btn-sm btn-outline-primary" data-order-handle data-editor-write>⠿ Reorder</button><div class="listing-card-media" data-order-surface><img class="listing-card-image" alt="" /></div><div class="editor-photo-caption"><span data-photo-label></span><span class="badge-soft" data-primary-badge>Primary</span></div><div class="editor-photo-actions"><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="primary">Make primary</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="up" aria-label="Move photo up">↑</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="down" aria-label="Move photo down">↓</button></div><details class="editor-photo-remove"><summary>Remove photo</summary><p class="form-text">Remove this photo from the listing and storage?</p><button type="button" class="btn btn-sm btn-outline-danger" data-photo-action="delete">Confirm removal</button></details></article>
+        <article class="editor-photo"><div class="listing-card-media" data-order-surface tabindex="-1"><img class="listing-card-image" alt="" /></div><div class="editor-photo-caption"><span data-photo-label></span><span class="badge-soft" data-primary-badge>Primary</span></div><div class="editor-photo-actions"><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="primary">Make primary</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="up" aria-label="Move photo up">↑</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="down" aria-label="Move photo down">↓</button></div><details class="editor-photo-remove"><summary>Remove photo</summary><p class="form-text">Remove this photo from the listing and storage?</p><button type="button" class="btn btn-sm btn-outline-danger" data-photo-action="delete">Confirm removal</button></details></article>
     </template>
     <template data-period-template>
-        <article class="editor-period"><p class="editor-period-range"></p><p class="editor-period-reason text-muted"></p><details data-period-edit><summary>Edit dates</summary><form data-editor-period class="editor-date-form" method="post"><div class="editor-date-inputs"><div><label class="form-label">First day<input name="StartDate" type="date" class="form-control" required /></label></div><div><label class="form-label">Ends before<input name="EndDate" type="date" class="form-control" required /></label></div></div><output class="form-text" data-last-day></output><label class="form-label mt-2" data-reason-label>Reason (optional, private)<input name="Reason" class="form-control" maxlength="250" /></label><button class="btn btn-outline-primary mt-3" type="submit">Save dates</button></form></details><details data-period-remove><summary>Remove period</summary><p class="form-text">Remove this period? Existing rental and publication requirements still apply.</p><button type="button" class="btn btn-sm btn-outline-danger" data-period-delete>Confirm removal</button></details></article>
+        <article class="editor-period"><p class="editor-period-range"></p><p class="editor-period-reason text-muted"></p><details data-period-edit><summary>Edit dates</summary><form data-editor-period class="editor-date-form" method="post"><div class="editor-date-inputs"><div><label class="form-label">First Day<input name="StartDate" type="date" class="form-control" required /></label></div><div><label class="form-label">Last Day<input name="LastDay" max="9999-12-30" type="date" class="form-control" required /></label></div></div><label class="form-label mt-2" data-reason-label>Reason (optional, private)<input name="Reason" class="form-control" maxlength="250" /></label><button class="btn btn-outline-primary mt-3" type="submit">Save dates</button></form></details><details data-period-remove><summary>Remove period</summary><p class="form-text">Remove this period? Existing rental and publication requirements still apply.</p><button type="button" class="btn btn-sm btn-outline-danger" data-period-delete>Confirm removal</button></details></article>
     </template>
 </div>

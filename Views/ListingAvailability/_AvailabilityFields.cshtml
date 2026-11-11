@@ -1,17 +1,17 @@
 @model ListingAvailabilityFormViewModel
 <div class="availability-date-fields">
     <div>
-        <label asp-for="StartDate" for="@Model.FormId-start" class="form-label">@(Model.IsBlock ? "First blocked day" : "First available day")</label>
+        <label asp-for="StartDate" for="@Model.FormId-start" class="form-label">First Day</label>
         <input asp-for="StartDate" asp-format="{0:yyyy-MM-dd}" type="date" id="@Model.FormId-start" class="form-control" aria-describedby="@Model.FormId-date-help @Model.FormId-start-error" required />
         <span asp-validation-for="StartDate" id="@Model.FormId-start-error"></span>
     </div>
     <div>
-        <label asp-for="EndDate" for="@Model.FormId-end" class="form-label">End date (not included)</label>
-        <input asp-for="EndDate" asp-format="{0:yyyy-MM-dd}" type="date" id="@Model.FormId-end" class="form-control" aria-describedby="@Model.FormId-date-help @Model.FormId-end-error" required />
-        <span asp-validation-for="EndDate" id="@Model.FormId-end-error"></span>
+        <label asp-for="LastDay" for="@Model.FormId-end" class="form-label">Last Day</label>
+        <input asp-for="LastDay" asp-format="{0:yyyy-MM-dd}" type="date" max="9999-12-30" id="@Model.FormId-end" class="form-control" aria-describedby="@Model.FormId-date-help @Model.FormId-end-error" required />
+        <span asp-validation-for="LastDay" id="@Model.FormId-end-error"></span>
     </div>
 </div>
-<p id="@Model.FormId-date-help" class="form-text">@(Model.IsBlock ? "Blocked dates include the first day and stop before the end date." : "Available dates include the first day and stop before the end date.") The end must be later than the start.</p>
+<p id="@Model.FormId-date-help" class="form-text">Both dates are included.</p>
 @if (Model.IsBlock)
 {
     <div class="mb-3">

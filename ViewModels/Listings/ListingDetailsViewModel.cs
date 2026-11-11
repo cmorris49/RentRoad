@@ -12,6 +12,8 @@ public sealed record ListingDetailsViewModel(int ListingId, string? Title, strin
     IReadOnlyList<ListingImageViewModel> Images, IReadOnlyList<ListingAvailabilityViewModel> AvailabilityWindows,
     IReadOnlyList<ListingAvailabilityViewModel> AvailabilityBlocks)
 {
+    public IReadOnlyList<ListingSummaryViewModel> SimilarListings { get; init; } = Array.Empty<ListingSummaryViewModel>();
+
     /// <summary>
     /// Places the primary image first and retains configured display order, with a stable ID tie-breaker, for remaining photos.
     /// </summary>

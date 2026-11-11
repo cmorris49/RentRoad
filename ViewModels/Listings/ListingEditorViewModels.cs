@@ -18,7 +18,10 @@ public sealed record ListingEditorFieldsViewModel(string? Title, string? Descrip
 public sealed record ListingEditorImageViewModel(int Id, string Url, string? AltText, bool IsPrimary, int DisplayOrder);
 
 /// <summary>Preserves ISO calendar boundaries while also displaying the actual included dates.</summary>
-public sealed record ListingEditorPeriodViewModel(int Id, DateOnly StartDate, DateOnly EndDate, string DisplayRange, string? Reason = null);
+public sealed record ListingEditorPeriodViewModel(int Id, DateOnly StartDate, DateOnly EndDate, string DisplayRange, string? Reason = null)
+{
+    public DateOnly LastDay => EndDate.AddDays(-1);
+}
 
 /// <summary>Projects a private editor snapshot without exposing Identity or Blob Storage internals.</summary>
 public sealed record ListingEditorStateViewModel(string Token, int? ListingId, string Status, string OwnerDisplayName,

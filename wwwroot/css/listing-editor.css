@@ -1,6 +1,5 @@
 /* Unified listing editor uses existing marketplace components and theme tokens. */
-.listing-editor { max-width: 1160px; margin-inline: auto; padding-bottom: 2rem; }
-.listing-editor .btn { transition: none; }
+.listing-editor { max-width: 100%; margin-inline: auto; padding-bottom: 2rem; }
 .editor-heading, .editor-section-heading, .editor-dialog-header, .editor-photo-caption { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .editor-heading { align-items: flex-start; }
 .editor-heading h1 { font-size: clamp(2rem, 4vw, 3rem); }
@@ -27,14 +26,15 @@
 .editor-date-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .editor-date-inputs label { width: 100%; }
 .editor-date-inputs input { min-width: 0; width: 100%; }
-.editor-date-form output { display: block; }
 .editor-date-form { margin-block: 1rem; }
 .editor-period { padding-block: 1rem; border-top: 1px solid var(--rr-border); }
 .editor-period-range { font-weight: 600; margin-bottom: .4rem; }
 .editor-period-reason { font-size: .875rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .editor-period details + details { margin-top: .75rem; }
 .editor-preview-actions { border: 0; margin-top: 0; padding-top: 0; }
-.editor-finish-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.editor-action-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem 2rem; }
+.editor-preview-actions { margin-bottom: 0; }
+.editor-finish-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-left: auto; }
 .editor-archive { margin-top: 2rem; }
 .editor-preview-dialog { width: min(1050px, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); padding: 0; border: 1px solid var(--rr-border); border-radius: var(--rr-radius); color: var(--rr-text); background: var(--rr-surface); }
 .editor-preview-dialog[data-preview-mode="card"] { width: min(480px, calc(100vw - 2rem)); }
@@ -60,7 +60,10 @@
 @media (max-width: 575.98px) {
     .editor-upload, .editor-date-inputs, .listing-editor .owner-form-fields { grid-template-columns: minmax(0, 1fr); }
     .editor-heading { flex-wrap: wrap; }
-    .editor-section-heading > span { display: none; }
+    .editor-section-heading { flex-wrap: wrap; gap: .5rem; }
+    .editor-section-heading > span { display: block; }
+    .editor-finish-actions { margin-left: 0; }
+    .editor-action-row > div { width: 100%; }
     .editor-dialog-body { padding: 1rem; }
     .editor-preview-dialog { width: calc(100vw - 1rem); max-height: calc(100dvh - 1rem); }
 }
@@ -76,9 +79,8 @@
 .editor-queued-photo p { margin: .2rem 0 0; }
 .editor-queued-photo progress { accent-color: var(--rr-primary); width: min(100%, 280px); }
 .editor-photo { position: relative; border-inline: 3px solid transparent; }
-.editor-photo[data-order-editable] [data-order-surface] { cursor: grab; }
-.editor-order-handle { cursor: grab; touch-action: none; margin-bottom: .5rem; }
-.editor-order-handle:active { cursor: grabbing; }
+.editor-photo[data-order-editable] [data-order-surface] { cursor: grab; touch-action: none; }
+.editor-photo[data-order-editable] [data-order-surface]:active { cursor: grabbing; }
 .editor-photo.is-dragging { opacity: .45; }
 .editor-photo.drop-before { border-left-color: var(--rr-primary); }
 .editor-photo.drop-after { border-right-color: var(--rr-primary); }

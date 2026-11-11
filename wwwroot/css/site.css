@@ -36,6 +36,8 @@
     --rr-radius: 1rem;
     --rr-radius-sm: .625rem;
     --rr-space: 1.5rem;
+    --rr-content-max-width: 1440px;
+    --rr-reading-max-width: 52rem;
 }
 
 [data-bs-theme="dark"] {
@@ -168,7 +170,7 @@ a:hover {
 }
 
 .container {
-    max-width: 1248px;
+    max-width: var(--rr-content-max-width);
     padding-inline: clamp(1rem, 3vw, 2rem);
 }
 
@@ -274,7 +276,7 @@ a:hover {
 }
 
 .navbar-nav .nav-link.active {
-    box-shadow: inset 0 -2px var(--rr-secondary);
+    box-shadow: var(--rr-shadow);
 }
 
 .account-navigation {
@@ -398,6 +400,10 @@ a:hover {
 }
 
 /* Buttons and pagination */
+.btn, .navbar-nav .nav-link {
+    transition: none;
+}
+
 .btn {
     min-height: 44px;
     padding: .625rem 1.125rem;
@@ -905,4 +911,12 @@ a:hover {
     border-radius: 50%;
     background: var(--rr-highlight);
     color: var(--rr-highlight-text);
+}
+
+/* Account labels retain comfortable navigation space even for long display names. */
+.account-display-name { display: inline-block; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.settings-page { max-width: var(--rr-reading-max-width); }
+@media (max-width: 575.98px) {
+    .account-toggle { max-width: 100%; }
+    .account-display-name { max-width: min(14rem, 65vw); }
 }

@@ -74,9 +74,15 @@ public sealed class ListingsController : Controller
             }
             return ValidationProblem(ModelState);
         }
-        return result.IsSuccess
-            ? View("Details", ListingDetailsViewModel.FromResult(result.Value!))
-            : Problem(statusCode: StatusCodes.Status500InternalServerError, title: "The listing could not be loaded.");
+        if (!result.IsSuccess)
+        {
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, title: "The listing could not be loaded.");
+        }
+        var similar = await listings.GetSimilarListingsAsync(id, cancellationToken);
+        return View("Details", ListingDetailsViewModel.FromResult(result.Value!) with
+        {
+            SimilarListings = similar.Select(ListingSummaryViewModel.FromResult).ToArray()
+        });
     }
 
     /// <summary>

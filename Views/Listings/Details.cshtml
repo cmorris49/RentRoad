@@ -1,4 +1,3 @@
-@using System.Globalization
 @using Microsoft.AspNetCore.Identity
 @using RentRoad.ViewModels.Listings
 @inject SignInManager<ApplicationUser> SignInManager
@@ -6,7 +5,6 @@
 @{
     var title = string.IsNullOrWhiteSpace(Model.Title) ? "Rental listing" : Model.Title;
     var photos = Model.GalleryImages;
-    var displayCulture = CultureInfo.GetCultureInfo("en-CA");
     ViewData["Title"] = title;
 }
 
@@ -60,7 +58,7 @@
             <div><p class="eyebrow">Plan ahead</p><h2 id="availability-heading">Availability</h2></div>
             <p>Listed windows apply except for blocked dates below. Final availability will be confirmed when rental requests are available.</p>
         </div>
-        <p class="date-convention">Ranges show the first and last included day. “Ends before” marks the following date, which is outside that period.</p>
+        <p class="date-convention">Both the first and last day shown are included.</p>
         <div class="availability-columns">
             <section class="card availability-panel" aria-labelledby="windows-heading">
                 <h3 id="windows-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>Listed availability windows</h3>
@@ -73,7 +71,7 @@
                     <ul class="availability-periods">
                         @foreach (var window in Model.AvailabilityWindows)
                         {
-                            <li><span class="availability-range">@window.DisplayRange</span><span class="availability-boundary">Ends before <time datetime="@window.EndDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@window.EndDate.ToString("MMM d, yyyy", displayCulture)</time></span></li>
+                            <li><span class="availability-range">@window.DisplayRange</span></li>
                         }
                     </ul>
                 }
@@ -89,15 +87,20 @@
                     <ul class="availability-periods">
                         @foreach (var block in Model.AvailabilityBlocks)
                         {
-                            <li><span class="availability-range">@block.DisplayRange</span><span class="availability-boundary">Ends before <time datetime="@block.EndDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@block.EndDate.ToString("MMM d, yyyy", displayCulture)</time></span></li>
+                            <li><span class="availability-range">@block.DisplayRange</span></li>
                         }
                     </ul>
                 }
             </section>
         </div>
     </section>
+    <partial name="_ListingScroller" model='@(new ListingScrollerViewModel("similar-listings", "Similar Listings", Model.SimilarListings))' />
 </div>
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/listing-scroller.css" asp-append-version="true" />
+}
 @section Scripts {
+    <script src="~/js/listing-scroller.js" asp-append-version="true" defer></script>
     <script src="~/js/listing-images.js" asp-append-version="true" defer></script>
 }

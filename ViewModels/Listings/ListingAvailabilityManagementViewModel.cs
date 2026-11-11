@@ -6,22 +6,45 @@ using RentRoad.Services.Listings;
 namespace RentRoad.ViewModels.Listings;
 
 /// <summary>
-/// Binds only a half-open DateOnly range, leaving date rules and duplicate/conflict checks to the service.
+/// Binds inclusive calendar dates and converts them to the existing half-open service contract.
 /// </summary>
-public class ListingAvailabilityWindowInputViewModel
+public class ListingAvailabilityWindowInputViewModel : IValidatableObject
 {
-    [Required]
+    [Required(ErrorMessage = "Choose a First Day.")]
+    [Display(Name = "First Day")]
     [DataType(DataType.Date)]
     public DateOnly? StartDate { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Choose a Last Day.")]
+    [Display(Name = "Last Day")]
     [DataType(DataType.Date)]
-    public DateOnly? EndDate { get; set; }
+    public DateOnly? LastDay { get; set; }
 
     /// <summary>
-    /// Maps an inclusive start and exclusive end without adjusting dates or accepting relationship identifiers.
+    /// Maps inclusive form dates to exclusive service boundaries without accepting relationship identifiers.
     /// </summary>
-    public ListingAvailabilityPeriod ToServicePeriod() => new(StartDate.GetValueOrDefault(), EndDate.GetValueOrDefault());
+    public ListingAvailabilityPeriod ToServicePeriod() => new(StartDate.GetValueOrDefault(), ExclusiveEndDate());
+
+    /// <summary>Rejects reversed or unrepresentable inclusive dates before any service mutation is attempted.</summary>
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (StartDate == DateOnly.MinValue)
+        {
+            yield return new ValidationResult("First Day must be January 2, 0001 or later.", new[] { nameof(StartDate) });
+        }
+        if (StartDate.HasValue && LastDay.HasValue && LastDay.Value < StartDate.Value)
+        {
+            yield return new ValidationResult("Last Day must be on or after First Day.", new[] { nameof(LastDay) });
+        }
+        if (LastDay == DateOnly.MaxValue)
+        {
+            yield return new ValidationResult("Last Day must be December 30, 9999 or earlier.", new[] { nameof(LastDay) });
+        }
+    }
+
+    /// <summary>Converts a validated last day using calendar arithmetic, safely retaining invalid input for validation.</summary>
+    protected DateOnly ExclusiveEndDate() => LastDay.HasValue && LastDay.Value < DateOnly.MaxValue
+        ? LastDay.Value.AddDays(1) : default;
 }
 
 /// <summary>
@@ -34,7 +57,7 @@ public class ListingAvailabilityBlockInputViewModel : ListingAvailabilityWindowI
     /// <summary>
     /// Maps editable block dates and reason without accepting owner, listing, or block IDs.
     /// </summary>
-    public ListingAvailabilityBlockUpdate ToServiceBlock() => new(StartDate.GetValueOrDefault(), EndDate.GetValueOrDefault(), Reason);
+    public ListingAvailabilityBlockUpdate ToServiceBlock() => new(StartDate.GetValueOrDefault(), ExclusiveEndDate(), Reason);
 }
 
 /// <summary>
@@ -108,7 +131,7 @@ public sealed class ListingAvailabilityManagementViewModel : ListingAvailability
     public ListingAvailabilityFormViewModel WindowForm(OwnerAvailabilityWindowViewModel? window = null)
     {
         var submitted = IsSubmitted(window is null ? ListingAvailabilityOperation.CreateWindow : ListingAvailabilityOperation.UpdateWindow, window?.WindowId);
-        var input = submitted ? this : new ListingAvailabilityWindowInputViewModel { StartDate = window?.Period.StartDate, EndDate = window?.Period.EndDate };
+        var input = submitted ? this : new ListingAvailabilityWindowInputViewModel { StartDate = window?.Period.StartDate, LastDay = window?.Period.LastIncludedDate };
         return new(ListingId, false, window?.WindowId, submitted, input);
     }
 
@@ -118,7 +141,7 @@ public sealed class ListingAvailabilityManagementViewModel : ListingAvailability
     public ListingAvailabilityFormViewModel BlockForm(OwnerAvailabilityBlockViewModel? block = null)
     {
         var submitted = IsSubmitted(block is null ? ListingAvailabilityOperation.CreateBlock : ListingAvailabilityOperation.UpdateBlock, block?.BlockId);
-        var input = submitted ? this : new ListingAvailabilityBlockInputViewModel { StartDate = block?.Period.StartDate, EndDate = block?.Period.EndDate, Reason = block?.Reason };
+        var input = submitted ? this : new ListingAvailabilityBlockInputViewModel { StartDate = block?.Period.StartDate, LastDay = block?.Period.LastIncludedDate, Reason = block?.Reason };
         return new(ListingId, true, block?.BlockId, submitted, input);
     }
 
@@ -138,12 +161,12 @@ public sealed class ListingAvailabilityManagementViewModel : ListingAvailability
             .Select(block => new OwnerAvailabilityBlockViewModel(block.AvailabilityBlockId,
             new ListingAvailabilityViewModel(block.StartDate, block.EndDate), block.Reason)).ToArray();
         StartDate = input?.StartDate;
-        EndDate = input?.EndDate;
+        LastDay = input?.LastDay;
         Reason = (input as ListingAvailabilityBlockInputViewModel)?.Reason;
         Windows = replacement is null ? listing.AvailabilityWindows.Select(window => new ListingAvailabilityWindowInputViewModel
-            { StartDate = window.StartDate, EndDate = window.EndDate }).ToArray()
+            { StartDate = window.StartDate, LastDay = window.EndDate.AddDays(-1) }).ToArray()
             : replacement.Windows?.Select(window => new ListingAvailabilityWindowInputViewModel
-                { StartDate = window?.StartDate, EndDate = window?.EndDate }).ToArray()
+                { StartDate = window?.StartDate, LastDay = window?.LastDay }).ToArray()
                 ?? Array.Empty<ListingAvailabilityWindowInputViewModel>();
         Feedback = feedback;
     }

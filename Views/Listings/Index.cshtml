@@ -32,7 +32,7 @@
     <aside class="browse-sidebar" aria-labelledby="filters-heading">
         <button class="btn btn-outline-primary filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filter-panel" aria-controls="filter-panel" aria-expanded="@(!Model.HasValidSearch ? "true" : "false")">Refine search <span aria-hidden="true">⌄</span></button>
         <div class="collapse d-lg-block @(!Model.HasValidSearch ? "show" : null)" id="filter-panel">
-            <form id="listing-filters" class="card filter-panel" method="get" asp-controller="Listings" asp-action="Index">
+            <form id="listing-filters" class="filter-panel" method="get" asp-controller="Listings" asp-action="Index">
                 <div class="filter-heading">
                     <h2 id="filters-heading" class="h5">Refine your search</h2>
                     <a asp-controller="Listings" asp-action="Index">Reset</a>
@@ -122,12 +122,12 @@
             <div class="sort-controls">
                 <label asp-for="SortOrder" class="form-label">Sort by</label>
                 <div class="sort-inputs">
-                    <select asp-for="SortOrder" class="form-select" form="listing-filters" aria-describedby="sort-error">
+                    <select asp-for="SortOrder" class="form-select sort-select" form="listing-filters" aria-describedby="sort-error">
                         <option value="@ListingSortOrder.NewestFirst">Newest first</option>
                         <option value="@ListingSortOrder.PriceLowToHigh">Price: low to high</option>
                         <option value="@ListingSortOrder.PriceHighToLow">Price: high to low</option>
                     </select>
-                    <button class="btn btn-outline-primary" type="submit" form="listing-filters">Update</button>
+                    <button class="btn btn-link sort-apply" type="submit" form="listing-filters">Update</button>
                 </div>
                 <span asp-validation-for="SortOrder" id="sort-error"></span>
             </div>

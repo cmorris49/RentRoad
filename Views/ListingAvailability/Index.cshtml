@@ -33,18 +33,12 @@
     {
         <div class="alert alert-info">This listing is archived. Its availability and private notes are read-only.</div>
     }
-    <div class="availability-explanation" aria-labelledby="date-convention-heading">
-        <h2 id="date-convention-heading" class="h5">The first day counts. The end date does not.</h2>
-        <p>A start of November 10 and an end of November 15 includes November 10–14. November 15 is excluded.</p>
-        <p>Windows describe when your item can be rented. Blocks mark exceptions. Adjacent and overlapping periods are allowed; exact duplicate windows or blocks are rejected. Approved and active rental reservations are always protected.</p>
-        <p class="mb-0">At least one valid availability window is required before publishing. Drafts can be saved without availability.</p>
-    </div>
+    <p class="text-muted">First Day and Last Day are included. Blocks mark exceptions; existing reservations remain protected.</p>
     <div class="availability-sections">
         <section aria-labelledby="windows-heading">
             <div class="owner-section-heading">
                 <h2 id="windows-heading" class="h3">Available to rent <span class="owner-listing-count">(@Model.AvailabilityWindows.Count)</span></h2>
             </div>
-            <p class="text-muted">Your availability windows, in chronological order.</p>
             @if (Model.CanEdit)
             {
                 <div class="card availability-add-card">
@@ -69,7 +63,6 @@
                         <div class="card-body">
                             <p class="eyebrow">Available dates</p>
                             <h3 id="window-heading-@window.WindowId" class="h5">@window.Period.DisplayRange</h3>
-                            <p class="form-text">End boundary: <time datetime="@window.Period.EndDate.ToString("yyyy-MM-dd")">@window.Period.EndDate.ToString("MMM d, yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-CA"))</time> (excluded).</p>
                             @if (Model.CanEdit)
                             {
                                 <details class="availability-edit" open="@form.IsSubmitted">
@@ -112,7 +105,6 @@
                         <div class="card-body">
                             <p class="eyebrow">Blocked dates</p>
                             <h3 id="block-heading-@block.BlockId" class="h5">@block.Period.DisplayRange</h3>
-                            <p class="form-text">End boundary: <time datetime="@block.Period.EndDate.ToString("yyyy-MM-dd")">@block.Period.EndDate.ToString("MMM d, yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-CA"))</time> (excluded).</p>
                             @if (!string.IsNullOrWhiteSpace(block.Reason))
                             {
                                 <p class="availability-reason"><span class="text-muted">Private reason:</span> @block.Reason</p>

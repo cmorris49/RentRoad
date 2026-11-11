@@ -1,4 +1,4 @@
-/** Adds persisted mouse, pen and touch-handle ordering while retaining ordinary Move up/down buttons. */
+/** Adds persisted mouse, pen and touch thumbnail ordering while retaining ordinary Move up/down buttons. */
 (function initializeImageOrdering() {
     "use strict";
 
@@ -38,13 +38,12 @@
         }
 
         collection.addEventListener("pointerdown", event => {
-            const surface = event.pointerType !== "touch" ? event.target.closest("[data-order-surface]") : null;
-            const handle = event.target.closest("[data-order-handle]") || surface?.closest("[data-order-id]")?.querySelector("[data-order-handle]");
-            if ((event.button !== undefined && event.button !== 0) || !options.canMove() || !handle) return;
-            source = handle.closest("[data-order-id]");
+            const surface = event.target.closest("[data-order-surface]");
+            if ((event.button !== undefined && event.button !== 0) || !options.canMove() || !surface) return;
+            source = surface.closest("[data-order-id]");
             pointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
-            handle.setPointerCapture(event.pointerId);
-            handle.focus({ preventScroll: true });
+            surface.setPointerCapture(event.pointerId);
+            surface.focus({ preventScroll: true });
             event.preventDefault();
         });
         collection.addEventListener("pointermove", event => {

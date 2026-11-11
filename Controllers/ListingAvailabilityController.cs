@@ -134,7 +134,7 @@ public sealed class ListingAvailabilityController : Controller
         }
         foreach (var error in errors)
         {
-            ModelState.AddModelError(FormField(error.Field, operation), error.Message);
+            ModelState.AddModelError(FormField(error.Field, operation), AvailabilityMessage(error.Message));
         }
         var current = await listings.GetOwnerAvailabilityAsync(listingId, User, cancellationToken);
         if (!current.IsSuccess)
@@ -163,15 +163,19 @@ public sealed class ListingAvailabilityController : Controller
         if (field.StartsWith("AvailabilityWindows", StringComparison.Ordinal))
         {
             return operation == ListingAvailabilityOperation.ReplaceWindows
-                ? "Windows" + field["AvailabilityWindows".Length..]
-                : operation is ListingAvailabilityOperation.CreateWindow or ListingAvailabilityOperation.UpdateWindow ? "EndDate" : string.Empty;
+                ? ("Windows" + field["AvailabilityWindows".Length..]).Replace(".EndDate", ".LastDay", StringComparison.Ordinal)
+                : operation is ListingAvailabilityOperation.CreateWindow or ListingAvailabilityOperation.UpdateWindow ? "LastDay" : string.Empty;
         }
         if (field == "AvailabilityBlocks")
         {
-            return operation is ListingAvailabilityOperation.CreateBlock or ListingAvailabilityOperation.UpdateBlock ? "EndDate" : string.Empty;
+            return operation is ListingAvailabilityOperation.CreateBlock or ListingAvailabilityOperation.UpdateBlock ? "LastDay" : string.Empty;
         }
-        return field is "StartDate" or "EndDate" or "Reason" ? field : string.Empty;
+        return field == "EndDate" ? "LastDay" : field is "StartDate" or "Reason" ? field : string.Empty;
     }
+
+    /// <summary>Adapts legacy boundary wording without changing the service validation rule or its result.</summary>
+    private static string AvailabilityMessage(string message) => message
+        .Replace("with the start before the end", "with Last Day on or after First Day", StringComparison.Ordinal);
 
     /// <summary>
     /// Maps auth/resource failures and unexpected outcomes before any private block data is returned.

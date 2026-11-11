@@ -1,0 +1,33 @@
+@model RentRoad.ViewModels.Account.AccountNavigationViewModel
+
+<ul class="navbar-nav account-navigation">
+@if (Model.IsSignedIn)
+{
+    <li class="nav-item dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle account-toggle" type="button" id="account-menu" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="account-display-name">@Model.DisplayName</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account-menu">
+            <li>
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">Manage account</a>
+            </li>
+            <li><a class="dropdown-item" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button type="submit" class="dropdown-item">Log out</button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Log in</a>
+    </li>
+    <li class="nav-item">
+        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Register</a>
+    </li>
+}
+</ul>

@@ -10,11 +10,22 @@
 }
 
 .browse-page ::deep .filter-panel {
-    padding: 1.25rem;
-    gap: 1.25rem;
+    display: grid;
+    gap: 0;
+    min-width: 0;
 }
 
+.browse-page ::deep .filter-panel > div:not(.filter-heading),
+.browse-page ::deep .filter-panel > fieldset {
+    padding-block: .875rem;
+    border-top: 1px solid var(--rr-border);
+    min-width: 0;
+}
+
+.browse-page ::deep .filter-panel > button { margin-top: .375rem; }
+
 .browse-page ::deep .filter-heading {
+    padding-bottom: .875rem;
     display: flex;
     justify-content: space-between;
     align-items: baseline;
@@ -109,7 +120,15 @@
 .browse-page ::deep .sort-inputs select {
     width: auto;
     min-width: 0;
+    border: 0;
+    background-color: transparent;
+    box-shadow: none;
+    padding-left: 0;
+    font-weight: 600;
+    cursor: pointer;
 }
+
+.browse-page ::deep .sort-apply { padding-inline: .25rem; text-underline-offset: .2em; }
 
 .browse-page ::deep .results-pagination {
     margin-top: 2rem;
@@ -159,6 +178,7 @@
     .browse-page ::deep .filter-panel {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 1.5rem;
     }
 
     .browse-page ::deep .filter-heading, .browse-page ::deep .filter-panel > button {
@@ -177,8 +197,6 @@
         align-items: center;
     }
 
-    .browse-page ::deep .sort-controls, .browse-page ::deep .sort-inputs select {
-        width: 100%;
-    }
+    .browse-page ::deep .sort-controls { max-width: 100%; }
 
 }

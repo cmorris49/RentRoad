@@ -300,6 +300,36 @@ public sealed partial class ListingService : IListingService
             new ListingSearchPage(items, totalCount, parameters.PageNumber, parameters.PageSize));
     }
 
+    private const int PUBLIC_ROW_LIMIT = 10;
+
+    /// <summary>
+    /// Uses newest-first selection until an actual popularity ranking is introduced.
+    /// </summary>
+    public async Task<IReadOnlyList<ListingSummary>> GetPopularListingsAsync(CancellationToken cancellationToken = default) =>
+        await ProjectSummaries(BuildPublicRowQuery()).ToListAsync(cancellationToken);
+
+    /// <summary>
+    /// Returns same-category cards only when the source listing is itself public, without loading its entity.
+    /// </summary>
+    public async Task<IReadOnlyList<ListingSummary>> GetSimilarListingsAsync(int listingId, CancellationToken cancellationToken = default) =>
+        await ProjectSummaries(BuildPublicRowQuery(listingId)).ToListAsync(cancellationToken);
+
+    /// <summary>
+    /// Bounds public rows in SQL with a stable ID tie-breaker and an optional same-category source predicate.
+    /// </summary>
+    private IQueryable<Listing> BuildPublicRowQuery(int? similarToId = null)
+    {
+        var query = PublishedListingsQuery();
+        if (similarToId.HasValue)
+        {
+            var sources = PublishedListingsQuery();
+            query = query.Where(listing => listing.ListingId != similarToId.Value && listing.Category != null
+                && sources.Any(source => source.ListingId == similarToId.Value && source.Category == listing.Category));
+        }
+        return query.OrderByDescending(listing => listing.PublishedAtUtc ?? listing.CreatedAtUtc)
+            .ThenByDescending(listing => listing.ListingId).Take(PUBLIC_ROW_LIMIT);
+    }
+
     /// <summary>
     /// Retrieves published item details, ordered images, and date ranges using public-only projections.
     /// </summary>

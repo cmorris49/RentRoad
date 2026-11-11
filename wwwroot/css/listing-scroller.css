@@ -1,0 +1,31 @@
+.listing-scroller { min-width: 0; max-width: 100%; margin-top: clamp(2rem, 5vw, 4rem); }
+.listing-scroller-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.listing-scroller-heading h2 { margin: 0; }
+.listing-scroller-actions { display: flex; align-items: center; gap: 1.25rem; }
+.listing-scroller-controls { display: flex; gap: .5rem; }
+.listing-scroller-controls .btn { border-radius: 50%; width: 2.75rem; height: 2.75rem; padding: 0; }
+.listing-scroller-track {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-behavior: smooth;
+    scroll-padding-inline: .25rem;
+    list-style: none;
+    margin: 0;
+    padding: .25rem .25rem 1rem;
+    max-width: 100%;
+    border-radius: var(--rr-radius);
+    scrollbar-color: var(--rr-secondary) var(--rr-surface);
+}
+.listing-scroller-item { flex: 0 0 clamp(17rem, 26vw, 21rem); min-width: 0; scroll-snap-align: start; }
+.listing-scroller-item .listing-card { height: 100%; }
+.listing-scroller .rr-gallery-stage { touch-action: pan-y; }
+@media (max-width: 575.98px) {
+    .listing-scroller-item { flex-basis: 85%; }
+    .listing-scroller-actions { gap: .75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .listing-scroller-track { scroll-behavior: auto; }
+}

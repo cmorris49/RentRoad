@@ -185,7 +185,7 @@
             finally {
                 busy = false;
                 updateControls();
-                if (focusAfterAction !== null) root.querySelector('[data-order-id="' + focusAfterAction + '"] [data-order-handle]')?.focus({ preventScroll: true });
+                if (focusAfterAction !== null) root.querySelector('[data-order-id="' + focusAfterAction + '"] [data-order-surface]')?.focus({ preventScroll: true });
                 focusAfterAction = null;
             }
         }
@@ -213,7 +213,7 @@
                 const card = root.querySelector("[data-photo-template]").content.firstElementChild.cloneNode(true);
                 card.dataset.orderId = String(photo.id);
                 if (!archived && state.status !== "Archived") card.dataset.orderEditable = "";
-                card.querySelector("[data-order-handle]").setAttribute("aria-label", "Drag photo " + (index + 1) + " to reorder; Move up and down buttons are also available");
+
                 const image = card.querySelector("img");
                 const fallback = document.createElement("span");
                 fallback.dataset.editorImageFallback = "";
@@ -237,7 +237,6 @@
                     if (button.dataset.photoAction === "down") button.hidden = index === state.images.length - 1;
                 }
                 if (archived) {
-                    card.querySelector("[data-order-handle]").remove();
                     card.querySelector(".editor-photo-actions").remove();
                     card.querySelector("details").remove();
                 }
@@ -270,7 +269,7 @@
                     const form = row.querySelector("form");
                     form.dataset.group = group;
                     form.dataset.recordId = String(period.id);
-                    for (const [name, value] of [["StartDate", period.startDate], ["EndDate", period.endDate], ["Reason", period.reason || ""]]) {
+                    for (const [name, value] of [["StartDate", period.startDate], ["LastDay", period.lastDay], ["Reason", period.reason || ""]]) {
                         const input = form.elements.namedItem(name);
                         input.value = value;
                         input.defaultValue = value;
@@ -280,7 +279,6 @@
                     row.querySelector("[data-period-delete]").dataset.recordId = String(period.id);
                     for (const button of row.querySelectorAll("button")) button.dataset.editorWrite = "";
                     restorePeriod(form, retained, changedKey);
-                    updateLastDay(form);
                     if (archived) for (const details of row.querySelectorAll("details")) details.remove();
                     list.append(row);
                 }
@@ -323,7 +321,7 @@
             const suffix = recordId ? "/" + recordId + (remove ? "/remove" : "/edit") : "";
             await request("/my/listings/" + state.listingId + "/availability/" + group + suffix, data);
             const unchanged = !form || JSON.stringify(Array.from(new FormData(form).entries())) === captured;
-            if (form && !recordId && unchanged) { form.reset(); updateLastDay(form); }
+            if (form && !recordId && unchanged) { form.reset(); }
             await refresh("dates", unchanged ? group + ":" + recordId : null);
             announce("Availability saved." + (!unchanged ? " Newer date edits still need saving." : state.status === "Draft" ? " Your draft is still private." : ""));
         }
@@ -352,20 +350,6 @@
             });
             await refresh("photos");
             announce(`${result.uploaded} photo(s) uploaded. ${result.rejected} rejected.` + (result.uncertain ? " One outcome needs checking. Review the file statuses before continuing." : " Check each file's status below."), false, result.rejected > 0 || result.uncertain);
-        }
-
-        /** Uses UTC calendar arithmetic solely to format the last included date without local timezone shifts. */
-        function updateLastDay(form) {
-            const value = form.elements.namedItem("EndDate")?.value;
-            const output = form.querySelector("[data-last-day]");
-            if (!output) return;
-            if (!value) { output.textContent = ""; return; }
-            const [year, month, day] = value.split("-").map(Number);
-            const date = new Date(0);
-            date.setUTCFullYear(year, month - 1, day);
-            date.setUTCHours(0, 0, 0, 0);
-            date.setUTCDate(date.getUTCDate() - 1);
-            output.textContent = "Last included day: " + new Intl.DateTimeFormat("en-CA", { dateStyle: "medium", timeZone: "UTC" }).format(date);
         }
 
         /** Builds safe, presentation-only previews from current unsaved fields or a frozen server review. */
@@ -465,11 +449,9 @@
             if (button.hasAttribute("data-period-delete")) perform(() => changePeriod(null, true, button.dataset.group, button.dataset.recordId));
         }
 
-        /** Keeps date summaries current and invalidates confirmation after edits. */
+        /** Invalidates confirmation after editing any submitted value. */
         function handleInput(event) {
             nonce = null;
-            const form = event.target.closest("form[data-editor-period]");
-            if (form) updateLastDay(form);
         }
 
         /** Warns before leaving while current scalar fields or an upload selection remain unsaved. */

@@ -3,7 +3,7 @@
 @using RentRoad.Services.Listings
 @using RentRoad.ViewModels.Listings
 @inject SignInManager<ApplicationUser> SignInManager
-@model ListingSearchInputViewModel
+@model HomeViewModel
 @{
     ViewData["Title"] = "Rent more. Own less.";
 }
@@ -69,7 +69,6 @@
             <p class="eyebrow">Find your next possibility</p>
             <h2 id="categories-heading">What have you got planned?</h2>
         </div>
-        <p>Start with a category. See what’s out there.</p>
     </div>
     <nav class="category-grid" aria-label="Browse rentals by category">
         @foreach (var category in Enum.GetValues<ListingCategory>())
@@ -85,6 +84,8 @@
     </nav>
 </section>
 
+<partial name="_ListingScroller" model='@(new ListingScrollerViewModel("popular-listings", "Popular Listings", Model.PopularListings, true))' />
+
 <section class="marketplace-introduction page-section" aria-labelledby="sharing-heading">
     <div>
         <p class="eyebrow">Good things go further when shared</p>
@@ -93,3 +94,10 @@
     <p>Find something useful for a little while, or let someone make use of the things you already own. RentRoad brings renters and owners together, one listing at a time.</p>
 </section>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/listing-scroller.css" asp-append-version="true" />
+}
+@section Scripts {
+    <script src="~/js/listing-scroller.js" asp-append-version="true" defer></script>
+}
