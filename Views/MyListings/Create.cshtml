@@ -1,6 +1,7 @@
 @model ListingCreateViewModel
 @{
-    ViewData["Title"] = "Create a listing";
+    ViewData["ClientResources"] = "editor";
+    ViewData["Title"] = Text["ListingEditor.CreatePageTitle"].Value;
     ViewData["EditorListingId"] = 0;
     ViewData["EditorStatus"] = ListingStatus.Draft;
 }

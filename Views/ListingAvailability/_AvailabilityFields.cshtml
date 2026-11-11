@@ -1,23 +1,23 @@
 @model ListingAvailabilityFormViewModel
 <div class="availability-date-fields">
     <div>
-        <label asp-for="StartDate" for="@Model.FormId-start" class="form-label">First Day</label>
+        <label asp-for="StartDate" for="@Model.FormId-start" class="form-label">@Text["Availability.FirstDay"]</label>
         <input asp-for="StartDate" asp-format="{0:yyyy-MM-dd}" type="date" id="@Model.FormId-start" class="form-control" aria-describedby="@Model.FormId-date-help @Model.FormId-start-error" required />
         <span asp-validation-for="StartDate" id="@Model.FormId-start-error"></span>
     </div>
     <div>
-        <label asp-for="LastDay" for="@Model.FormId-end" class="form-label">Last Day</label>
+        <label asp-for="LastDay" for="@Model.FormId-end" class="form-label">@Text["Availability.LastDay"]</label>
         <input asp-for="LastDay" asp-format="{0:yyyy-MM-dd}" type="date" max="9999-12-30" id="@Model.FormId-end" class="form-control" aria-describedby="@Model.FormId-date-help @Model.FormId-end-error" required />
         <span asp-validation-for="LastDay" id="@Model.FormId-end-error"></span>
     </div>
 </div>
-<p id="@Model.FormId-date-help" class="form-text">Both dates are included.</p>
+<p id="@Model.FormId-date-help" class="form-text">@Text["Availability.DatesInclusiveHelp"]</p>
 @if (Model.IsBlock)
 {
     <div class="mb-3">
-        <label asp-for="Reason" for="@Model.FormId-reason" class="form-label">Reason <span class="text-muted">(optional, private)</span></label>
+        <label asp-for="Reason" for="@Model.FormId-reason" class="form-label">@Text["Availability.Reason"] <span class="text-muted">@Text["Availability.OptionalPrivate"]</span></label>
         <textarea asp-for="Reason" id="@Model.FormId-reason" class="form-control" rows="2" maxlength="250" aria-describedby="@Model.FormId-reason-help @Model.FormId-reason-error"></textarea>
-        <div id="@Model.FormId-reason-help" class="form-text">Only you can see this note. Up to 250 characters.</div>
+        <div id="@Model.FormId-reason-help" class="form-text">@Text["Availability.ReasonHelp"]</div>
         <span asp-validation-for="Reason" id="@Model.FormId-reason-error"></span>
     </div>
 }

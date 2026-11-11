@@ -5,33 +5,33 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @model HomeViewModel
 @{
-    ViewData["Title"] = "Rent more. Own less.";
+    ViewData["Title"] = Text["Home.PageTitle"];
 }
 
 <div class="home-page">
 <section class="home-hero page-section" aria-labelledby="home-heading">
     <div class="hero-copy">
-        <p class="eyebrow">A little closer. A lot more possible.</p>
-        <h1 id="home-heading">Big plans.<br /><span>Less to own.</span></h1>
-        <p class="hero-introduction">For the project, the weekend, and everything in between. Rent tools, gear, and everyday essentials from people around you.</p>
-        <form class="hero-search" method="get" asp-controller="Listings" asp-action="Index" role="search" aria-label="Find a rental">
-            <label asp-for="SearchText" class="form-label">What would you like to rent?</label>
+        <p class="eyebrow">@Text["Home.Eyebrow"]</p>
+        <h1 id="home-heading">@Text["Home.BigPlans"]<br /><span>@Text["Home.LessToOwn"]</span></h1>
+        <p class="hero-introduction">@Text["Home.Introduction"]</p>
+        <form class="hero-search" method="get" asp-controller="Listings" asp-action="Index" role="search" aria-label="@Text["Home.SearchLabel"]">
+            <label asp-for="SearchText" class="form-label">@Text["Home.SearchPrompt"]</label>
             <div class="hero-search-controls">
-                <input asp-for="SearchText" type="search" class="form-control" placeholder="Try camera, drill, or camping gear" maxlength="@ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH" />
-                <button type="submit" class="btn btn-primary">Find rentals <span aria-hidden="true">↗</span></button>
+                <input asp-for="SearchText" type="search" class="form-control" placeholder="@Text["Home.SearchPlaceholder"]" maxlength="@ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH" />
+                <button type="submit" class="btn btn-primary">@Text["Home.FindRentals"] <span aria-hidden="true">↗</span></button>
             </div>
         </form>
         <div class="hero-actions">
-            <a class="hero-browse-link" asp-controller="Listings" asp-action="Index">Browse all rentals <span aria-hidden="true">→</span></a>
+            <a class="hero-browse-link" asp-controller="Listings" asp-action="Index">@Text["Home.BrowseRentals"] <span aria-hidden="true">→</span></a>
             @if (SignInManager.IsSignedIn(User))
             {
-                <a class="btn btn-outline-primary" asp-controller="MyListings" asp-action="Create">Create Listing</a>
+                <a class="btn btn-outline-primary" asp-controller="MyListings" asp-action="Create">@Text["Navigation.CreateListing"]</a>
             }
         </div>
-        <p class="hero-location">Starting in Vancouver, British Columbia <span aria-hidden="true">·</span> Prices in CAD</p>
+        <p class="hero-location">@Text["Home.Location"]</p>
     </div>
     <div class="hero-art" aria-hidden="true">
-        <span class="hero-art-label">Make room for more doing.</span>
+        <span class="hero-art-label">@Text["Home.ArtLabel"]</span>
         <svg class="rental-illustration" viewBox="0 0 460 410" fill="none" focusable="false">
             <circle class="illustration-halo" cx="230" cy="198" r="166" />
             <path class="illustration-route" d="M49 295C-10 180 97 72 215 80c161 11 262 100 187 200-55 74-282 99-324-5" stroke-width="2" stroke-dasharray="5 10" />
@@ -59,18 +59,18 @@
             </g>
             <path class="illustration-spark" d="M69 228v20m-10-10h20m287 51v24m-12-12h24M276 51v16m-8-8h16" stroke-width="3" stroke-linecap="round" />
         </svg>
-        <span class="hero-art-caption">Useful things. Shared locally.</span>
+        <span class="hero-art-caption">@Text["Home.ArtCaption"]</span>
     </div>
 </section>
 
 <section class="home-categories page-section" aria-labelledby="categories-heading">
     <div class="section-heading">
         <div>
-            <p class="eyebrow">Find your next possibility</p>
-            <h2 id="categories-heading">What have you got planned?</h2>
+            <p class="eyebrow">@Text["Home.CategoriesEyebrow"]</p>
+            <h2 id="categories-heading">@Text["Home.CategoriesHeading"]</h2>
         </div>
     </div>
-    <nav class="category-grid" aria-label="Browse rentals by category">
+    <nav class="category-grid" aria-label="@Text["Home.CategoriesLabel"]">
         @foreach (var category in Enum.GetValues<ListingCategory>())
         {
             <a class="category-link" asp-controller="Listings" asp-action="Index" asp-route-Category="@category">
@@ -84,14 +84,14 @@
     </nav>
 </section>
 
-<partial name="_ListingScroller" model='@(new ListingScrollerViewModel("popular-listings", "Popular Listings", Model.PopularListings, true))' />
+<partial name="_ListingScroller" model='@(new ListingScrollerViewModel("popular-listings", Text["Home.PopularListings"].Value, Model.PopularListings, true))' />
 
 <section class="marketplace-introduction page-section" aria-labelledby="sharing-heading">
     <div>
-        <p class="eyebrow">Good things go further when shared</p>
-        <h2 id="sharing-heading">Your neighbourhood has a lot to offer.</h2>
+        <p class="eyebrow">@Text["Home.SharingEyebrow"]</p>
+        <h2 id="sharing-heading">@Text["Home.SharingHeading"]</h2>
     </div>
-    <p>Find something useful for a little while, or let someone make use of the things you already own. RentRoad brings renters and owners together, one listing at a time.</p>
+    <p>@Text["Home.SharingIntroduction"]</p>
 </section>
 </div>
 

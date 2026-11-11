@@ -9,13 +9,13 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account-menu">
             <li>
-                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">Manage account</a>
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">@Text["Navigation.ManageAccount"]</a>
             </li>
-            <li><a class="dropdown-item" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a></li>
+            <li><a class="dropdown-item" asp-area="" asp-controller="Settings" asp-action="Index">@Text["Navigation.Settings"]</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
                 <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                    <button type="submit" class="dropdown-item">Log out</button>
+                    <button type="submit" class="dropdown-item">@Text["Navigation.LogOut"]</button>
                 </form>
             </li>
         </ul>
@@ -24,10 +24,10 @@
 else
 {
     <li class="nav-item">
-        <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Log in</a>
+        <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">@Text["Navigation.LogIn"]</a>
     </li>
     <li class="nav-item">
-        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">@Text["Navigation.Register"]</a>
     </li>
 }
 </ul>

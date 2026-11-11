@@ -56,7 +56,7 @@ public sealed class MyListingsController : Controller
         var result = await listings.CreateDraftAsync(User, input.ToServiceUpdate(), cancellationToken);
         if (result.IsSuccess)
         {
-            TempData["ListingSuccess"] = "Your draft has been saved. You can keep editing it before publishing.";
+            TempData["ListingSuccess"] = SharedResource.Get("ListingFeedback.YourDraftHasBeenSavedYouCanKeepEditing");
             return RedirectToAction("Edit", new { id = result.Value!.ListingId });
         }
         var terminal = TerminalFailure(result.Status);
@@ -95,7 +95,7 @@ public sealed class MyListingsController : Controller
         var result = await listings.UpdateAsync(id, User, input.ToServiceUpdate(), cancellationToken);
         if (result.IsSuccess)
         {
-            TempData["ListingSuccess"] = "Your listing changes have been saved.";
+            TempData["ListingSuccess"] = SharedResource.Get("ListingFeedback.YourListingChangesHaveBeenSaved");
             return RedirectToAction("Edit", new { id = result.Value!.ListingId });
         }
         var terminal = TerminalFailure(result.Status);
@@ -116,7 +116,7 @@ public sealed class MyListingsController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return ValidationProblem(ModelState);
+            return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
         var result = await listings.GetOwnerListingAsync(id, User, cancellationToken);
         return result.IsSuccess ? RedirectToAction("SavedReview", "ListingEditor", new { id }) : ReadFailure(result.Status);
@@ -131,12 +131,12 @@ public sealed class MyListingsController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return ValidationProblem(ModelState);
+            return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
         var result = await listings.ArchiveAsync(id, User, cancellationToken);
         if (result.IsSuccess)
         {
-            TempData["ListingSuccess"] = "Your listing has been archived. Its history is preserved.";
+            TempData["ListingSuccess"] = SharedResource.Get("ListingFeedback.YourListingHasBeenArchivedItsHistoryIsPreserved");
             return RedirectToAction("Index");
         }
         var terminal = TerminalFailure(result.Status);
@@ -169,14 +169,14 @@ public sealed class MyListingsController : Controller
         ListingServiceStatus.Forbidden => Forbid(),
         ListingServiceStatus.NotFound => NotFound(),
         ListingServiceStatus.ValidationFailed or ListingServiceStatus.Conflict or ListingServiceStatus.InvalidState => null,
-        _ => Problem(statusCode: StatusCodes.Status500InternalServerError, title: "The listing operation could not be completed.")
+        _ => Problem(statusCode: StatusCodes.Status500InternalServerError, title: SharedResource.Get("ListingFeedback.TheListingOperationCouldNotBeCompleted"))
     };
 
     /// <summary>
     /// Handles read failures for which there is no authorized form model to redisplay.
     /// </summary>
     private IActionResult ReadFailure(ListingServiceStatus status) => TerminalFailure(status)
-        ?? Problem(statusCode: FailureStatusCode(status), title: "The listing could not be loaded.");
+        ?? Problem(statusCode: FailureStatusCode(status), title: SharedResource.Get("ListingFeedback.TheListingCouldNotBeLoaded"));
 
     /// <summary>
     /// Adds service field errors to the same flat field names used by the form ViewModels.

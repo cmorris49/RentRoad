@@ -1,4 +1,3 @@
-using System.Globalization;
 using RentRoad.Services.Listings;
 
 namespace RentRoad.ViewModels.Listings;
@@ -9,7 +8,7 @@ namespace RentRoad.ViewModels.Listings;
 public sealed record ListingPriceViewModel(long Cents)
 {
     public decimal AmountCad => Cents / 100m;
-    public string FormattedAmount => "CA$" + AmountCad.ToString("N2", CultureInfo.GetCultureInfo("en-CA"));
+    public string FormattedAmount => SharedResource.Get("Currency.CadAmount", AmountCad);
 }
 
 /// <summary>
@@ -35,8 +34,8 @@ public sealed record ListingAvailabilityViewModel(DateOnly StartDate, DateOnly E
     /// Formats the actual included dates without presenting the exclusive end boundary as an available day.
     /// </summary>
     public string DisplayRange => StartDate == LastIncludedDate
-        ? StartDate.ToString("MMM d, yyyy", CultureInfo.GetCultureInfo("en-CA"))
-        : $"{StartDate.ToString("MMM d, yyyy", CultureInfo.GetCultureInfo("en-CA"))} – {LastIncludedDate.ToString("MMM d, yyyy", CultureInfo.GetCultureInfo("en-CA"))}";
+        ? SharedResource.Get("Availability.SingleDate", StartDate)
+        : SharedResource.Get("Availability.DateRange", StartDate, LastIncludedDate);
 
     /// <summary>
     /// Preserves the existing half-open availability date convention in the presentation contract.

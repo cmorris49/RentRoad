@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using RentRoad.Models.Enums;
 using RentRoad.Models;
 using RentRoad.Services.Listings;
@@ -11,7 +10,7 @@ namespace RentRoad.ViewModels.Listings;
 /// </summary>
 public class ListingImageUploadViewModel
 {
-    [Required(ErrorMessage = "Choose an image to upload.")]
+    [Required(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.ImageFileRequired))]
     public IFormFile? File { get; set; }
 
     public string? AltText { get; set; }
@@ -22,7 +21,7 @@ public class ListingImageUploadViewModel
 /// </summary>
 public sealed class ListingImageOrderViewModel
 {
-    [Required(ErrorMessage = "Supply the listing's image order.")]
+    [Required(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.ImageOrderRequired))]
     public List<int>? ImageIds { get; set; }
 }
 
@@ -55,8 +54,8 @@ public sealed class ListingImageManagementViewModel : ListingImageUploadViewMode
     public ListingStatus Status { get; init; }
     public int MaxImageSizeBytes { get; init; }
     public string MaxImageSizeLabel => MaxImageSizeBytes >= 1024 * 1024
-        ? (MaxImageSizeBytes / (1024m * 1024m)).ToString("0.##", CultureInfo.GetCultureInfo("en-CA")) + " MiB"
-        : MaxImageSizeBytes.ToString("N0", CultureInfo.GetCultureInfo("en-CA")) + " bytes";
+        ? SharedResource.Get("ListingImages.SizeMiB", MaxImageSizeBytes / (1024m * 1024m))
+        : SharedResource.Get("ListingImages.SizeBytes", MaxImageSizeBytes);
     public bool CanEdit => Status != ListingStatus.Archived;
     public bool CanDeleteImages => CanEdit && (Images.Count > 1 || Status is not (ListingStatus.Published or ListingStatus.Unavailable));
     public IReadOnlyList<ListingManagedImageViewModel> Images { get; }

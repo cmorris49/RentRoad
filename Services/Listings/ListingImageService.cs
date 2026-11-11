@@ -1,3 +1,4 @@
+using RentRoad.Localization;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Security.Claims;
@@ -54,7 +55,7 @@ public sealed class ListingImageService : IListingImageService
         }
         if (owned.Value!.Status == ListingStatus.Archived)
         {
-            return Failure<ListingImage>(ListingServiceStatus.InvalidState, "Archived listings cannot be edited.");
+            return Failure<ListingImage>(ListingServiceStatus.InvalidState, SharedResource.Get("ImageFeedback.ArchivedListingsCannotBeEdited"));
         }
         var candidate = new ListingImage
         {
@@ -65,7 +66,7 @@ public sealed class ListingImageService : IListingImageService
         var errors = ValidateText(candidate);
         if (content is null || string.IsNullOrWhiteSpace(contentType))
         {
-            errors.Add(new(nameof(Listing.Images), "An image stream and content type are required."));
+            errors.Add(new(nameof(Listing.Images), SharedResource.Get("ImageFeedback.AnImageStreamAndContentTypeAreRequired")));
         }
         if (errors.Count > 0)
         {
@@ -79,12 +80,12 @@ public sealed class ListingImageService : IListingImageService
         }
         catch (ArgumentException)
         {
-            return Failure<ListingImage>(ListingServiceStatus.ValidationFailed, "Choose a nonempty JPEG, PNG, or WebP image within the configured size limit.");
+            return Failure<ListingImage>(ListingServiceStatus.ValidationFailed, SharedResource.Get("ImageFeedback.ChooseANonemptyJPEGPNGOrWebPImageWithin"));
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             LogFailure("UploadStorage", listingId, null, exception);
-            return Failure<ListingImage>(ListingServiceStatus.StorageFailed, "The image could not be uploaded. Check storage configuration or try again.");
+            return Failure<ListingImage>(ListingServiceStatus.StorageFailed, SharedResource.Get("ImageFeedback.TheImageCouldNotBeUploadedCheckStorageConfiguration"));
         }
         candidate.ContainerName = stored.ContainerName;
         candidate.BlobName = stored.BlobName;
@@ -97,7 +98,7 @@ public sealed class ListingImageService : IListingImageService
             || !string.Equals(stored.ContainerName, containerName, StringComparison.Ordinal))
         {
             return await RecoverUploadAsync(candidate, attempt, Failure<ListingImage>(ListingServiceStatus.StorageFailed,
-                "Storage returned invalid image metadata."));
+                SharedResource.Get("ImageFeedback.StorageReturnedInvalidImageMetadata")));
         }
 
         try
@@ -110,7 +111,7 @@ public sealed class ListingImageService : IListingImageService
                 {
                     return attempt.SaveAttempted && existing.ListingId == listingId
                         ? ListingServiceResult<ListingImage>.Success(existing)
-                        : Failure<ListingImage>(ListingServiceStatus.Conflict, "This storage image is already associated with a listing.");
+                        : Failure<ListingImage>(ListingServiceStatus.Conflict, SharedResource.Get("ImageFeedback.ThisStorageImageIsAlreadyAssociatedWithAListing"));
                 }
                 NormalizeOrder(images);
                 var image = new ListingImage
@@ -131,7 +132,7 @@ public sealed class ListingImageService : IListingImageService
         }
         catch (OperationCanceledException)
         {
-            await RecoverUploadAsync(candidate, attempt, Failure<ListingImage>(ListingServiceStatus.PersistenceFailed, "Image metadata saving was cancelled."));
+            await RecoverUploadAsync(candidate, attempt, Failure<ListingImage>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.ImageMetadataSavingWasCancelled")));
             throw;
         }
     }
@@ -155,12 +156,12 @@ public sealed class ListingImageService : IListingImageService
                 }
                 if (!string.Equals(selected.ContainerName, containerName, StringComparison.Ordinal))
                 {
-                    return Failure<ListingImage>(ListingServiceStatus.InvalidState, "The image belongs to a different configured storage container.");
+                    return Failure<ListingImage>(ListingServiceStatus.InvalidState, SharedResource.Get("ImageFeedback.TheImageBelongsToADifferentConfiguredStorageContainer"));
                 }
                 var remaining = images.Where(image => image.ListingImageId != imageId).ToList();
                 if (listing.Status is ListingStatus.Published or ListingStatus.Unavailable && !remaining.Any(ListingService.HasStoredImageMetadata))
                 {
-                    return Failure<ListingImage>(ListingServiceStatus.ValidationFailed, "A published or unavailable listing must retain at least one stored image.");
+                    return Failure<ListingImage>(ListingServiceStatus.ValidationFailed, SharedResource.Get("ImageFeedback.ImageRequired"));
                 }
                 planned = selected;
                 database.ListingImages.Remove(selected);
@@ -193,7 +194,7 @@ public sealed class ListingImageService : IListingImageService
             if (!inspection.Verified)
             {
                 return Failure<ListingImageDeletion>(ListingServiceStatus.ReconciliationRequired,
-                    "Image removal could not be verified. Refresh the listing before retrying; storage was left untouched.");
+                    SharedResource.Get("ImageFeedback.ImageRemovalCouldNotBeVerifiedRefreshTheListing"));
             }
             if (inspection.Image is not null)
             {
@@ -242,7 +243,7 @@ public sealed class ListingImageService : IListingImageService
                 || snapshot.Any(id => id <= 0) || !snapshot.ToHashSet().SetEquals(images.Select(image => image.ListingImageId)))
             {
                 return Failure<IReadOnlyList<ListingImage>>(ListingServiceStatus.ValidationFailed,
-                    "Supply every current image ID for this listing exactly once. Refresh the images if they changed.");
+                    SharedResource.Get("ImageFeedback.SupplyEveryCurrentImageIDForThisListingExactly"));
             }
             var byId = images.ToDictionary(image => image.ListingImageId);
             var ordered = snapshot.Select(id => byId[id]).ToList();
@@ -274,7 +275,7 @@ public sealed class ListingImageService : IListingImageService
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             LogFailure("ReadImages", listingId, null, exception);
-            return Failure<IReadOnlyList<ListingImage>>(ListingServiceStatus.PersistenceFailed, "Listing images could not be loaded. Try again later.");
+            return Failure<IReadOnlyList<ListingImage>>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.ListingImagesCouldNotBeLoadedTryAgainLater"));
         }
     }
 
@@ -286,7 +287,7 @@ public sealed class ListingImageService : IListingImageService
     {
         if (listingId <= 0 || imageId <= 0)
         {
-            return Failure<BlobImageDownload>(ListingServiceStatus.ValidationFailed, "Listing and image IDs must be positive.");
+            return Failure<BlobImageDownload>(ListingServiceStatus.ValidationFailed, SharedResource.Get("ImageFeedback.ListingAndImageIDsMustBePositive"));
         }
         BlobImageDownload? opened = null;
         try
@@ -300,7 +301,7 @@ public sealed class ListingImageService : IListingImageService
             }
             if (!string.Equals(reference!.ContainerName, containerName, StringComparison.Ordinal) || string.IsNullOrWhiteSpace(reference.BlobName))
             {
-                return Failure<BlobImageDownload>(ListingServiceStatus.StorageFailed, "The image's storage configuration is unavailable.");
+                return Failure<BlobImageDownload>(ListingServiceStatus.StorageFailed, SharedResource.Get("ImageFeedback.TheImageSStorageConfigurationIsUnavailable"));
             }
             opened = await storage.DownloadAsync(reference.BlobName, cancellationToken);
             var current = await ReadImageReferenceAsync(database, listingId, imageId, cancellationToken);
@@ -309,7 +310,7 @@ public sealed class ListingImageService : IListingImageService
             {
                 await opened.DisposeAsync();
                 opened = null;
-                return denied ?? Failure<BlobImageDownload>(ListingServiceStatus.NotFound, "The image could not be found.");
+                return denied ?? Failure<BlobImageDownload>(ListingServiceStatus.NotFound, SharedResource.Get("ImageFeedback.TheImageCouldNotBeFound"));
             }
             return ListingServiceResult<BlobImageDownload>.Success(opened);
         }
@@ -333,7 +334,7 @@ public sealed class ListingImageService : IListingImageService
                 BlobImageStorageFailure.NotFound => ListingServiceStatus.NotFound,
                 BlobImageStorageFailure.Conflict => ListingServiceStatus.Conflict,
                 _ => ListingServiceStatus.StorageFailed
-            }, "The image could not be retrieved from storage.");
+            }, SharedResource.Get("ImageFeedback.TheImageCouldNotBeRetrievedFromStorage"));
         }
         catch (Exception exception)
         {
@@ -342,7 +343,7 @@ public sealed class ListingImageService : IListingImageService
                 await opened.DisposeAsync();
             }
             LogFailure("DownloadImage", listingId, imageId, exception);
-            return Failure<BlobImageDownload>(ListingServiceStatus.PersistenceFailed, "The image could not be loaded. Try again later.");
+            return Failure<BlobImageDownload>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.TheImageCouldNotBeLoadedTryAgainLater"));
         }
     }
 
@@ -362,7 +363,7 @@ public sealed class ListingImageService : IListingImageService
     {
         if (reference is null)
         {
-            return Failure<BlobImageDownload>(ListingServiceStatus.NotFound, "The image could not be found for this listing.");
+            return Failure<BlobImageDownload>(ListingServiceStatus.NotFound, SharedResource.Get("ImageFeedback.TheImageCouldNotBeFoundForThisListing"));
         }
         if (reference.Status == ListingStatus.Published)
         {
@@ -371,10 +372,10 @@ public sealed class ListingImageService : IListingImageService
         var ownerId = ListingOperationScope.GetOwnerId(user);
         if (ownerId is null)
         {
-            return Failure<BlobImageDownload>(ListingServiceStatus.Unauthenticated, "Sign in to view this image.");
+            return Failure<BlobImageDownload>(ListingServiceStatus.Unauthenticated, SharedResource.Get("ImageFeedback.SignInToViewThisImage"));
         }
         return string.Equals(reference.OwnerId, ownerId, StringComparison.Ordinal) ? null
-            : Failure<BlobImageDownload>(ListingServiceStatus.Forbidden, "Only the listing owner can view this image.");
+            : Failure<BlobImageDownload>(ListingServiceStatus.Forbidden, SharedResource.Get("ImageFeedback.OnlyTheListingOwnerCanViewThisImage"));
     }
 
     /// <summary>
@@ -400,7 +401,7 @@ public sealed class ListingImageService : IListingImageService
                 }
                 if (owned.Value!.Status == ListingStatus.Archived)
                 {
-                    return Failure<T>(ListingServiceStatus.InvalidState, "Archived listings cannot be edited.");
+                    return Failure<T>(ListingServiceStatus.InvalidState, SharedResource.Get("ImageFeedback.ArchivedListingsCannotBeEdited"));
                 }
                 var images = await database.ListingImages.Where(image => image.ListingId == listingId)
                     .OrderBy(image => image.DisplayOrder).ThenBy(image => image.ListingImageId).ToListAsync(token);
@@ -410,7 +411,7 @@ public sealed class ListingImageService : IListingImageService
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             LogFailure("SaveMetadata", listingId, null, exception);
-            return Failure<T>(ListingServiceStatus.PersistenceFailed, "Image metadata could not be saved. Refresh the listing before retrying.");
+            return Failure<T>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.ImageMetadataCouldNotBeSavedRefreshTheListing"));
         }
     }
 
@@ -427,7 +428,7 @@ public sealed class ListingImageService : IListingImageService
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             LogFailure("ReadListing", listingId, null, exception);
-            return Failure<Listing>(ListingServiceStatus.PersistenceFailed, "The listing could not be loaded. Try again later.");
+            return Failure<Listing>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.TheListingCouldNotBeLoadedTryAgainLater"));
         }
     }
 
@@ -441,7 +442,7 @@ public sealed class ListingImageService : IListingImageService
         if (!inspection.Verified)
         {
             return Failure<ListingImage>(ListingServiceStatus.ReconciliationRequired,
-                "The upload's database outcome could not be verified. Storage was left untouched for reconciliation.");
+                SharedResource.Get("ImageFeedback.TheUploadSDatabaseOutcomeCouldNotBeVerified"));
         }
         if (inspection.Image is not null)
         {
@@ -457,7 +458,7 @@ public sealed class ListingImageService : IListingImageService
             return failure;
         }
         return Failure<ListingImage>(ListingServiceStatus.CleanupPending,
-            "Image metadata was not saved, but blob cleanup is pending. The failure was recorded for reconciliation.");
+            SharedResource.Get("ImageFeedback.ImageMetadataWasNotSavedButBlobCleanupIs"));
     }
 
     /// <summary>
@@ -468,7 +469,7 @@ public sealed class ListingImageService : IListingImageService
         var inspection = await InspectReferenceAsync(image);
         if (!metadataCommitted && (!inspection.Verified || inspection.Image is not null))
         {
-            return Failure<ListingImageDeletion>(ListingServiceStatus.ReconciliationRequired, "Image deletion was interrupted; storage was left untouched.");
+            return Failure<ListingImageDeletion>(ListingServiceStatus.ReconciliationRequired, SharedResource.Get("ImageFeedback.ImageDeletionWasInterruptedStorageWasLeftUntouched"));
         }
         var removed = inspection.Verified && inspection.Image is null && await TryDeleteBlobAsync(image);
         var value = new ListingImageDeletion(image.ListingImageId, true, removed);
@@ -479,7 +480,7 @@ public sealed class ListingImageService : IListingImageService
         }
         LogReconciliation(image, "DeleteCleanupPending");
         return new ListingServiceResult<ListingImageDeletion>(ListingServiceStatus.CleanupPending, value,
-            new[] { new ListingValidationError(nameof(Listing.Images), "Image metadata was removed, but blob cleanup is pending. The failure was recorded for reconciliation.") });
+            new[] { new ListingValidationError(nameof(Listing.Images), SharedResource.Get("ImageFeedback.ImageMetadataWasRemovedButBlobCleanupIsPending")) });
     }
 
     /// <summary>
@@ -553,10 +554,10 @@ public sealed class ListingImageService : IListingImageService
         Validator.TryValidateProperty(image.OriginalFileName,
             new ValidationContext(image) { MemberName = nameof(ListingImage.OriginalFileName) }, results);
         Validator.TryValidateProperty(image.AltText, new ValidationContext(image) { MemberName = nameof(ListingImage.AltText) }, results);
-        var errors = results.SelectMany(result => result.MemberNames.Select(field => new ListingValidationError(field, result.ErrorMessage!))).ToList();
+        var errors = results.SelectMany(result => result.MemberNames.Select(field => new ListingValidationError(field, ResourceValidation.Message(image, field)))).ToList();
         if (image.OriginalFileName?.Any(char.IsControl) == true || image.AltText?.Any(char.IsControl) == true)
         {
-            errors.Add(new(nameof(Listing.Images), "Image filenames and alternative text must not contain control characters."));
+            errors.Add(new(nameof(Listing.Images), SharedResource.Get("ImageFeedback.ImageFilenamesAndAlternativeTextMustNotContainControl")));
         }
         return errors;
     }
@@ -582,8 +583,8 @@ public sealed class ListingImageService : IListingImageService
     /// Distinguishes invalid selected IDs from records absent from the owned listing.
     /// </summary>
     private static ListingServiceResult<T> MissingImage<T>(int imageId) => imageId <= 0
-        ? Failure<T>(ListingServiceStatus.ValidationFailed, "Image ID must be positive.")
-        : Failure<T>(ListingServiceStatus.NotFound, "The image could not be found for this listing.");
+        ? Failure<T>(ListingServiceStatus.ValidationFailed, SharedResource.Get("ImageFeedback.ImageIDMustBePositive"))
+        : Failure<T>(ListingServiceStatus.NotFound, SharedResource.Get("ImageFeedback.TheImageCouldNotBeFoundForThisListing"));
 
     /// <summary>
     /// Logs failure classification without retaining potentially sensitive SDK or SQL exception messages.

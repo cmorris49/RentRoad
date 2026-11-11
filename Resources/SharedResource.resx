@@ -1,0 +1,1322 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="Application.PageTitle" xml:space="preserve">
+    <value>{0} · RentRoad</value>
+  </data>
+  <data name="Browse.AllCategories" xml:space="preserve">
+    <value>All categories</value>
+  </data>
+  <data name="Browse.AnyCondition" xml:space="preserve">
+    <value>Any condition</value>
+  </data>
+  <data name="Browse.AnyPrice" xml:space="preserve">
+    <value>Any</value>
+  </data>
+  <data name="Browse.ApplyFilters" xml:space="preserve">
+    <value>Apply filters</value>
+  </data>
+  <data name="Browse.Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Browse.Condition" xml:space="preserve">
+    <value>Item condition</value>
+  </data>
+  <data name="Browse.DailyPrice" xml:space="preserve">
+    <value>Daily price (CAD)</value>
+  </data>
+  <data name="Browse.Explore" xml:space="preserve">
+    <value>Explore the marketplace</value>
+  </data>
+  <data name="Browse.Eyebrow" xml:space="preserve">
+    <value>The RentRoad marketplace</value>
+  </data>
+  <data name="Browse.FiltersHeading" xml:space="preserve">
+    <value>Refine your search</value>
+  </data>
+  <data name="Browse.FirstPage" xml:space="preserve">
+    <value>Back to the first page</value>
+  </data>
+  <data name="Browse.Heading" xml:space="preserve">
+    <value>Find your next rental.</value>
+  </data>
+  <data name="Browse.Introduction" xml:space="preserve">
+    <value>Something for your plans, without the commitment of owning it.</value>
+  </data>
+  <data name="Browse.InvalidHeading" xml:space="preserve">
+    <value>We couldn’t use those search filters.</value>
+  </data>
+  <data name="Browse.InvalidHint" xml:space="preserve">
+    <value>Check the values below and apply your filters again, or &lt;a href="{0}"&gt;reset your search&lt;/a&gt;.</value>
+  </data>
+  <data name="Browse.Maximum" xml:space="preserve">
+    <value>Maximum</value>
+  </data>
+  <data name="Browse.Minimum" xml:space="preserve">
+    <value>Minimum</value>
+  </data>
+  <data name="Browse.NextPage" xml:space="preserve">
+    <value>Next page</value>
+  </data>
+  <data name="Browse.NoResults" xml:space="preserve">
+    <value>No rentals to show just yet.</value>
+  </data>
+  <data name="Browse.NoResultsHelp" xml:space="preserve">
+    <value>Try a different keyword, category, or price range. New listings will appear as owners publish them.</value>
+  </data>
+  <data name="Browse.PageEmptyEyebrow" xml:space="preserve">
+    <value>Let’s get you back on track</value>
+  </data>
+  <data name="Browse.PageEmptyHeading" xml:space="preserve">
+    <value>That page has no rentals.</value>
+  </data>
+  <data name="Browse.PageEmptyIntroduction" xml:space="preserve">
+    <value>Your search has matches, but this page is beyond the results.</value>
+  </data>
+  <data name="Browse.PageLabel" xml:space="preserve">
+    <value>Page {0}</value>
+  </data>
+  <data name="Browse.PageOf" xml:space="preserve">
+    <value>Page {0:N0} of {1:N0}</value>
+  </data>
+  <data name="Browse.PageSize" xml:space="preserve">
+    <value>Results per page</value>
+  </data>
+  <data name="Browse.PageTitle" xml:space="preserve">
+    <value>Browse rentals</value>
+  </data>
+  <data name="Browse.PaginationLabel" xml:space="preserve">
+    <value>Listing result pages</value>
+  </data>
+  <data name="Browse.PickupArea" xml:space="preserve">
+    <value>Pickup area</value>
+  </data>
+  <data name="Browse.PickupPlaceholder" xml:space="preserve">
+    <value>e.g. Kitsilano, Vancouver</value>
+  </data>
+  <data name="Browse.PreviousPage" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="Browse.PriceHelp" xml:space="preserve">
+    <value>Per day, with up to two decimal places.</value>
+  </data>
+  <data name="Browse.Refine" xml:space="preserve">
+    <value>Refine search</value>
+  </data>
+  <data name="Browse.ResetFilters" xml:space="preserve">
+    <value>Reset filters</value>
+  </data>
+  <data name="Browse.ResultCountMany" xml:space="preserve">
+    <value>{0:N0} rentals found · Prices per day in CAD</value>
+  </data>
+  <data name="Browse.ResultCountOne" xml:space="preserve">
+    <value>{0:N0} rental found · Prices per day in CAD</value>
+  </data>
+  <data name="Browse.ResultsFor" xml:space="preserve">
+    <value>Results for “{0}”</value>
+  </data>
+  <data name="Browse.SearchLabel" xml:space="preserve">
+    <value>Search rental listings</value>
+  </data>
+  <data name="Browse.SearchPlaceholder" xml:space="preserve">
+    <value>What are you looking for?</value>
+  </data>
+  <data name="Browse.SearchPrompt" xml:space="preserve">
+    <value>Search rentals</value>
+  </data>
+  <data name="Browse.SortBy" xml:space="preserve">
+    <value>Sort by</value>
+  </data>
+  <data name="Browse.SortNewest" xml:space="preserve">
+    <value>Newest first</value>
+  </data>
+  <data name="Browse.SortPriceAscending" xml:space="preserve">
+    <value>Price: low to high</value>
+  </data>
+  <data name="Browse.SortPriceDescending" xml:space="preserve">
+    <value>Price: high to low</value>
+  </data>
+  <data name="Category.Cameras" xml:space="preserve">
+    <value>Cameras</value>
+  </data>
+  <data name="Category.CampingGear" xml:space="preserve">
+    <value>Camping gear</value>
+  </data>
+  <data name="Category.Electronics" xml:space="preserve">
+    <value>Electronics</value>
+  </data>
+  <data name="Category.Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Category.SportsEquipment" xml:space="preserve">
+    <value>Sports equipment</value>
+  </data>
+  <data name="Category.Tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="Category.Unspecified" xml:space="preserve">
+    <value>Uncategorized</value>
+  </data>
+  <data name="Common.BrandName" xml:space="preserve">
+    <value>RentRoad</value>
+  </data>
+  <data name="Common.ComingSoon" xml:space="preserve">
+    <value>Coming soon</value>
+  </data>
+  <data name="Common.Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Common.Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Common.Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Condition.Fair" xml:space="preserve">
+    <value>Fair</value>
+  </data>
+  <data name="Condition.Good" xml:space="preserve">
+    <value>Good</value>
+  </data>
+  <data name="Condition.LikeNew" xml:space="preserve">
+    <value>Like new</value>
+  </data>
+  <data name="Condition.New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Condition.Unspecified" xml:space="preserve">
+    <value>Condition not specified</value>
+  </data>
+  <data name="Currency.CadAmount" xml:space="preserve">
+    <value>CA${0:N2}</value>
+  </data>
+  <data name="Footer.Copyright" xml:space="preserve">
+    <value>© {0} RentRoad</value>
+  </data>
+  <data name="Footer.Location" xml:space="preserve">
+    <value>Vancouver, BC · Prices in CAD</value>
+  </data>
+  <data name="Footer.Tagline" xml:space="preserve">
+    <value>More possibilities. Less to own.</value>
+  </data>
+  <data name="Gallery.Choose" xml:space="preserve">
+    <value>Choose a photo</value>
+  </data>
+  <data name="Gallery.Close" xml:space="preserve">
+    <value>Close ✕</value>
+  </data>
+  <data name="Gallery.CloseLabel" xml:space="preserve">
+    <value>Close photo viewer</value>
+  </data>
+  <data name="Gallery.Empty" xml:space="preserve">
+    <value>No photos available</value>
+  </data>
+  <data name="Gallery.Next" xml:space="preserve">
+    <value>Next photo</value>
+  </data>
+  <data name="Gallery.OpenPhoto" xml:space="preserve">
+    <value>Open photo {0} at full size</value>
+  </data>
+  <data name="Gallery.Photo" xml:space="preserve">
+    <value>Listing photo</value>
+  </data>
+  <data name="Gallery.PhotoAlt" xml:space="preserve">
+    <value>{0}, photo {1}</value>
+  </data>
+  <data name="Gallery.PhotoOf" xml:space="preserve">
+    <value>Photo {0} of {1}</value>
+  </data>
+  <data name="Gallery.PhotosLabel" xml:space="preserve">
+    <value>{0} photos</value>
+  </data>
+  <data name="Gallery.Position" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Gallery.Previous" xml:space="preserve">
+    <value>Previous photo</value>
+  </data>
+  <data name="Gallery.Primary" xml:space="preserve">
+    <value>Primary photo</value>
+  </data>
+  <data name="Gallery.Show" xml:space="preserve">
+    <value>Show photo {0} of {1}</value>
+  </data>
+  <data name="Gallery.Unavailable" xml:space="preserve">
+    <value>Photo unavailable</value>
+  </data>
+  <data name="Gallery.Viewer" xml:space="preserve">
+    <value>Listing photo viewer</value>
+  </data>
+  <data name="Home.ArtCaption" xml:space="preserve">
+    <value>Useful things. Shared locally.</value>
+  </data>
+  <data name="Home.ArtLabel" xml:space="preserve">
+    <value>Make room for more doing.</value>
+  </data>
+  <data name="Home.BigPlans" xml:space="preserve">
+    <value>Big plans.</value>
+  </data>
+  <data name="Home.BrowseRentals" xml:space="preserve">
+    <value>Browse all rentals</value>
+  </data>
+  <data name="Home.CategoriesEyebrow" xml:space="preserve">
+    <value>Find your next possibility</value>
+  </data>
+  <data name="Home.CategoriesHeading" xml:space="preserve">
+    <value>What have you got planned?</value>
+  </data>
+  <data name="Home.CategoriesLabel" xml:space="preserve">
+    <value>Browse rentals by category</value>
+  </data>
+  <data name="Home.Eyebrow" xml:space="preserve">
+    <value>A little closer. A lot more possible.</value>
+  </data>
+  <data name="Home.FindRentals" xml:space="preserve">
+    <value>Find rentals</value>
+  </data>
+  <data name="Home.Introduction" xml:space="preserve">
+    <value>For the project, the weekend, and everything in between. Rent tools, gear, and everyday essentials from people around you.</value>
+  </data>
+  <data name="Home.LessToOwn" xml:space="preserve">
+    <value>Less to own.</value>
+  </data>
+  <data name="Home.Location" xml:space="preserve">
+    <value>Starting in Vancouver, British Columbia · Prices in CAD</value>
+  </data>
+  <data name="Home.PageTitle" xml:space="preserve">
+    <value>Rent more. Own less.</value>
+  </data>
+  <data name="Home.PopularListings" xml:space="preserve">
+    <value>Popular Listings</value>
+  </data>
+  <data name="Home.SearchLabel" xml:space="preserve">
+    <value>Find a rental</value>
+  </data>
+  <data name="Home.SearchPlaceholder" xml:space="preserve">
+    <value>Try camera, drill, or camping gear</value>
+  </data>
+  <data name="Home.SearchPrompt" xml:space="preserve">
+    <value>What would you like to rent?</value>
+  </data>
+  <data name="Home.SharingEyebrow" xml:space="preserve">
+    <value>Good things go further when shared</value>
+  </data>
+  <data name="Home.SharingHeading" xml:space="preserve">
+    <value>Your neighbourhood has a lot to offer.</value>
+  </data>
+  <data name="Home.SharingIntroduction" xml:space="preserve">
+    <value>Find something useful for a little while, or let someone make use of the things you already own. RentRoad brings renters and owners together, one listing at a time.</value>
+  </data>
+  <data name="Listing.BrowseAll" xml:space="preserve">
+    <value>Browse all listings</value>
+  </data>
+  <data name="Listing.NextInSection" xml:space="preserve">
+    <value>Next listings in {0}</value>
+  </data>
+  <data name="Listing.NoPickupArea" xml:space="preserve">
+    <value>Pickup area not specified</value>
+  </data>
+  <data name="Listing.NonePublished" xml:space="preserve">
+    <value>No published listings yet. Check back soon for rentals near you.</value>
+  </data>
+  <data name="Listing.PerDay" xml:space="preserve">
+    <value>/ day</value>
+  </data>
+  <data name="Listing.PreviousInSection" xml:space="preserve">
+    <value>Previous listings in {0}</value>
+  </data>
+  <data name="Listing.ScrollInstructions" xml:space="preserve">
+    <value>Scroll to explore. With the listing row focused, use Left and Right to scroll, or Home and End to reach either end. Photo controls change only the photos.</value>
+  </data>
+  <data name="Listing.SimilarListings" xml:space="preserve">
+    <value>Similar Listings</value>
+  </data>
+  <data name="Listing.Untitled" xml:space="preserve">
+    <value>Rental listing</value>
+  </data>
+  <data name="Navigation.Account" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="Navigation.BackToMyListings" xml:space="preserve">
+    <value>Back to My Listings</value>
+  </data>
+  <data name="Navigation.BrandHome" xml:space="preserve">
+    <value>RentRoad home</value>
+  </data>
+  <data name="Navigation.BrowseListings" xml:space="preserve">
+    <value>Browse Listings</value>
+  </data>
+  <data name="Navigation.CreateListing" xml:space="preserve">
+    <value>Create Listing</value>
+  </data>
+  <data name="Navigation.Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Navigation.LogIn" xml:space="preserve">
+    <value>Log in</value>
+  </data>
+  <data name="Navigation.LogOut" xml:space="preserve">
+    <value>Log out</value>
+  </data>
+  <data name="Navigation.Main" xml:space="preserve">
+    <value>Main navigation</value>
+  </data>
+  <data name="Navigation.ManageAccount" xml:space="preserve">
+    <value>Manage account</value>
+  </data>
+  <data name="Navigation.MyListings" xml:space="preserve">
+    <value>My Listings</value>
+  </data>
+  <data name="Navigation.Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Navigation.Register" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="Navigation.Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Navigation.SkipToContent" xml:space="preserve">
+    <value>Skip to main content</value>
+  </data>
+  <data name="Navigation.Toggle" xml:space="preserve">
+    <value>Toggle navigation</value>
+  </data>
+  <data name="Settings.Introduction" xml:space="preserve">
+    <value>Account settings will be available in a future update.</value>
+  </data>
+  <data name="Settings.YourAccount" xml:space="preserve">
+    <value>Your account</value>
+  </data>
+  <data name="Theme.DarkMode" xml:space="preserve">
+    <value>Dark mode</value>
+  </data>
+  <data name="Theme.Toggle" xml:space="preserve">
+    <value>Toggle dark mode</value>
+  </data>
+  <data name="Validation.FractionalCents" xml:space="preserve">
+    <value>Enter a price with no more than two decimal places.</value>
+  </data>
+  <data name="Validation.InvalidCategory" xml:space="preserve">
+    <value>Select a valid item category.</value>
+  </data>
+  <data name="Validation.InvalidCondition" xml:space="preserve">
+    <value>Select a valid item condition.</value>
+  </data>
+  <data name="Validation.InvalidSort" xml:space="preserve">
+    <value>Select a valid listing sort order.</value>
+  </data>
+  <data name="Validation.InvalidValue" xml:space="preserve">
+    <value>The value '{0}' is not valid for {1}.</value>
+  </data>
+  <data name="Validation.ListingsUnavailable" xml:space="preserve">
+    <value>Listings could not be loaded.</value>
+  </data>
+  <data name="Validation.MaximumPrice" xml:space="preserve">
+    <value>Maximum daily price cannot be negative.</value>
+  </data>
+  <data name="Validation.MinimumPrice" xml:space="preserve">
+    <value>Minimum daily price cannot be negative.</value>
+  </data>
+  <data name="Validation.NullValue" xml:space="preserve">
+    <value>The value '{0}' is invalid.</value>
+  </data>
+  <data name="Validation.NumberRequired" xml:space="preserve">
+    <value>The field {0} must be a number.</value>
+  </data>
+  <data name="Validation.PageNumber" xml:space="preserve">
+    <value>Page number must be at least 1.</value>
+  </data>
+  <data name="Validation.PageRange" xml:space="preserve">
+    <value>The requested page exceeds the supported pagination range.</value>
+  </data>
+  <data name="Validation.PageSize" xml:space="preserve">
+    <value>Page size must be between 1 and {0}.</value>
+  </data>
+  <data name="Validation.PickupLength" xml:space="preserve">
+    <value>Pickup area cannot exceed {0} characters.</value>
+  </data>
+  <data name="Validation.PriceRange" xml:space="preserve">
+    <value>Maximum daily price must be at least the minimum.</value>
+  </data>
+  <data name="Validation.PriceRangeSupported" xml:space="preserve">
+    <value>Enter a price within the supported range.</value>
+  </data>
+  <data name="Validation.SearchLength" xml:space="preserve">
+    <value>Search text cannot exceed {0} characters.</value>
+  </data>
+  <data name="Validation.SearchTerms" xml:space="preserve">
+    <value>Search supports at most {0} distinct terms.</value>
+  </data>
+  <data name="Browse.MinimumDailyPrice" xml:space="preserve">
+    <value>Minimum daily price</value>
+  </data>
+  <data name="Browse.MaximumDailyPrice" xml:space="preserve">
+    <value>Maximum daily price</value>
+  </data>
+  <data name="ListingDetails.OwnerFallback" xml:space="preserve">
+    <value>Listing owner</value>
+  </data>
+  <data name="ListingDetails.NoDescription" xml:space="preserve">
+    <value>No description has been provided.</value>
+  </data>
+  <data name="ListingDetails.Condition" xml:space="preserve">
+    <value>Condition</value>
+  </data>
+  <data name="ListingDetails.Owner" xml:space="preserve">
+    <value>Shared by</value>
+  </data>
+  <data name="ListingDetails.CadPriceHelp" xml:space="preserve">
+    <value>Daily rental price in Canadian dollars.</value>
+  </data>
+  <data name="ListingDetails.RequestToRent" xml:space="preserve">
+    <value>Request to Rent</value>
+  </data>
+  <data name="ListingDetails.RequestComingSoon" xml:space="preserve">
+    <value>Rental requests will be available in a later update. You can browse this listing’s photos and schedule for now.</value>
+  </data>
+  <data name="ListingDetails.LogInToRequest" xml:space="preserve">
+    <value>Log in to request a rental</value>
+  </data>
+  <data name="ListingDetails.AnonymousRequestHelp" xml:space="preserve">
+    <value>Rental requests are coming soon. You can log in now and return to this listing afterward.</value>
+  </data>
+  <data name="ListingDetails.Eyebrow" xml:space="preserve">
+    <value>A closer look</value>
+  </data>
+  <data name="ListingDetails.Description" xml:space="preserve">
+    <value>About this item</value>
+  </data>
+  <data name="Availability.PlanAhead" xml:space="preserve">
+    <value>Plan ahead</value>
+  </data>
+  <data name="Availability.Heading" xml:space="preserve">
+    <value>Availability</value>
+  </data>
+  <data name="Availability.PublicHelp" xml:space="preserve">
+    <value>Listed windows apply except for blocked dates below. Final availability will be confirmed when rental requests are available.</value>
+  </data>
+  <data name="Availability.DisplayInclusiveHelp" xml:space="preserve">
+    <value>Both the first and last day shown are included.</value>
+  </data>
+  <data name="Availability.ListedWindows" xml:space="preserve">
+    <value>Listed availability windows</value>
+  </data>
+  <data name="Availability.NoListedWindows" xml:space="preserve">
+    <value>No availability windows are listed.</value>
+  </data>
+  <data name="Availability.BlockedUnavailableDates" xml:space="preserve">
+    <value>Blocked / unavailable dates</value>
+  </data>
+  <data name="Availability.NoListedBlocks" xml:space="preserve">
+    <value>No blocked dates are listed.</value>
+  </data>
+  <data name="Common.Breadcrumb" xml:space="preserve">
+    <value>Breadcrumb</value>
+  </data>
+  <data name="ListingImages.Photos" xml:space="preserve">
+    <value>Listing photos</value>
+  </data>
+  <data name="MyListings.Untitled" xml:space="preserve">
+    <value>Untitled listing</value>
+  </data>
+  <data name="ListingImages.NoPhotoYet" xml:space="preserve">
+    <value>No photo yet</value>
+  </data>
+  <data name="MyListings.NoPrice" xml:space="preserve">
+    <value>Price not set</value>
+  </data>
+  <data name="MyListings.NoPickupArea" xml:space="preserve">
+    <value>Pickup area not set</value>
+  </data>
+  <data name="MyListings.EditListing" xml:space="preserve">
+    <value>Edit listing</value>
+  </data>
+  <data name="MyListings.ViewArchived" xml:space="preserve">
+    <value>View archived listing</value>
+  </data>
+  <data name="ListingImages.Manage" xml:space="preserve">
+    <value>Manage images</value>
+  </data>
+  <data name="ListingImages.View" xml:space="preserve">
+    <value>View images</value>
+  </data>
+  <data name="Availability.Manage" xml:space="preserve">
+    <value>Manage availability</value>
+  </data>
+  <data name="Availability.View" xml:space="preserve">
+    <value>View availability</value>
+  </data>
+  <data name="MyListings.Eyebrow" xml:space="preserve">
+    <value>Your corner of RentRoad</value>
+  </data>
+  <data name="MyListings.Introduction" xml:space="preserve">
+    <value>Keep your items up to date, finish a draft, or revisit your listing history.</value>
+  </data>
+  <data name="MyListings.CreateListing" xml:space="preserve">
+    <value>Create listing</value>
+  </data>
+  <data name="MyListings.EmptyEyebrow" xml:space="preserve">
+    <value>Start with something you already own</value>
+  </data>
+  <data name="MyListings.EmptyState" xml:space="preserve">
+    <value>Your first listing starts here.</value>
+  </data>
+  <data name="MyListings.EmptyHelp" xml:space="preserve">
+    <value>A useful tool, a camera, or gear for a weekend away. Save a draft now and add the finishing touches later.</value>
+  </data>
+  <data name="MyListings.CreateFirst" xml:space="preserve">
+    <value>Create your first listing</value>
+  </data>
+  <data name="MyListings.YourListings" xml:space="preserve">
+    <value>Your listings</value>
+  </data>
+  <data name="MyListings.IncludeDrafts" xml:space="preserve">
+    <value>Drafts and archived items are included.</value>
+  </data>
+  <data name="MyListings.ReviewListing" xml:space="preserve">
+    <value>Review listing</value>
+  </data>
+  <data name="MyListings.ViewPublic" xml:space="preserve">
+    <value>View public listing</value>
+  </data>
+  <data name="Common.CountInParentheses" xml:space="preserve">
+    <value>({0:N0})</value>
+  </data>
+  <data name="ListingEditor.CreatePageTitle" xml:space="preserve">
+    <value>Create a listing</value>
+  </data>
+  <data name="ListingEditor.Title" xml:space="preserve">
+    <value>Listing title</value>
+  </data>
+  <data name="ListingEditor.Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="ListingEditor.ChooseLater" xml:space="preserve">
+    <value>Choose later</value>
+  </data>
+  <data name="ListingEditor.PickupHelp" xml:space="preserve">
+    <value>Use a neighbourhood or general area, rather than a full street address.</value>
+  </data>
+  <data name="ListingEditor.TitlePlaceholder" xml:space="preserve">
+    <value>e.g. Cordless drill with carry case</value>
+  </data>
+  <data name="ListingEditor.DescriptionPlaceholder" xml:space="preserve">
+    <value>Describe your item, what’s included, and anything a renter should know.</value>
+  </data>
+  <data name="ListingEditor.PickupPlaceholder" xml:space="preserve">
+    <value>e.g. Mount Pleasant, Vancouver</value>
+  </data>
+  <data name="Common.ActionFailed" xml:space="preserve">
+    <value>We couldn’t complete that action.</value>
+  </data>
+  <data name="ListingEditor.ValidationHelp" xml:space="preserve">
+    <value>Your entered details are still here. Review the messages below and try again.</value>
+  </data>
+  <data name="MyListings.Archive" xml:space="preserve">
+    <value>Archive listing</value>
+  </data>
+  <data name="MyListings.ArchivePrompt" xml:space="preserve">
+    <value>Archive this listing?</value>
+  </data>
+  <data name="MyListings.ConfirmArchive" xml:space="preserve">
+    <value>Confirm archive</value>
+  </data>
+  <data name="MyListings.CancelArchive" xml:space="preserve">
+    <value>Close “Archive listing” above to keep it as it is.</value>
+  </data>
+  <data name="MyListings.ArchiveConsequences" xml:space="preserve">
+    <value>It will leave public browsing and become read-only. Your rental history and listing information will be kept.</value>
+  </data>
+  <data name="ListingEditor.HistoryHeading" xml:space="preserve">
+    <value>Your listing history</value>
+  </data>
+  <data name="ListingEditor.CreateHeading" xml:space="preserve">
+    <value>Share something useful.</value>
+  </data>
+  <data name="ListingEditor.EditHeading" xml:space="preserve">
+    <value>Edit your listing.</value>
+  </data>
+  <data name="ListingEditor.ArchivedHelp" xml:space="preserve">
+    <value>Archived listings are read-only.</value>
+  </data>
+  <data name="ListingEditor.PublishedHelp" xml:space="preserve">
+    <value>This listing is public. Saving changes and updating photos or dates updates the live listing.</value>
+  </data>
+  <data name="ListingEditor.PrivateHelp" xml:space="preserve">
+    <value>Your listing stays private until you review and confirm publication.</value>
+  </data>
+  <data name="Availability.BlockedDates" xml:space="preserve">
+    <value>Blocked dates</value>
+  </data>
+  <data name="Availability.AvailableToRent" xml:space="preserve">
+    <value>Available to rent</value>
+  </data>
+  <data name="Availability.AddBlock" xml:space="preserve">
+    <value>Add blocked dates</value>
+  </data>
+  <data name="Availability.AddWindow" xml:space="preserve">
+    <value>Add window</value>
+  </data>
+  <data name="ListingEditor.ReviewChanges" xml:space="preserve">
+    <value>Review changes</value>
+  </data>
+  <data name="ListingEditor.UploadListing" xml:space="preserve">
+    <value>Upload Listing</value>
+  </data>
+  <data name="Common.SaveChanges" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="ListingEditor.SaveDraft" xml:space="preserve">
+    <value>Save Draft</value>
+  </data>
+  <data name="Navigation.BackToMyListingsArrow" xml:space="preserve">
+    <value>← My Listings</value>
+  </data>
+  <data name="ListingEditor.Eyebrow" xml:space="preserve">
+    <value>Make room for more possibilities</value>
+  </data>
+  <data name="ListingEditor.CheckDetails" xml:space="preserve">
+    <value>Check these details</value>
+  </data>
+  <data name="ListingEditor.EnableJavaScript" xml:space="preserve">
+    <value>Enable JavaScript to use the integrated listing editor, previews, and inline photo and date tools.</value>
+  </data>
+  <data name="ListingEditor.ItemDetailsStep" xml:space="preserve">
+    <value>1. Item details</value>
+  </data>
+  <data name="ListingEditor.CadPerDay" xml:space="preserve">
+    <value>CAD per day</value>
+  </data>
+  <data name="ListingEditor.ItemDetails" xml:space="preserve">
+    <value>Item details</value>
+  </data>
+  <data name="ListingEditor.PhotosStep" xml:space="preserve">
+    <value>2. Photos</value>
+  </data>
+  <data name="ListingImages.DragHelp" xml:space="preserve">
+    <value>Drag photos to reorder them.</value>
+  </data>
+  <data name="ListingImages.DropPrompt" xml:space="preserve">
+    <value>Drop photos here or choose files</value>
+  </data>
+  <data name="ListingImages.LoadingSizeLimit" xml:space="preserve">
+    <value>JPEG, PNG or WebP. Loading the configured size limit…</value>
+  </data>
+  <data name="ListingImages.SelectedDescription" xml:space="preserve">
+    <value>Description for selected photos</value>
+  </data>
+  <data name="Common.Optional" xml:space="preserve">
+    <value>(optional)</value>
+  </data>
+  <data name="ListingImages.UploadSelected" xml:space="preserve">
+    <value>Upload selected photos</value>
+  </data>
+  <data name="ListingImages.PublicationHelp" xml:space="preserve">
+    <value>No uploaded photos yet. At least one is needed to publish.</value>
+  </data>
+  <data name="ListingEditor.AvailabilityStep" xml:space="preserve">
+    <value>3. Availability</value>
+  </data>
+  <data name="Availability.InclusiveDaysHelp" xml:space="preserve">
+    <value>Both First Day and Last Day are included.</value>
+  </data>
+  <data name="Availability.FirstDay" xml:space="preserve">
+    <value>First Day</value>
+  </data>
+  <data name="Availability.LastDay" xml:space="preserve">
+    <value>Last Day</value>
+  </data>
+  <data name="Availability.Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Availability.OptionalPrivate" xml:space="preserve">
+    <value>(optional, private)</value>
+  </data>
+  <data name="ListingEditor.PreviewAndFinish" xml:space="preserve">
+    <value>4. Preview &amp; finish</value>
+  </data>
+  <data name="ListingEditor.BrowseCardPreview" xml:space="preserve">
+    <value>Browse Card Preview</value>
+  </data>
+  <data name="ListingEditor.DetailsPreview" xml:space="preserve">
+    <value>Listing Details Preview</value>
+  </data>
+  <data name="ListingImages.Primary" xml:space="preserve">
+    <value>Primary</value>
+  </data>
+  <data name="ListingImages.MakePrimary" xml:space="preserve">
+    <value>Make primary</value>
+  </data>
+  <data name="ListingImages.RemovePhoto" xml:space="preserve">
+    <value>Remove photo</value>
+  </data>
+  <data name="ListingImages.RemovePhotoPrompt" xml:space="preserve">
+    <value>Remove this photo from the listing and storage?</value>
+  </data>
+  <data name="Common.ConfirmRemoval" xml:space="preserve">
+    <value>Confirm removal</value>
+  </data>
+  <data name="Availability.EditDates" xml:space="preserve">
+    <value>Edit dates</value>
+  </data>
+  <data name="Availability.ReasonOptionalPrivate" xml:space="preserve">
+    <value>Reason (optional, private)</value>
+  </data>
+  <data name="Availability.SaveDates" xml:space="preserve">
+    <value>Save dates</value>
+  </data>
+  <data name="Availability.RemovePeriod" xml:space="preserve">
+    <value>Remove period</value>
+  </data>
+  <data name="Availability.RemovePeriodHelp" xml:space="preserve">
+    <value>Remove this period? Existing rental and publication requirements still apply.</value>
+  </data>
+  <data name="ListingImages.DescriptionPlaceholder" xml:space="preserve">
+    <value>e.g. Camera with lens and carry case</value>
+  </data>
+  <data name="ListingImages.SelectedStatuses" xml:space="preserve">
+    <value>Selected photo statuses</value>
+  </data>
+  <data name="ListingImages.MovePhotoUp" xml:space="preserve">
+    <value>Move photo up</value>
+  </data>
+  <data name="ListingImages.MovePhotoDown" xml:space="preserve">
+    <value>Move photo down</value>
+  </data>
+  <data name="ListingEditor.PreviewHeading" xml:space="preserve">
+    <value>Listing preview</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="ListingEditor.PreviewContext" xml:space="preserve">
+    <value>Private preview · current form values</value>
+  </data>
+  <data name="ListingEditor.PublicationRequirements" xml:space="preserve">
+    <value>Still needed before publication</value>
+  </data>
+  <data name="ListingEditor.ConfirmPublish" xml:space="preserve">
+    <value>Confirm &amp; publish</value>
+  </data>
+  <data name="ListingEditor.KeepEditing" xml:space="preserve">
+    <value>Keep editing</value>
+  </data>
+  <data name="ListingEditor.KeepEditingArrow" xml:space="preserve">
+    <value>← Keep editing</value>
+  </data>
+  <data name="ListingEditor.ReviewHeading" xml:space="preserve">
+    <value>Review your listing</value>
+  </data>
+  <data name="ListingEditor.ConfirmHelp" xml:space="preserve">
+    <value>Nothing is published until you confirm.</value>
+  </data>
+  <data name="ListingEditor.CategoryCondition" xml:space="preserve">
+    <value>Category / condition</value>
+  </data>
+  <data name="ListingEditor.ListingFallback" xml:space="preserve">
+    <value>Listing</value>
+  </data>
+  <data name="ListingImages.PageTitle" xml:space="preserve">
+    <value>Manage listing images</value>
+  </data>
+  <data name="ListingImages.AddImage" xml:space="preserve">
+    <value>Add an image</value>
+  </data>
+  <data name="ListingImages.FirstPhoto" xml:space="preserve">
+    <value>Give your listing its first photo.</value>
+  </data>
+  <data name="ListingImages.NoImages" xml:space="preserve">
+    <value>No listing images</value>
+  </data>
+  <data name="ListingImages.FirstPhotoHelp" xml:space="preserve">
+    <value>Choose a photo and upload it to get started. Your first image will become the primary image.</value>
+  </data>
+  <data name="ListingImages.ArchivedEmpty" xml:space="preserve">
+    <value>There are no images attached to this archived listing.</value>
+  </data>
+  <data name="Common.MoveUp" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="Common.MoveDown" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="ListingEditor.BackToEdit" xml:space="preserve">
+    <value>← Back to Edit Listing</value>
+  </data>
+  <data name="ListingEditor.OpenEditor" xml:space="preserve">
+    <value>Open listing editor</value>
+  </data>
+  <data name="ListingImages.Heading" xml:space="preserve">
+    <value>Listing images</value>
+  </data>
+  <data name="ListingImages.IncompleteHeading" xml:space="preserve">
+    <value>The image operation did not fully complete.</value>
+  </data>
+  <data name="ListingImages.DeletionCleanupPending" xml:space="preserve">
+    <value>The image was removed from this listing, but its file could not be fully removed from storage. Cleanup is pending.</value>
+  </data>
+  <data name="ListingImages.DoNotRepeatDeletion" xml:space="preserve">
+    <value>Do not repeat this deletion. The remaining storage file needs cleanup review.</value>
+  </data>
+  <data name="ListingImages.UploadCleanupPending" xml:space="preserve">
+    <value>Storage cleanup is pending after an unsuccessful image operation. A file may remain without an associated listing image. Avoid uploading it again until cleanup has been reviewed.</value>
+  </data>
+  <data name="ListingImages.ReconciliationRequired" xml:space="preserve">
+    <value>This operation needs reconciliation. Its final outcome could not be confirmed. Review the current images and contact support before repeating the operation.</value>
+  </data>
+  <data name="ListingImages.ActionFailed" xml:space="preserve">
+    <value>We couldn’t complete that image action.</value>
+  </data>
+  <data name="ListingImages.FailureHelp" xml:space="preserve">
+    <value>Review the messages below. If an upload failed, choose the file again before retrying.</value>
+  </data>
+  <data name="ListingImages.ArchivedHelp" xml:space="preserve">
+    <value>This listing is archived. Its images are available to you for reference and cannot be changed.</value>
+  </data>
+  <data name="ListingImages.ChooseImage" xml:space="preserve">
+    <value>Choose an image</value>
+  </data>
+  <data name="ListingImages.Description" xml:space="preserve">
+    <value>Image description</value>
+  </data>
+  <data name="ListingImages.DescriptionHelp" xml:space="preserve">
+    <value>Describe the photo for screen readers.</value>
+  </data>
+  <data name="ListingImages.UploadImage" xml:space="preserve">
+    <value>Upload image</value>
+  </data>
+  <data name="ListingImages.YourImages" xml:space="preserve">
+    <value>Your images</value>
+  </data>
+  <data name="ListingImages.SavedOrderHelp" xml:space="preserve">
+    <value>Saved order · bulk uploads and dragging in the editor</value>
+  </data>
+  <data name="ListingImages.RequiredImageHelp" xml:space="preserve">
+    <value>Published and unavailable listings must keep at least one stored image. Upload another image before removing this one.</value>
+  </data>
+  <data name="ListingImages.PrimaryImage" xml:space="preserve">
+    <value>Primary image</value>
+  </data>
+  <data name="ListingImages.SetPrimary" xml:space="preserve">
+    <value>Set as primary</value>
+  </data>
+  <data name="ListingImages.DeleteImage" xml:space="preserve">
+    <value>Delete image</value>
+  </data>
+  <data name="Common.ConfirmDelete" xml:space="preserve">
+    <value>Confirm delete</value>
+  </data>
+  <data name="MyListings.ManagementLabel" xml:space="preserve">
+    <value>Listing management</value>
+  </data>
+  <data name="ListingImages.SelectedUploadPreview" xml:space="preserve">
+    <value>Preview of the selected upload</value>
+  </data>
+  <data name="ListingImages.AltPlaceholder" xml:space="preserve">
+    <value>e.g. Drill and accessories in a carry case</value>
+  </data>
+  <data name="ListingImages.SizeHelp" xml:space="preserve">
+    <value>JPEG, PNG or WebP · up to {0}.</value>
+  </data>
+  <data name="ListingImages.ImageNumber" xml:space="preserve">
+    <value>Image {0}</value>
+  </data>
+  <data name="ListingImages.ImageReference" xml:space="preserve">
+    <value>: image {0}</value>
+  </data>
+  <data name="ListingImages.OrderLabel" xml:space="preserve">
+    <value>Display order for image {0}</value>
+  </data>
+  <data name="ListingImages.DeletePrompt" xml:space="preserve">
+    <value>Delete image {0}? A remaining photo becomes primary if needed.</value>
+  </data>
+  <data name="ListingImages.SizeKiB" xml:space="preserve">
+    <value>{0:0.#} KiB</value>
+  </data>
+  <data name="Availability.PageTitle" xml:space="preserve">
+    <value>Manage listing availability</value>
+  </data>
+  <data name="Availability.EmptyWindowsHelp" xml:space="preserve">
+    <value>Add the dates when your item can be rented. Your draft can remain unfinished until you are ready to publish.</value>
+  </data>
+  <data name="Availability.ArchivedEmpty" xml:space="preserve">
+    <value>No availability windows are saved with this archived listing.</value>
+  </data>
+  <data name="Availability.Eyebrow" xml:space="preserve">
+    <value>Make time for sharing</value>
+  </data>
+  <data name="Availability.ListingHeading" xml:space="preserve">
+    <value>Listing availability</value>
+  </data>
+  <data name="Availability.ChangeFailed" xml:space="preserve">
+    <value>Your availability change was not saved.</value>
+  </data>
+  <data name="Availability.FailureHelp" xml:space="preserve">
+    <value>Review the messages below before trying again.</value>
+  </data>
+  <data name="Availability.ArchivedHelp" xml:space="preserve">
+    <value>This listing is archived. Its availability and private notes are read-only.</value>
+  </data>
+  <data name="Availability.ManagementHelp" xml:space="preserve">
+    <value>First Day and Last Day are included. Blocks mark exceptions; existing reservations remain protected.</value>
+  </data>
+  <data name="Availability.AddWindowHeading" xml:space="preserve">
+    <value>Add an availability window</value>
+  </data>
+  <data name="Availability.NoWindows" xml:space="preserve">
+    <value>No availability windows</value>
+  </data>
+  <data name="Availability.AvailableDates" xml:space="preserve">
+    <value>Available dates</value>
+  </data>
+  <data name="Availability.EditWindow" xml:space="preserve">
+    <value>Edit window</value>
+  </data>
+  <data name="Availability.UnavailableDates" xml:space="preserve">
+    <value>Unavailable dates</value>
+  </data>
+  <data name="Availability.BlockHelp" xml:space="preserve">
+    <value>Block dates when you can’t share your item. Reasons are visible only to you.</value>
+  </data>
+  <data name="Availability.NoBlocks" xml:space="preserve">
+    <value>No blocked dates</value>
+  </data>
+  <data name="Availability.NoBlocksHelp" xml:space="preserve">
+    <value>You have no exceptions saved for this listing. Reservations are protected separately and do not need to be entered as blocks.</value>
+  </data>
+  <data name="Availability.PrivateReason" xml:space="preserve">
+    <value>Private reason:</value>
+  </data>
+  <data name="Availability.EditBlock" xml:space="preserve">
+    <value>Edit block</value>
+  </data>
+  <data name="Availability.DatesInclusiveHelp" xml:space="preserve">
+    <value>Both dates are included.</value>
+  </data>
+  <data name="Availability.ReasonHelp" xml:space="preserve">
+    <value>Only you can see this note. Up to 250 characters.</value>
+  </data>
+  <data name="Availability.BlockDates" xml:space="preserve">
+    <value>Block dates</value>
+  </data>
+  <data name="Availability.BlockFormReference" xml:space="preserve">
+    <value>: unavailable period {0}</value>
+  </data>
+  <data name="Availability.WindowFormReference" xml:space="preserve">
+    <value>: availability window {0}</value>
+  </data>
+  <data name="Availability.RemoveBlock" xml:space="preserve">
+    <value>Remove block</value>
+  </data>
+  <data name="Availability.RemoveWindow" xml:space="preserve">
+    <value>Remove window</value>
+  </data>
+  <data name="Availability.RemoveBlockHelp" xml:space="preserve">
+    <value>Remove this block? These dates will no longer be blocked by this entry; other availability and reservation rules still apply.</value>
+  </data>
+  <data name="Availability.RemoveWindowHelp" xml:space="preserve">
+    <value>Remove this availability window? Approved and active rentals must remain covered, and published or unavailable listings must retain valid availability.</value>
+  </data>
+  <data name="Availability.BlockRecordReference" xml:space="preserve">
+    <value>: block {0}</value>
+  </data>
+  <data name="Availability.WindowRecordReference" xml:space="preserve">
+    <value>: window {0}</value>
+  </data>
+  <data name="Availability.CancelRemoveBlock" xml:space="preserve">
+    <value>Close “Remove block” to cancel.</value>
+  </data>
+  <data name="Availability.CancelRemoveWindow" xml:space="preserve">
+    <value>Close “Remove window” to cancel.</value>
+  </data>
+  <data name="ListingStatus.Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="ListingStatus.Published" xml:space="preserve">
+    <value>Published</value>
+  </data>
+  <data name="ListingStatus.Unavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="ListingStatus.Archived" xml:space="preserve">
+    <value>Archived</value>
+  </data>
+  <data name="ListingStatus.Unknown" xml:space="preserve">
+    <value>Status unavailable</value>
+  </data>
+  <data name="Availability.SingleDate" xml:space="preserve">
+    <value>{0:MMM d, yyyy}</value>
+  </data>
+  <data name="Availability.DateRange" xml:space="preserve">
+    <value>{0:MMM d, yyyy} – {1:MMM d, yyyy}</value>
+  </data>
+  <data name="Availability.FirstDayRequired" xml:space="preserve">
+    <value>Choose a First Day.</value>
+  </data>
+  <data name="Availability.LastDayRequired" xml:space="preserve">
+    <value>Choose a Last Day.</value>
+  </data>
+  <data name="Availability.FirstDayMinimum" xml:space="preserve">
+    <value>First Day must be January 2, 0001 or later.</value>
+  </data>
+  <data name="Availability.LastDayBeforeFirst" xml:space="preserve">
+    <value>Last Day must be on or after First Day.</value>
+  </data>
+  <data name="Availability.LastDayMaximum" xml:space="preserve">
+    <value>Last Day must be December 30, 9999 or earlier.</value>
+  </data>
+  <data name="ListingImages.FileRequired" xml:space="preserve">
+    <value>Choose an image to upload.</value>
+  </data>
+  <data name="ListingImages.OrderRequired" xml:space="preserve">
+    <value>Supply the listing's image order.</value>
+  </data>
+  <data name="ListingImages.SizeMiB" xml:space="preserve">
+    <value>{0:0.##} MiB</value>
+  </data>
+  <data name="ListingImages.SizeBytes" xml:space="preserve">
+    <value>{0:N0} bytes</value>
+  </data>
+  <data name="ListingEditor.PriceRange" xml:space="preserve">
+    <value>Enter a daily price within the supported range.</value>
+  </data>
+  <data name="ListingEditor.PricePrecision" xml:space="preserve">
+    <value>Enter a daily price with no more than two decimal places.</value>
+  </data>
+  <data name="Currency.CadLabel" xml:space="preserve">
+    <value>CA$</value>
+  </data>
+  <data name="Common.ItemReference" xml:space="preserve">
+    <value>: {0}</value>
+  </data>
+  <data name="ListingFeedback.YourDraftHasBeenSavedYouCanKeepEditing" xml:space="preserve"><value>Your draft has been saved. You can keep editing it before publishing.</value></data>
+  <data name="ListingFeedback.YourListingChangesHaveBeenSaved" xml:space="preserve"><value>Your listing changes have been saved.</value></data>
+  <data name="ListingFeedback.YourListingHasBeenArchivedItsHistoryIsPreserved" xml:space="preserve"><value>Your listing has been archived. Its history is preserved.</value></data>
+  <data name="ListingFeedback.TheListingOperationCouldNotBeCompleted" xml:space="preserve"><value>The listing operation could not be completed.</value></data>
+  <data name="ListingFeedback.TheListingCouldNotBeLoaded" xml:space="preserve"><value>The listing could not be loaded.</value></data>
+  <data name="EditorFeedback.YourListingIsPublishedAndVisibleInBrowseListings" xml:space="preserve"><value>Your listing is published and visible in Browse Listings.</value></data>
+  <data name="EditorFeedback.EnterAValidValue" xml:space="preserve"><value>Enter a valid value.</value></data>
+  <data name="AvailabilityFeedback.YourAvailabilityWindowWasAdded" xml:space="preserve"><value>Your availability window was added.</value></data>
+  <data name="AvailabilityFeedback.YourAvailabilityWindowWasUpdated" xml:space="preserve"><value>Your availability window was updated.</value></data>
+  <data name="AvailabilityFeedback.YourAvailabilityWindowWasRemoved" xml:space="preserve"><value>Your availability window was removed.</value></data>
+  <data name="AvailabilityFeedback.YourAvailabilityWindowsWereReplaced" xml:space="preserve"><value>Your availability windows were replaced.</value></data>
+  <data name="AvailabilityFeedback.YourUnavailableDatesWereAdded" xml:space="preserve"><value>Your unavailable dates were added.</value></data>
+  <data name="AvailabilityFeedback.YourUnavailableDatesWereUpdated" xml:space="preserve"><value>Your unavailable dates were updated.</value></data>
+  <data name="AvailabilityFeedback.YourUnavailableDatesWereRemoved" xml:space="preserve"><value>Your unavailable dates were removed.</value></data>
+  <data name="AvailabilityFeedback.AvailabilityCouldNotBeUpdated" xml:space="preserve"><value>Availability could not be updated.</value></data>
+  <data name="AvailabilityFeedback.AvailabilityCouldNotBeLoaded" xml:space="preserve"><value>Availability could not be loaded.</value></data>
+  <data name="ImageFeedback.TheImageIsTemporarilyUnavailable" xml:space="preserve"><value>The image is temporarily unavailable.</value></data>
+  <data name="ImageFeedback.ListingImagesCouldNotBeLoaded" xml:space="preserve"><value>Listing images could not be loaded.</value></data>
+  <data name="ImageFeedback.YourImageWasUploadedAndAddedToTheListing" xml:space="preserve"><value>Your image was uploaded and added to the listing.</value></data>
+  <data name="ImageFeedback.TheImageWasRemovedFromYourListingAndStorage" xml:space="preserve"><value>The image was removed from your listing and storage.</value></data>
+  <data name="ImageFeedback.YourPrimaryImageHasBeenUpdated" xml:space="preserve"><value>Your primary image has been updated.</value></data>
+  <data name="ImageFeedback.YourImageDisplayOrderHasBeenSaved" xml:space="preserve"><value>Your image display order has been saved.</value></data>
+  <data name="ImageFeedback.TheImageOperationDidNotFullyCompleteAndImage" xml:space="preserve"><value>The image operation did not fully complete and image metadata could not be refreshed.</value></data>
+  <data name="ImageFeedback.TheImageOperationDidNotFullyCompleteAndListing" xml:space="preserve"><value>The image operation did not fully complete and listing information could not be refreshed.</value></data>
+  <data name="ListingValidation.SignInToManageYourListings" xml:space="preserve"><value>Sign in to manage your listings.</value></data>
+  <data name="ListingValidation.YourAccountCouldNotBeFound" xml:space="preserve"><value>Your account could not be found.</value></data>
+  <data name="ListingValidation.ListingDetailsAreRequired" xml:space="preserve"><value>Listing details are required.</value></data>
+  <data name="ListingValidation.TheListingIsNotAvailableToThisAccount" xml:space="preserve"><value>The listing is not available to this account.</value></data>
+  <data name="ListingValidation.ListingIDMustBePositive" xml:space="preserve"><value>Listing ID must be positive.</value></data>
+  <data name="ListingValidation.TheListingCouldNotBeFound" xml:space="preserve"><value>The listing could not be found.</value></data>
+  <data name="ListingValidation.EnterAnItemTitleBeforePublishing" xml:space="preserve"><value>Enter an item title before publishing.</value></data>
+  <data name="ListingValidation.EnterAnItemDescriptionBeforePublishing" xml:space="preserve"><value>Enter an item description before publishing.</value></data>
+  <data name="ListingValidation.SelectAnItemCategoryBeforePublishing" xml:space="preserve"><value>Select an item category before publishing.</value></data>
+  <data name="ListingValidation.SelectTheItemSConditionBeforePublishing" xml:space="preserve"><value>Select the item's condition before publishing.</value></data>
+  <data name="ListingValidation.EnterADailyPriceGreaterThanCA0Before" xml:space="preserve"><value>Enter a daily price greater than CA$0 before publishing.</value></data>
+  <data name="ListingValidation.EnterAPickupAreaBeforePublishing" xml:space="preserve"><value>Enter a pickup area before publishing.</value></data>
+  <data name="ListingValidation.AddAtLeastOneStoredListingImageBeforePublishing" xml:space="preserve"><value>Add at least one stored listing image before publishing.</value></data>
+  <data name="ListingValidation.AddAtLeastOneAvailabilityWindowBeforePublishing" xml:space="preserve"><value>Add at least one availability window before publishing.</value></data>
+  <data name="ListingValidation.DailyPriceCannotBeNegative" xml:space="preserve"><value>Daily price cannot be negative.</value></data>
+  <data name="ListingValidation.LatitudeMustBeBetween90And90" xml:space="preserve"><value>Latitude must be between -90 and 90.</value></data>
+  <data name="ListingValidation.LongitudeMustBeBetween180And180" xml:space="preserve"><value>Longitude must be between -180 and 180.</value></data>
+  <data name="ListingValidation.ChooseAvailabilityDatesWithTheStartBeforeTheEnd" xml:space="preserve"><value>Choose availability dates with the start before the end.</value></data>
+  <data name="ListingValidation.AnAvailabilityWindowWithTheseDatesAlreadyExists" xml:space="preserve"><value>An availability window with these dates already exists.</value></data>
+  <data name="ListingValidation.ArchivedListingsCannotBeEditedOrPublished" xml:space="preserve"><value>Archived listings cannot be edited or published.</value></data>
+  <data name="ListingValidation.OnlyTheListingOwnerCanPerformThisAction" xml:space="preserve"><value>Only the listing owner can perform this action.</value></data>
+  <data name="ListingValidation.SaveOrDiscardPendingListingChangesAndCompleteThe" xml:space="preserve"><value>Save or discard pending listing changes and complete the current transaction before modifying the listing.</value></data>
+  <data name="AvailabilityFeedback.SupplyTheReplacementWindowsOrAnEmptyCollectionTo" xml:space="preserve"><value>Supply the replacement windows, or an empty collection to clear them.</value></data>
+  <data name="AvailabilityFeedback.WindowIDMustBePositive" xml:space="preserve"><value>Window ID must be positive.</value></data>
+  <data name="AvailabilityFeedback.AvailabilityDatesAreRequired" xml:space="preserve"><value>Availability dates are required.</value></data>
+  <data name="AvailabilityFeedback.TheAvailabilityWindowCouldNotBeFoundForThis" xml:space="preserve"><value>The availability window could not be found for this listing.</value></data>
+  <data name="AvailabilityFeedback.BlockIDMustBePositive" xml:space="preserve"><value>Block ID must be positive.</value></data>
+  <data name="AvailabilityFeedback.UnavailableDatesAreRequired" xml:space="preserve"><value>Unavailable dates are required.</value></data>
+  <data name="AvailabilityFeedback.TheAvailabilityBlockCouldNotBeFoundForThis" xml:space="preserve"><value>The availability block could not be found for this listing.</value></data>
+  <data name="AvailabilityFeedback.ChooseUnavailableDatesWithTheStartBeforeTheEnd" xml:space="preserve"><value>Choose unavailable dates with the start before the end.</value></data>
+  <data name="AvailabilityFeedback.AnAvailabilityBlockWithTheseDatesAlreadyExists" xml:space="preserve"><value>An availability block with these dates already exists.</value></data>
+  <data name="AvailabilityFeedback.ThisChangeWouldInvalidateAnApprovedOrActiveRental" xml:space="preserve"><value>This change would invalidate an approved or active rental reservation.</value></data>
+  <data name="EditorFeedback.SignInToManageAListing" xml:space="preserve"><value>Sign in to manage a listing.</value></data>
+  <data name="EditorFeedback.ReviewTheListingAgainBeforeConfirmingPublication" xml:space="preserve"><value>Review the listing again before confirming publication.</value></data>
+  <data name="EditorFeedback.TheListingPhotosOrDatesChangedReviewThemAgain" xml:space="preserve"><value>The listing, photos or dates changed. Review them again before publishing.</value></data>
+  <data name="EditorFeedback.TheDraftSaveOutcomeIsUncertainCheckMyListings" xml:space="preserve"><value>The draft save outcome is uncertain. Check My Listings before starting another listing; this editor will not create a duplicate.</value></data>
+  <data name="EditorFeedback.TheSaveCouldNotBeConfirmedCheckTheSaved" xml:space="preserve"><value>The save could not be confirmed. Check the saved listing before retrying.</value></data>
+  <data name="EditorFeedback.ThisEditorSessionExpiredOrIsUnavailableKeepYour" xml:space="preserve"><value>This editor session expired or is unavailable. Keep your entered values and check My Listings before opening a new editor.</value></data>
+  <data name="ImageFeedback.ArchivedListingsCannotBeEdited" xml:space="preserve"><value>Archived listings cannot be edited.</value></data>
+  <data name="ImageFeedback.AnImageStreamAndContentTypeAreRequired" xml:space="preserve"><value>An image stream and content type are required.</value></data>
+  <data name="ImageFeedback.ChooseANonemptyJPEGPNGOrWebPImageWithin" xml:space="preserve"><value>Choose a nonempty JPEG, PNG, or WebP image within the configured size limit.</value></data>
+  <data name="ImageFeedback.TheImageCouldNotBeUploadedCheckStorageConfiguration" xml:space="preserve"><value>The image could not be uploaded. Check storage configuration or try again.</value></data>
+  <data name="ImageFeedback.StorageReturnedInvalidImageMetadata" xml:space="preserve"><value>Storage returned invalid image metadata.</value></data>
+  <data name="ImageFeedback.ThisStorageImageIsAlreadyAssociatedWithAListing" xml:space="preserve"><value>This storage image is already associated with a listing.</value></data>
+  <data name="ImageFeedback.ImageMetadataSavingWasCancelled" xml:space="preserve"><value>Image metadata saving was cancelled.</value></data>
+  <data name="ImageFeedback.TheImageBelongsToADifferentConfiguredStorageContainer" xml:space="preserve"><value>The image belongs to a different configured storage container.</value></data>
+  <data name="ImageFeedback.ImageRemovalCouldNotBeVerifiedRefreshTheListing" xml:space="preserve"><value>Image removal could not be verified. Refresh the listing before retrying; storage was left untouched.</value></data>
+  <data name="ImageFeedback.SupplyEveryCurrentImageIDForThisListingExactly" xml:space="preserve"><value>Supply every current image ID for this listing exactly once. Refresh the images if they changed.</value></data>
+  <data name="ImageFeedback.ListingImagesCouldNotBeLoadedTryAgainLater" xml:space="preserve"><value>Listing images could not be loaded. Try again later.</value></data>
+  <data name="ImageFeedback.ListingAndImageIDsMustBePositive" xml:space="preserve"><value>Listing and image IDs must be positive.</value></data>
+  <data name="ImageFeedback.TheImageSStorageConfigurationIsUnavailable" xml:space="preserve"><value>The image's storage configuration is unavailable.</value></data>
+  <data name="ImageFeedback.TheImageCouldNotBeFound" xml:space="preserve"><value>The image could not be found.</value></data>
+  <data name="ImageFeedback.TheImageCouldNotBeRetrievedFromStorage" xml:space="preserve"><value>The image could not be retrieved from storage.</value></data>
+  <data name="ImageFeedback.TheImageCouldNotBeLoadedTryAgainLater" xml:space="preserve"><value>The image could not be loaded. Try again later.</value></data>
+  <data name="ImageFeedback.TheImageCouldNotBeFoundForThisListing" xml:space="preserve"><value>The image could not be found for this listing.</value></data>
+  <data name="ImageFeedback.SignInToViewThisImage" xml:space="preserve"><value>Sign in to view this image.</value></data>
+  <data name="ImageFeedback.OnlyTheListingOwnerCanViewThisImage" xml:space="preserve"><value>Only the listing owner can view this image.</value></data>
+  <data name="ImageFeedback.ImageMetadataCouldNotBeSavedRefreshTheListing" xml:space="preserve"><value>Image metadata could not be saved. Refresh the listing before retrying.</value></data>
+  <data name="ImageFeedback.TheListingCouldNotBeLoadedTryAgainLater" xml:space="preserve"><value>The listing could not be loaded. Try again later.</value></data>
+  <data name="ImageFeedback.TheUploadSDatabaseOutcomeCouldNotBeVerified" xml:space="preserve"><value>The upload's database outcome could not be verified. Storage was left untouched for reconciliation.</value></data>
+  <data name="ImageFeedback.ImageMetadataWasNotSavedButBlobCleanupIs" xml:space="preserve"><value>Image metadata was not saved, but blob cleanup is pending. The failure was recorded for reconciliation.</value></data>
+  <data name="ImageFeedback.ImageDeletionWasInterruptedStorageWasLeftUntouched" xml:space="preserve"><value>Image deletion was interrupted; storage was left untouched.</value></data>
+  <data name="ImageFeedback.ImageMetadataWasRemovedButBlobCleanupIsPending" xml:space="preserve"><value>Image metadata was removed, but blob cleanup is pending. The failure was recorded for reconciliation.</value></data>
+  <data name="ImageFeedback.ImageFilenamesAndAlternativeTextMustNotContainControl" xml:space="preserve"><value>Image filenames and alternative text must not contain control characters.</value></data>
+  <data name="ImageFeedback.ImageIDMustBePositive" xml:space="preserve"><value>Image ID must be positive.</value></data>
+  <data name="Availability.InvalidWindowDates" xml:space="preserve"><value>Choose availability dates with Last Day on or after First Day.</value></data>
+  <data name="Availability.InvalidBlockDates" xml:space="preserve"><value>Choose unavailable dates with Last Day on or after First Day.</value></data>
+  <data name="StorageFeedback.TheImageBlobOrConfiguredContainerCouldNotBe" xml:space="preserve"><value>The image blob or configured container could not be found.</value></data>
+  <data name="StorageFeedback.ImageStorageAccessWasDeniedCheckTheServerS" xml:space="preserve"><value>Image storage access was denied. Check the server's storage configuration and permissions.</value></data>
+  <data name="StorageFeedback.TheImageStorageOperationConflictsWithTheBlobS" xml:space="preserve"><value>The image storage operation conflicts with the blob's current state.</value></data>
+  <data name="StorageFeedback.ImageStorageIsTemporarilyUnavailableTryAgainLater" xml:space="preserve"><value>Image storage is temporarily unavailable. Try again later.</value></data>
+  <data name="StorageFeedback.ImageStorageCouldNotBeReachedTryAgainLater" xml:space="preserve"><value>Image storage could not be reached. Try again later.</value></data>
+  <data name="ListingEditor.SignInAgainBeforeSavingYourEnteredDetailsAre" xml:space="preserve"><value>Sign in again before saving. Your entered details are still here.</value></data>
+  <data name="ListingEditor.TheOperationCouldNotBeConfirmedReviewTheSaved" xml:space="preserve"><value>The operation could not be confirmed. Review the saved photos and dates before retrying.</value></data>
+  <data name="ListingEditor.ThePhotoMetadataWasRemovedButStorageCleanupIs" xml:space="preserve"><value>The photo metadata was removed, but storage cleanup is pending. Do not repeat this removal.</value></data>
+  <data name="ListingEditor.ThisActionDidNotFullyCompleteReviewCleanupOr" xml:space="preserve"><value>This action did not fully complete. Review cleanup or reconciliation before repeating it.</value></data>
+  <data name="ListingEditor.YourDraftIsPrivateUntilYouReviewAndConfirm" xml:space="preserve"><value>Your draft is private until you review and confirm publication.</value></data>
+  <data name="ListingEditor.ItemDetailsWereSavedTheFollowingPhotoOrDate" xml:space="preserve"><value>Item details were saved. The following photo or date action did not fully complete.</value></data>
+  <data name="ListingEditor.NoAvailabilityWindowsYet" xml:space="preserve"><value>No availability windows yet.</value></data>
+  <data name="ListingEditor.NoBlockedDates" xml:space="preserve"><value>No blocked dates.</value></data>
+  <data name="ListingEditor.PhotoChangesSaved" xml:space="preserve"><value>Photo changes saved.</value></data>
+  <data name="ListingEditor.AvailabilitySaved" xml:space="preserve"><value>Availability saved.</value></data>
+  <data name="ListingEditor.PhotoOrderSavedPrimaryPhotoUnchanged" xml:space="preserve"><value>Photo order saved. Primary photo unchanged.</value></data>
+  <data name="ListingEditor.ChooseAtLeastOneValidPhotoToUpload" xml:space="preserve"><value>Choose at least one valid photo to upload.</value></data>
+  <data name="ListingEditor.NotSelected" xml:space="preserve"><value>Not selected</value></data>
+  <data name="ListingEditor.NoDescriptionYet" xml:space="preserve"><value>No description yet.</value></data>
+  <data name="ListingEditor.NoneAdded" xml:space="preserve"><value>None added</value></data>
+  <data name="ListingEditor.CheckTheseSavedPhotosAndProposedDetailsNothingIs" xml:space="preserve"><value>Check these saved photos and proposed details. Nothing is published until you confirm.</value></data>
+  <data name="ListingEditor.YourEditsChangedWhilePreparingReviewChooseUploadListing" xml:space="preserve"><value>Your edits changed while preparing review. Choose Upload Listing again to review the latest values.</value></data>
+  <data name="ListingEditor.YourListingIsPublished" xml:space="preserve"><value>Your listing is published.</value></data>
+  <data name="ListingEditor.ChangesSavedToYourPublishedListing" xml:space="preserve"><value>Changes saved to your published listing.</value></data>
+  <data name="ListingEditor.DraftSavedOnlyYouCanSeeItUntilPublication" xml:space="preserve"><value>Draft saved. Only you can see it until publication.</value></data>
+  <data name="ListingImages.LocalPreviewOnlyChooseUploadImageToSaveIt" xml:space="preserve"><value>Local preview only. Choose Upload image to save it.</value></data>
+  <data name="ListingImages.UploadingYourImagePleaseWait" xml:space="preserve"><value>Uploading your image. Please wait.</value></data>
+  <data name="ListingImages.Uploading" xml:space="preserve"><value>Uploading…</value></data>
+  <data name="UploadQueue.Ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="UploadQueue.Invalid" xml:space="preserve"><value>Invalid</value></data>
+  <data name="UploadQueue.Uploading" xml:space="preserve"><value>Uploading</value></data>
+  <data name="UploadQueue.Uploaded" xml:space="preserve"><value>Uploaded</value></data>
+  <data name="UploadQueue.Rejected" xml:space="preserve"><value>Rejected</value></data>
+  <data name="UploadQueue.CheckSavedPhotos" xml:space="preserve"><value>Check saved photos</value></data>
+  <data name="UploadQueue.LocalPreviewServerValidationPending" xml:space="preserve"><value>Local preview · server validation pending</value></data>
+  <data name="UploadQueue.SavedToThisListing" xml:space="preserve"><value>Saved to this listing.</value></data>
+  <data name="UploadQueue.UploadOutcomeCouldNotBeConfirmed" xml:space="preserve"><value>Upload outcome could not be confirmed.</value></data>
+  <data name="UploadQueue.LocalPreview" xml:space="preserve"><value>Local preview of {0}</value></data>
+  <data name="UploadQueue.FileStatus" xml:space="preserve"><value>{0} KiB · {1}</value></data>
+  <data name="UploadQueue.Progress" xml:space="preserve"><value>Upload progress for {0}</value></data>
+  <data name="UploadQueue.Dismiss" xml:space="preserve"><value>Dismiss</value></data>
+  <data name="UploadQueue.DismissFile" xml:space="preserve"><value>Dismiss {0}</value></data>
+  <data name="UploadQueue.RemoveFile" xml:space="preserve"><value>Remove {0}</value></data>
+  <data name="UploadQueue.Summary" xml:space="preserve"><value>{0} uploaded · {1} ready · {2} need attention</value></data>
+  <data name="UploadQueue.InvalidFile" xml:space="preserve"><value>Choose a nonempty JPEG, PNG or WebP up to {0} MiB.</value></data>
+  <data name="UploadQueue.Duplicates" xml:space="preserve"><value>{0} · {1} duplicate selection(s) ignored</value></data>
+  <data name="UploadQueue.CleanupPending" xml:space="preserve"><value>{0} Storage cleanup is pending.</value></data>
+  <data name="UploadQueue.CheckBeforeRetry" xml:space="preserve"><value>{0} No automatic retry. Check saved photos and any cleanup outcome before selecting this file again.</value></data>
+  <data name="Common.Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="ListingEditor.PhotoAlt" xml:space="preserve"><value>Listing photo {0}</value></data>
+  <data name="ListingEditor.PhotoNumber" xml:space="preserve"><value>Photo {0}</value></data>
+  <data name="ListingEditor.MoveEarlier" xml:space="preserve"><value>Move photo {0} earlier</value></data>
+  <data name="ListingEditor.MoveLater" xml:space="preserve"><value>Move photo {0} later</value></data>
+  <data name="ListingEditor.NewerEdits" xml:space="preserve"><value>{0} Newer edits still need saving.</value></data>
+  <data name="ListingEditor.PublicLink" xml:space="preserve"><value> View published listing</value></data>
+  <data name="ListingEditor.UploadSummary" xml:space="preserve"><value>{0} photo(s) uploaded. {1} rejected. Check each file's status below.</value></data>
+  <data name="ListingEditor.UploadSummaryUncertain" xml:space="preserve"><value>{0} photo(s) uploaded. {1} rejected. One outcome needs checking. Review the file statuses before continuing.</value></data>
+  <data name="ListingEditor.UploadLimit" xml:space="preserve"><value>JPEG, PNG or WebP · up to {0} MiB per photo.</value></data>
+  <data name="ListingEditor.PhotoSavedDraft" xml:space="preserve"><value>Photo changes saved. Your draft is still private.</value></data>
+  <data name="ListingEditor.AvailabilitySavedNewer" xml:space="preserve"><value>Availability saved. Newer date edits still need saving.</value></data>
+  <data name="ListingEditor.AvailabilitySavedDraft" xml:space="preserve"><value>Availability saved. Your draft is still private.</value></data>
+  <data name="ListingEditor.ReviewContextPending" xml:space="preserve"><value>Check these saved photos and proposed details. Nothing is published until you confirm. Selected local photos are not included until uploaded.</value></data>
+  <data name="ListingEditor.PreviewContextPending" xml:space="preserve"><value>Private preview · current form values · selected photos not yet uploaded</value></data>
+  <data name="ListingImages.PreviewUnavailable" xml:space="preserve"><value>A preview is unavailable for this file. The server will validate any submitted image.</value></data>
+  <data name="Identity.DisplayName" xml:space="preserve"><value>Display name</value></data>
+  <data name="Identity.Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Identity.Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Identity.ConfirmPassword" xml:space="preserve"><value>Confirm password</value></data>
+  <data name="Validation.Required" xml:space="preserve"><value>The {0} field is required.</value></data>
+  <data name="Validation.MaximumLength" xml:space="preserve"><value>The field {0} must be a string with a maximum length of {1}.</value></data>
+  <data name="Identity.PasswordLength" xml:space="preserve"><value>The field {0} must be a string with a minimum length of {2} and a maximum length of {1}.</value></data>
+  <data name="Identity.EmailAddressInvalid" xml:space="preserve"><value>The {0} field is not a valid e-mail address.</value></data>
+  <data name="Identity.PasswordsDiffer" xml:space="preserve"><value>The password and confirmation password do not match.</value></data>
+  <data name="Identity.CreateAccount" xml:space="preserve"><value>Create a new account.</value></data>
+  <data name="Identity.ExternalHeading" xml:space="preserve"><value>Use another service to register.</value></data>
+  <data name="Identity.ExternalTitle" xml:space="preserve"><value>Register using your {0} account</value></data>
+  <data name="Identity.EmailPlaceholder" xml:space="preserve"><value>name@example.com</value></data>
+  <data name="Privacy.Title" xml:space="preserve"><value>Privacy Policy</value></data>
+  <data name="Privacy.Placeholder" xml:space="preserve"><value>Use this page to detail your site's privacy policy.</value></data>
+  <data name="Error.Title" xml:space="preserve"><value>Error</value></data>
+  <data name="Error.Heading" xml:space="preserve"><value>Error.</value></data>
+  <data name="Error.Description" xml:space="preserve"><value>An error occurred while processing your request.</value></data>
+  <data name="Error.RequestId" xml:space="preserve"><value>Request ID:</value></data>
+  <data name="Error.DevelopmentHeading" xml:space="preserve"><value>Development Mode</value></data>
+  <data name="Error.DevelopmentDetails" xml:space="preserve"><value>Swapping to &lt;strong&gt;Development&lt;/strong&gt; environment will display more detailed information about the error that occurred.</value></data>
+  <data name="Error.DevelopmentWarning" xml:space="preserve"><value>&lt;strong&gt;The Development environment shouldn't be enabled for deployed applications.&lt;/strong&gt; It can result in displaying sensitive information from exceptions to end users. For local debugging, enable the &lt;strong&gt;Development&lt;/strong&gt; environment by setting the &lt;strong&gt;ASPNETCORE_ENVIRONMENT&lt;/strong&gt; environment variable to &lt;strong&gt;Development&lt;/strong&gt; and restarting the app.</value></data>
+  <data name="Validation.InvalidField" xml:space="preserve"><value>The field {0} is invalid.</value></data>
+  <data name="Validation.FieldTitle" xml:space="preserve"><value>Title</value></data>
+  <data name="Validation.FieldPickupArea" xml:space="preserve"><value>PickupArea</value></data>
+  <data name="Validation.FieldOriginalFileName" xml:space="preserve"><value>OriginalFileName</value></data>
+  <data name="Validation.FieldAltText" xml:space="preserve"><value>AltText</value></data>
+  <data name="Validation.FieldOwnerId" xml:space="preserve"><value>OwnerId</value></data>
+  <data name="Validation.FieldContainerName" xml:space="preserve"><value>ContainerName</value></data>
+  <data name="Validation.FieldBlobName" xml:space="preserve"><value>BlobName</value></data>
+  <data name="Validation.FieldContentType" xml:space="preserve"><value>ContentType</value></data>
+  <data name="Identity.DefaultError" xml:space="preserve"><value>An unknown failure has occurred.</value></data>
+  <data name="Identity.ConcurrencyFailure" xml:space="preserve"><value>Optimistic concurrency failure, object has been modified.</value></data>
+  <data name="Identity.PasswordMismatch" xml:space="preserve"><value>Incorrect password.</value></data>
+  <data name="Identity.InvalidToken" xml:space="preserve"><value>Invalid token.</value></data>
+  <data name="Identity.RecoveryCodeRedemptionFailed" xml:space="preserve"><value>Recovery code redemption failed.</value></data>
+  <data name="Identity.LoginAlreadyAssociated" xml:space="preserve"><value>A user with this login already exists.</value></data>
+  <data name="Identity.InvalidUserName" xml:space="preserve"><value>Username '{0}' is invalid, can only contain letters or digits.</value></data>
+  <data name="Identity.InvalidEmail" xml:space="preserve"><value>Email '{0}' is invalid.</value></data>
+  <data name="Identity.DuplicateUserName" xml:space="preserve"><value>Username '{0}' is already taken.</value></data>
+  <data name="Identity.DuplicateEmail" xml:space="preserve"><value>Email '{0}' is already taken.</value></data>
+  <data name="Identity.InvalidRoleName" xml:space="preserve"><value>Role name '{0}' is invalid.</value></data>
+  <data name="Identity.DuplicateRoleName" xml:space="preserve"><value>Role name '{0}' is already taken.</value></data>
+  <data name="Identity.UserAlreadyHasPassword" xml:space="preserve"><value>User already has a password set.</value></data>
+  <data name="Identity.UserLockoutNotEnabled" xml:space="preserve"><value>Lockout is not enabled for this user.</value></data>
+  <data name="Identity.UserAlreadyInRole" xml:space="preserve"><value>User already in role '{0}'.</value></data>
+  <data name="Identity.UserNotInRole" xml:space="preserve"><value>User is not in role '{0}'.</value></data>
+  <data name="Identity.PasswordTooShort" xml:space="preserve"><value>Passwords must be at least {0} characters.</value></data>
+  <data name="Identity.PasswordRequiresUniqueChars" xml:space="preserve"><value>Passwords must use at least {0} different characters.</value></data>
+  <data name="Identity.PasswordRequiresNonAlphanumeric" xml:space="preserve"><value>Passwords must have at least one non alphanumeric character.</value></data>
+  <data name="Identity.PasswordRequiresDigit" xml:space="preserve"><value>Passwords must have at least one digit ('0'-'9').</value></data>
+  <data name="Identity.PasswordRequiresLower" xml:space="preserve"><value>Passwords must have at least one lowercase ('a'-'z').</value></data>
+  <data name="Identity.PasswordRequiresUpper" xml:space="preserve"><value>Passwords must have at least one uppercase ('A'-'Z').</value></data>
+  <data name="ImageFeedback.ImageRequired" xml:space="preserve"><value>A published or unavailable listing must retain at least one stored image.</value></data>
+  <data name="AvailabilityFeedback.WindowRequired" xml:space="preserve"><value>A published or unavailable listing must retain at least one availability window.</value></data>
+  <data name="Validation.MissingBindRequired" xml:space="preserve"><value>A value for the '{0}' parameter or property was not provided.</value></data>
+  <data name="Validation.MissingKeyOrValue" xml:space="preserve"><value>A value is required.</value></data>
+  <data name="Validation.MissingBody" xml:space="preserve"><value>A non-empty request body is required.</value></data>
+  <data name="Validation.NonPropertyAttemptInvalid" xml:space="preserve"><value>The value '{0}' is not valid.</value></data>
+  <data name="Validation.UnknownValueInvalid" xml:space="preserve"><value>The supplied value is invalid for {0}.</value></data>
+  <data name="Validation.NonPropertyUnknownInvalid" xml:space="preserve"><value>The supplied value is invalid.</value></data>
+  <data name="Validation.NonPropertyNumber" xml:space="preserve"><value>The field must be a number.</value></data>
+  <data name="Validation.Summary" xml:space="preserve"><value>One or more validation errors occurred.</value></data>
+</root>

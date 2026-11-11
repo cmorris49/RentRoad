@@ -1,11 +1,11 @@
 @model ListingAvailabilityFormViewModel
 <details class="owner-archive availability-remove">
-    <summary class="btn btn-outline-danger">Remove @(Model.IsBlock ? "block" : "window")<span class="visually-hidden"> @Model.RecordId</span></summary>
+    <summary class="btn btn-outline-danger">@Text[Model.IsBlock ? "Availability.RemoveBlock" : "Availability.RemoveWindow"]<span class="visually-hidden"> @Model.RecordId</span></summary>
     <div class="owner-archive-confirmation">
-        <p>@(Model.IsBlock ? "Remove this block? These dates will no longer be blocked by this entry; other availability and reservation rules still apply." : "Remove this availability window? Approved and active rentals must remain covered, and published or unavailable listings must retain valid availability.")</p>
+        <p>@(Model.IsBlock ? Text["Availability.RemoveBlockHelp"].Value : Text["Availability.RemoveWindowHelp"].Value)</p>
         <form asp-action="@(Model.IsBlock ? "RemoveBlock" : "RemoveWindow")" asp-route-listingId="@Model.ListingId" asp-route-windowId="@(Model.IsBlock ? null : Model.RecordId)" asp-route-blockId="@(Model.IsBlock ? Model.RecordId : null)" method="post">
-            <button type="submit" class="btn btn-outline-danger">Confirm removal<span class="visually-hidden">: @(Model.IsBlock ? "block" : "window") @Model.RecordId</span></button>
+            <button type="submit" class="btn btn-outline-danger">@Text["Common.ConfirmRemoval"]<span class="visually-hidden">@Text[Model.IsBlock ? "Availability.BlockRecordReference" : "Availability.WindowRecordReference", Model.RecordId!]</span></button>
         </form>
-        <p class="form-text">Close “Remove @(Model.IsBlock ? "block" : "window")” to cancel.</p>
+        <p class="form-text">@Text[Model.IsBlock ? "Availability.CancelRemoveBlock" : "Availability.CancelRemoveWindow"]</p>
     </div>
 </details>

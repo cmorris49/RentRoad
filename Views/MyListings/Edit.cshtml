@@ -1,6 +1,7 @@
 @model ListingEditViewModel
 @{
-    ViewData["Title"] = "Edit listing";
+    ViewData["ClientResources"] = "editor";
+    ViewData["Title"] = Text["MyListings.EditListing"].Value;
     ViewData["EditorListingId"] = Model.ListingId;
     ViewData["EditorStatus"] = Model.Publication.Status;
 }

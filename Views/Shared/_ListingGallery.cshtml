@@ -1,20 +1,20 @@
 @using RentRoad.ViewModels.Listings
 @model ListingGalleryViewModel
-<div class="rr-gallery @(Model.Compact ? "rr-gallery-compact" : null)" data-listing-gallery data-gallery-compact="@Model.Compact.ToString().ToLowerInvariant()" aria-label="@(Model.Title + " photos")">
+<div class="rr-gallery @(Model.Compact ? "rr-gallery-compact" : null)" data-listing-gallery data-gallery-compact="@Model.Compact.ToString().ToLowerInvariant()" aria-label="@Text["Gallery.PhotosLabel", Model.Title]">
     <div class="rr-gallery-stage" data-gallery-stage>
         @if (Model.Photos.Count == 0)
         {
-            <div class="rr-gallery-empty">No photos available</div>
+            <div class="rr-gallery-empty">@Text["Gallery.Empty"]</div>
         }
         @for (var index = 0; index < Model.Photos.Count; index++)
         {
             var photo = Model.Photos[index];
             <figure class="rr-gallery-slide" data-gallery-slide data-gallery-primary="@photo.IsPrimary.ToString().ToLowerInvariant()" hidden="@(index != 0)">
-                <a href="@(Model.Compact ? Model.NavigationUrl : photo.Url)" class="rr-gallery-open" data-gallery-open aria-label="@(Model.Compact ? Model.Title : $"Open photo {index + 1} at full size")">
-                    <span class="listing-image-fallback" data-image-fallback aria-hidden="true">Photo unavailable</span>
-                    <img data-listing-image src="@photo.Url" alt="@(string.IsNullOrWhiteSpace(photo.AltText) ? $"{Model.Title}, photo {index + 1}" : photo.AltText)" width="1000" height="750" loading="lazy" decoding="async" />
+                <a href="@(Model.Compact ? Model.NavigationUrl : photo.Url)" class="rr-gallery-open" data-gallery-open aria-label="@(Model.Compact ? Model.Title : Text["Gallery.OpenPhoto", index + 1].Value)">
+                    <span class="listing-image-fallback" data-image-fallback aria-hidden="true">@Text["Gallery.Unavailable"]</span>
+                    <img data-listing-image src="@photo.Url" alt="@(string.IsNullOrWhiteSpace(photo.AltText) ? Text["Gallery.PhotoAlt", Model.Title, index + 1].Value : photo.AltText)" width="1000" height="750" loading="lazy" decoding="async" />
                 </a>
-                @if (photo.IsPrimary && !Model.Compact) { <span class="rr-gallery-primary badge-soft">Primary photo</span> }
+                @if (photo.IsPrimary && !Model.Compact) { <span class="rr-gallery-primary badge-soft">@Text["Gallery.Primary"]</span> }
             </figure>
         }
     </div>

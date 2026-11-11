@@ -53,23 +53,25 @@ public class RegisterModel : PageModel
     /// </summary>
     public class InputModel
     {
-        [Required]
-        [StringLength(100)]
-        [Display(Name = "Display name")]
+        [Required(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.RequiredField))]
+        [StringLength(100, ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.MaximumLength))]
+        [Display(Name = nameof(SharedResource.RegisterDisplayName), ResourceType = typeof(SharedResource))]
         public string DisplayName { get; set; } = string.Empty;
 
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.RequiredField))]
+        [EmailAddress(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.EmailAddressInvalid))]
+        [Display(Name = nameof(SharedResource.RegisterEmail), ResourceType = typeof(SharedResource))]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(100, MinimumLength = 6)]
+        [Required(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.RequiredField))]
+        [StringLength(100, MinimumLength = 6, ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.PasswordLength))]
         [DataType(DataType.Password)]
+        [Display(Name = nameof(SharedResource.RegisterPassword), ResourceType = typeof(SharedResource))]
         public string Password { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare(nameof(Password), ErrorMessage = "The password and confirmation password do not match.")]
+        [Display(Name = nameof(SharedResource.RegisterConfirmPassword), ResourceType = typeof(SharedResource))]
+        [Compare(nameof(Password), ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.PasswordsDiffer))]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
 

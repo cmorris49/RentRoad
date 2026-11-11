@@ -51,7 +51,7 @@ public sealed class ListingEditorController(ListingEditorService editor, IListin
         if (!result.IsSuccess) return Failure(result.Status, result.Errors);
         if (Request.Headers.Accept.ToString().Contains("application/json", StringComparison.OrdinalIgnoreCase))
             return Json(new { state = ListingEditorStateViewModel.FromState(result.Value!) });
-        TempData["ListingSuccess"] = "Your listing is published and visible in Browse Listings.";
+        TempData["ListingSuccess"] = SharedResource.Get("EditorFeedback.YourListingIsPublishedAndVisibleInBrowseListings");
         return RedirectToAction("Edit", "MyListings", new { id = result.Value!.Listing!.ListingId });
     }
 
@@ -69,7 +69,7 @@ public sealed class ListingEditorController(ListingEditorService editor, IListin
 
     /// <summary>Returns binder errors without replacing the client's current form values.</summary>
     private IActionResult BindingFailure() => Failure(ListingServiceStatus.ValidationFailed, ModelState.SelectMany(pair => pair.Value!.Errors
-        .Select(error => new ListingValidationError(pair.Key, string.IsNullOrEmpty(error.ErrorMessage) ? "Enter a valid value." : error.ErrorMessage))).ToArray());
+        .Select(error => new ListingValidationError(pair.Key, string.IsNullOrEmpty(error.ErrorMessage) ? SharedResource.Get("EditorFeedback.EnterAValidValue") : error.ErrorMessage))).ToArray());
 
     /// <summary>Maps expected failures to safe structured feedback without returning entities or storage configuration.</summary>
     private ObjectResult Failure(ListingServiceStatus status, IReadOnlyList<ListingValidationError> errors) => StatusCode(status switch

@@ -30,7 +30,7 @@ public sealed class ListingImageContentController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return ValidationProblem(ModelState);
+            return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
         var result = await images.DownloadAsync(listingId, imageId, User, cancellationToken);
         if (!result.IsSuccess)
@@ -42,7 +42,7 @@ public sealed class ListingImageContentController : Controller
                 ListingServiceStatus.Forbidden => StatusCode(StatusCodes.Status403Forbidden),
                 ListingServiceStatus.ValidationFailed => BadRequest(),
                 ListingServiceStatus.Conflict => StatusCode(StatusCodes.Status409Conflict),
-                _ => Problem(statusCode: StatusCodes.Status503ServiceUnavailable, title: "The image is temporarily unavailable.")
+                _ => Problem(statusCode: StatusCodes.Status503ServiceUnavailable, title: SharedResource.Get("ImageFeedback.TheImageIsTemporarilyUnavailable"))
             };
         }
         var downloaded = result.Value!;

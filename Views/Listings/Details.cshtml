@@ -3,68 +3,68 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @model ListingDetailsViewModel
 @{
-    var title = string.IsNullOrWhiteSpace(Model.Title) ? "Rental listing" : Model.Title;
+    var title = string.IsNullOrWhiteSpace(Model.Title) ? Text["Listing.Untitled"].Value : Model.Title;
     var photos = Model.GalleryImages;
     ViewData["Title"] = title;
 }
 
 <div class="details-page">
-    <nav class="details-breadcrumb" aria-label="Breadcrumb">
-        <a asp-controller="Listings" asp-action="Index"><span aria-hidden="true">←</span> Browse Listings</a>
+    <nav class="details-breadcrumb" aria-label="@Text["Common.Breadcrumb"]">
+        <a asp-controller="Listings" asp-action="Index"><span aria-hidden="true">←</span> @Text["Navigation.BrowseListings"]</a>
         <span aria-hidden="true">/</span>
         <span aria-current="page">@title</span>
     </nav>
 
     <div class="details-layout">
-        <section class="listing-gallery" aria-label="Listing photos">
+        <section class="listing-gallery" aria-label="@Text["ListingImages.Photos"]">
             <partial name="_ListingGallery" model="@(new ListingGalleryViewModel(title, photos.Select(photo => new ListingGalleryPhotoViewModel(Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = photo.ListingImageId })!, photo.AltText, photo.IsPrimary)).ToArray()))" />
         </section>
 
         <section class="listing-overview" aria-labelledby="listing-title">
             <p class="eyebrow">@ListingDisplayText.Category(Model.Category)</p>
             <h1 id="listing-title">@title</h1>
-            <p class="details-location">@(string.IsNullOrWhiteSpace(Model.PickupArea) ? "Pickup area not specified" : Model.PickupArea)</p>
+            <p class="details-location">@(string.IsNullOrWhiteSpace(Model.PickupArea) ? Text["Listing.NoPickupArea"].Value : Model.PickupArea)</p>
             <dl class="listing-facts">
-                <div><dt>Condition</dt><dd>@ListingDisplayText.Condition(Model.Condition)</dd></div>
-                <div><dt>Shared by</dt><dd>@(string.IsNullOrWhiteSpace(Model.OwnerDisplayName) ? "Listing owner" : Model.OwnerDisplayName)</dd></div>
+                <div><dt>@Text["ListingDetails.Condition"]</dt><dd>@ListingDisplayText.Condition(Model.Condition)</dd></div>
+                <div><dt>@Text["ListingDetails.Owner"]</dt><dd>@(string.IsNullOrWhiteSpace(Model.OwnerDisplayName) ? Text["ListingDetails.OwnerFallback"].Value : Model.OwnerDisplayName)</dd></div>
             </dl>
 
             <section class="card rental-summary" aria-labelledby="request-heading">
-                <p class="rental-price"><span>@Model.DailyPrice.FormattedAmount</span> <span class="rental-price-unit">/ day</span></p>
-                <p class="rental-currency">Daily rental price in Canadian dollars.</p>
-                <div class="request-heading"><h2 id="request-heading" class="h5">Request to Rent</h2><span class="badge-soft">Coming soon</span></div>
+                <p class="rental-price"><span>@Model.DailyPrice.FormattedAmount</span> <span class="rental-price-unit">@Text["Listing.PerDay"]</span></p>
+                <p class="rental-currency">@Text["ListingDetails.CadPriceHelp"]</p>
+                <div class="request-heading"><h2 id="request-heading" class="h5">@Text["ListingDetails.RequestToRent"]</h2><span class="badge-soft">@Text["Common.ComingSoon"]</span></div>
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    <button class="btn btn-primary" type="button" disabled aria-describedby="request-note">Request to Rent</button>
-                    <p id="request-note" class="request-note">Rental requests will be available in a later update. You can browse this listing’s photos and schedule for now.</p>
+                    <button class="btn btn-primary" type="button" disabled aria-describedby="request-note">@Text["ListingDetails.RequestToRent"]</button>
+                    <p id="request-note" class="request-note">@Text["ListingDetails.RequestComingSoon"]</p>
                 }
                 else
                 {
-                    <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "Listings", new { id = Model.ListingId })" aria-describedby="request-note">Log in to request a rental</a>
-                    <p id="request-note" class="request-note">Rental requests are coming soon. You can log in now and return to this listing afterward.</p>
+                    <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "Listings", new { id = Model.ListingId })" aria-describedby="request-note">@Text["ListingDetails.LogInToRequest"]</a>
+                    <p id="request-note" class="request-note">@Text["ListingDetails.AnonymousRequestHelp"]</p>
                 }
             </section>
         </section>
     </div>
 
     <section class="details-section description-section" aria-labelledby="description-heading">
-        <p class="eyebrow">A closer look</p>
-        <h2 id="description-heading">About this item</h2>
-        <p class="listing-description">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description has been provided." : Model.Description)</p>
+        <p class="eyebrow">@Text["ListingDetails.Eyebrow"]</p>
+        <h2 id="description-heading">@Text["ListingDetails.Description"]</h2>
+        <p class="listing-description">@(string.IsNullOrWhiteSpace(Model.Description) ? Text["ListingDetails.NoDescription"].Value : Model.Description)</p>
     </section>
 
     <section class="details-section" aria-labelledby="availability-heading">
         <div class="availability-heading">
-            <div><p class="eyebrow">Plan ahead</p><h2 id="availability-heading">Availability</h2></div>
-            <p>Listed windows apply except for blocked dates below. Final availability will be confirmed when rental requests are available.</p>
+            <div><p class="eyebrow">@Text["Availability.PlanAhead"]</p><h2 id="availability-heading">@Text["Availability.Heading"]</h2></div>
+            <p>@Text["Availability.PublicHelp"]</p>
         </div>
-        <p class="date-convention">Both the first and last day shown are included.</p>
+        <p class="date-convention">@Text["Availability.DisplayInclusiveHelp"]</p>
         <div class="availability-columns">
             <section class="card availability-panel" aria-labelledby="windows-heading">
-                <h3 id="windows-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>Listed availability windows</h3>
+                <h3 id="windows-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>@Text["Availability.ListedWindows"]</h3>
                 @if (Model.AvailabilityWindows.Count == 0)
                 {
-                    <p class="availability-empty">No availability windows are listed.</p>
+                    <p class="availability-empty">@Text["Availability.NoListedWindows"]</p>
                 }
                 else
                 {
@@ -77,10 +77,10 @@
                 }
             </section>
             <section class="card availability-panel blocked-periods" aria-labelledby="blocks-heading">
-                <h3 id="blocks-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>Blocked / unavailable dates</h3>
+                <h3 id="blocks-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>@Text["Availability.BlockedUnavailableDates"]</h3>
                 @if (Model.AvailabilityBlocks.Count == 0)
                 {
-                    <p class="availability-empty">No blocked dates are listed.</p>
+                    <p class="availability-empty">@Text["Availability.NoListedBlocks"]</p>
                 }
                 else
                 {
@@ -94,7 +94,7 @@
             </section>
         </div>
     </section>
-    <partial name="_ListingScroller" model='@(new ListingScrollerViewModel("similar-listings", "Similar Listings", Model.SimilarListings))' />
+    <partial name="_ListingScroller" model='@(new ListingScrollerViewModel("similar-listings", Text["Listing.SimilarListings"].Value, Model.SimilarListings))' />
 </div>
 
 @section Styles {

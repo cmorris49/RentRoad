@@ -217,16 +217,16 @@ public sealed class AzureBlobImageStorageService : IBlobImageStorageService
             };
             throw new BlobImageStorageException(failure, failure switch
             {
-                BlobImageStorageFailure.NotFound => "The image blob or configured container could not be found.",
-                BlobImageStorageFailure.AccessDenied => "Image storage access was denied. Check the server's storage configuration and permissions.",
-                BlobImageStorageFailure.Conflict => "The image storage operation conflicts with the blob's current state.",
-                _ => "Image storage is temporarily unavailable. Try again later."
+                BlobImageStorageFailure.NotFound => SharedResource.Get("StorageFeedback.TheImageBlobOrConfiguredContainerCouldNotBe"),
+                BlobImageStorageFailure.AccessDenied => SharedResource.Get("StorageFeedback.ImageStorageAccessWasDeniedCheckTheServerS"),
+                BlobImageStorageFailure.Conflict => SharedResource.Get("StorageFeedback.TheImageStorageOperationConflictsWithTheBlobS"),
+                _ => SharedResource.Get("StorageFeedback.ImageStorageIsTemporarilyUnavailableTryAgainLater")
             });
         }
         catch (HttpRequestException)
         {
             throw new BlobImageStorageException(BlobImageStorageFailure.Unavailable,
-                "Image storage could not be reached. Try again later.");
+                SharedResource.Get("StorageFeedback.ImageStorageCouldNotBeReachedTryAgainLater"));
         }
     }
 }

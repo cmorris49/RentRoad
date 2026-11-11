@@ -15,7 +15,7 @@ public sealed class ListingEditorService(IListingService listings, IListingImage
         CancellationToken cancellationToken = default)
     {
         var owner = await users.GetUserAsync(user);
-        if (owner is null) return Failure<ListingEditorState>(ListingServiceStatus.Unauthenticated, "Sign in to manage a listing.");
+        if (owner is null) return Failure<ListingEditorState>(ListingServiceStatus.Unauthenticated, SharedResource.Get("EditorFeedback.SignInToManageAListing"));
         if (token is not null)
         {
             var resumed = sessions.Find(token, owner.Id);
@@ -89,13 +89,13 @@ public sealed class ListingEditorService(IListingService listings, IListingImage
             if (!string.IsNullOrEmpty(nonce) && session.ConfirmedNonce == nonce)
                 return await ReadAsync(token, session, user, null, cancellationToken);
             if (session.ReviewNonce is null || session.ReviewNonce != nonce || session.ReviewExpires < clock.GetUtcNow())
-                return Failure<ListingEditorState>(ListingServiceStatus.Conflict, "Review the listing again before confirming publication.");
+                return Failure<ListingEditorState>(ListingServiceStatus.Conflict, SharedResource.Get("EditorFeedback.ReviewTheListingAgainBeforeConfirmingPublication"));
             var state = await ReadAsync(token, session, user, null, cancellationToken);
             if (!state.IsSuccess) return state;
             if (Fingerprint(state.Value!) != session.ReviewFingerprint)
             {
                 session.ReviewNonce = null;
-                return Failure<ListingEditorState>(ListingServiceStatus.Conflict, "The listing, photos or dates changed. Review them again before publishing.");
+                return Failure<ListingEditorState>(ListingServiceStatus.Conflict, SharedResource.Get("EditorFeedback.TheListingPhotosOrDatesChangedReviewThemAgain"));
             }
             session.ReviewNonce = null;
             var updated = await listings.UpdateAsync(session.ListingId!.Value, user, session.ReviewInput!, cancellationToken);
@@ -120,7 +120,7 @@ public sealed class ListingEditorService(IListingService listings, IListingImage
         bool updateExisting, CancellationToken cancellationToken)
     {
         if (session.CreationUncertain)
-            return Failure<bool>(ListingServiceStatus.ReconciliationRequired, "The draft save outcome is uncertain. Check My Listings before starting another listing; this editor will not create a duplicate.");
+            return Failure<bool>(ListingServiceStatus.ReconciliationRequired, SharedResource.Get("EditorFeedback.TheDraftSaveOutcomeIsUncertainCheckMyListings"));
         if (session.ListingId.HasValue && !updateExisting) return ListingServiceResult<bool>.Success(true);
         var creating = !session.ListingId.HasValue;
         try
@@ -137,7 +137,7 @@ public sealed class ListingEditorService(IListingService listings, IListingImage
             if (exception is OperationCanceledException) throw;
             logger.LogError(exception, "An intentional listing editor save could not be confirmed.");
             return Failure<bool>(creating ? ListingServiceStatus.ReconciliationRequired : ListingServiceStatus.PersistenceFailed,
-                "The save could not be confirmed. Check the saved listing before retrying.");
+                SharedResource.Get("EditorFeedback.TheSaveCouldNotBeConfirmedCheckTheSaved"));
         }
     }
 
@@ -145,7 +145,7 @@ public sealed class ListingEditorService(IListingService listings, IListingImage
     private async Task<ListingServiceResult<ListingEditorState>> ReadAsync(string token, ListingEditorSession session, ClaimsPrincipal user,
         string? displayName, CancellationToken cancellationToken)
     {
-        displayName ??= (await users.GetUserAsync(user))?.DisplayName ?? "Listing owner";
+        displayName ??= (await users.GetUserAsync(user))?.DisplayName ?? SharedResource.Get("ListingDetails.OwnerFallback");
         if (!session.ListingId.HasValue)
             return ListingServiceResult<ListingEditorState>.Success(new(token, null, Array.Empty<ListingImage>(), displayName));
         var listing = await listings.GetOwnerAvailabilityAsync(session.ListingId.Value, user, cancellationToken);
@@ -168,7 +168,7 @@ public sealed class ListingEditorService(IListingService listings, IListingImage
 
     /// <summary>Returns a safe error without silently allocating another draft for an expired or foreign editor.</summary>
     private static ListingServiceResult<T> Expired<T>() => Failure<T>(ListingServiceStatus.Conflict,
-        "This editor session expired or is unavailable. Keep your entered values and check My Listings before opening a new editor.");
+        SharedResource.Get("EditorFeedback.ThisEditorSessionExpiredOrIsUnavailableKeepYour"));
 
     /// <summary>Creates an actionable orchestration error using the existing service result contract.</summary>
     private static ListingServiceResult<T> Failure<T>(ListingServiceStatus status, string message) =>

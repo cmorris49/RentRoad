@@ -8,24 +8,24 @@
             <div class="listing-scroller-actions">
                 @if (Model.ShowBrowseLink)
                 {
-                    <a asp-controller="Listings" asp-action="Index">Browse all listings <span aria-hidden="true">→</span></a>
+                    <a asp-controller="Listings" asp-action="Index">@Text["Listing.BrowseAll"] <span aria-hidden="true">→</span></a>
                 }
                 @if (Model.Listings.Count > 0)
                 {
                     <div class="listing-scroller-controls" data-scroller-controls hidden>
-                        <button class="btn btn-outline-primary" type="button" data-scroller-previous aria-label="Previous listings in @Model.Heading" aria-controls="@(Model.Id)-track" disabled><span aria-hidden="true">←</span></button>
-                        <button class="btn btn-outline-primary" type="button" data-scroller-next aria-label="Next listings in @Model.Heading" aria-controls="@(Model.Id)-track" disabled><span aria-hidden="true">→</span></button>
+                        <button class="btn btn-outline-primary" type="button" data-scroller-previous aria-label="@Text["Listing.PreviousInSection", Model.Heading]" aria-controls="@(Model.Id)-track" disabled><span aria-hidden="true">←</span></button>
+                        <button class="btn btn-outline-primary" type="button" data-scroller-next aria-label="@Text["Listing.NextInSection", Model.Heading]" aria-controls="@(Model.Id)-track" disabled><span aria-hidden="true">→</span></button>
                     </div>
                 }
             </div>
         </div>
         @if (Model.Listings.Count == 0)
         {
-            <p class="text-muted">No published listings yet. Check back soon for rentals near you.</p>
+            <p class="text-muted">@Text["Listing.NonePublished"]</p>
         }
         else
         {
-            <p class="visually-hidden" id="@(Model.Id)-help">Scroll to explore. With the listing row focused, use Left and Right to scroll, or Home and End to reach either end. Photo controls change only the photos.</p>
+            <p class="visually-hidden" id="@(Model.Id)-help">@Text["Listing.ScrollInstructions"]</p>
             <ul id="@(Model.Id)-track" class="listing-scroller-track" role="list" data-scroller-track tabindex="0" aria-labelledby="@(Model.Id)-heading" aria-describedby="@(Model.Id)-help">
                 @foreach (var listing in Model.Listings)
                 {

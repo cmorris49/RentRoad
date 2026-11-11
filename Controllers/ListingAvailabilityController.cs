@@ -114,13 +114,13 @@ public sealed class ListingAvailabilityController : Controller
                 if (IsEditorRequest()) return Json(new { status = "Success" });
                 TempData["ListingAvailabilitySuccess"] = operation switch
                 {
-                    ListingAvailabilityOperation.CreateWindow => "Your availability window was added.",
-                    ListingAvailabilityOperation.UpdateWindow => "Your availability window was updated.",
-                    ListingAvailabilityOperation.RemoveWindow => "Your availability window was removed.",
-                    ListingAvailabilityOperation.ReplaceWindows => "Your availability windows were replaced.",
-                    ListingAvailabilityOperation.CreateBlock => "Your unavailable dates were added.",
-                    ListingAvailabilityOperation.UpdateBlock => "Your unavailable dates were updated.",
-                    _ => "Your unavailable dates were removed."
+                    ListingAvailabilityOperation.CreateWindow => SharedResource.Get("AvailabilityFeedback.YourAvailabilityWindowWasAdded"),
+                    ListingAvailabilityOperation.UpdateWindow => SharedResource.Get("AvailabilityFeedback.YourAvailabilityWindowWasUpdated"),
+                    ListingAvailabilityOperation.RemoveWindow => SharedResource.Get("AvailabilityFeedback.YourAvailabilityWindowWasRemoved"),
+                    ListingAvailabilityOperation.ReplaceWindows => SharedResource.Get("AvailabilityFeedback.YourAvailabilityWindowsWereReplaced"),
+                    ListingAvailabilityOperation.CreateBlock => SharedResource.Get("AvailabilityFeedback.YourUnavailableDatesWereAdded"),
+                    ListingAvailabilityOperation.UpdateBlock => SharedResource.Get("AvailabilityFeedback.YourUnavailableDatesWereUpdated"),
+                    _ => SharedResource.Get("AvailabilityFeedback.YourUnavailableDatesWereRemoved")
                 };
                 return RedirectToAction("Index", new { listingId });
             }
@@ -173,9 +173,11 @@ public sealed class ListingAvailabilityController : Controller
         return field == "EndDate" ? "LastDay" : field is "StartDate" or "Reason" ? field : string.Empty;
     }
 
-    /// <summary>Adapts legacy boundary wording without changing the service validation rule or its result.</summary>
-    private static string AvailabilityMessage(string message) => message
-        .Replace("with the start before the end", "with Last Day on or after First Day", StringComparison.Ordinal);
+    /// <summary>Selects complete inclusive-input messages without rewriting translated sentence fragments.</summary>
+    private static string AvailabilityMessage(string message) => message == SharedResource.Get("ListingValidation.ChooseAvailabilityDatesWithTheStartBeforeTheEnd")
+        ? SharedResource.Get("Availability.InvalidWindowDates")
+        : message == SharedResource.Get("AvailabilityFeedback.ChooseUnavailableDatesWithTheStartBeforeTheEnd")
+            ? SharedResource.Get("Availability.InvalidBlockDates") : message;
 
     /// <summary>
     /// Maps auth/resource failures and unexpected outcomes before any private block data is returned.
@@ -186,14 +188,14 @@ public sealed class ListingAvailabilityController : Controller
         ListingServiceStatus.Forbidden => Forbid(),
         ListingServiceStatus.NotFound => NotFound(),
         ListingServiceStatus.ValidationFailed or ListingServiceStatus.Conflict or ListingServiceStatus.InvalidState => null,
-        _ => Problem(statusCode: FailureStatusCode(status), title: "Availability could not be updated.")
+        _ => Problem(statusCode: FailureStatusCode(status), title: SharedResource.Get("AvailabilityFeedback.AvailabilityCouldNotBeUpdated"))
     };
 
     /// <summary>
     /// Handles read errors without constructing a form from unauthorized or missing data.
     /// </summary>
     private IActionResult ReadFailure(ListingServiceStatus status) => TerminalFailure(status)
-        ?? Problem(statusCode: FailureStatusCode(status), title: "Availability could not be loaded.");
+        ?? Problem(statusCode: FailureStatusCode(status), title: SharedResource.Get("AvailabilityFeedback.AvailabilityCouldNotBeLoaded"));
 
     /// <summary>
     /// Distinguishes form validation, conflicts, and unavailable server dependencies.

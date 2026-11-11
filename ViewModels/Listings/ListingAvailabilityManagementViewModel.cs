@@ -10,13 +10,13 @@ namespace RentRoad.ViewModels.Listings;
 /// </summary>
 public class ListingAvailabilityWindowInputViewModel : IValidatableObject
 {
-    [Required(ErrorMessage = "Choose a First Day.")]
-    [Display(Name = "First Day")]
+    [Required(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.FirstDayRequired))]
+    [Display(Name = nameof(SharedResource.FirstDayLabel), ResourceType = typeof(SharedResource))]
     [DataType(DataType.Date)]
     public DateOnly? StartDate { get; set; }
 
-    [Required(ErrorMessage = "Choose a Last Day.")]
-    [Display(Name = "Last Day")]
+    [Required(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.LastDayRequired))]
+    [Display(Name = nameof(SharedResource.LastDayLabel), ResourceType = typeof(SharedResource))]
     [DataType(DataType.Date)]
     public DateOnly? LastDay { get; set; }
 
@@ -30,15 +30,15 @@ public class ListingAvailabilityWindowInputViewModel : IValidatableObject
     {
         if (StartDate == DateOnly.MinValue)
         {
-            yield return new ValidationResult("First Day must be January 2, 0001 or later.", new[] { nameof(StartDate) });
+            yield return new ValidationResult(SharedResource.Get("Availability.FirstDayMinimum"), new[] { nameof(StartDate) });
         }
         if (StartDate.HasValue && LastDay.HasValue && LastDay.Value < StartDate.Value)
         {
-            yield return new ValidationResult("Last Day must be on or after First Day.", new[] { nameof(LastDay) });
+            yield return new ValidationResult(SharedResource.Get("Availability.LastDayBeforeFirst"), new[] { nameof(LastDay) });
         }
         if (LastDay == DateOnly.MaxValue)
         {
-            yield return new ValidationResult("Last Day must be December 30, 9999 or earlier.", new[] { nameof(LastDay) });
+            yield return new ValidationResult(SharedResource.Get("Availability.LastDayMaximum"), new[] { nameof(LastDay) });
         }
     }
 

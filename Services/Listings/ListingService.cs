@@ -1,3 +1,4 @@
+using RentRoad.Localization;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace RentRoad.Services.Listings;
 /// </summary>
 public sealed partial class ListingService : IListingService
 {
-    private const string SIGN_IN_MESSAGE = "Sign in to manage your listings.";
+    private static string SignInMessage => SharedResource.Get("ListingValidation.SignInToManageYourListings");
     private readonly ApplicationDbContext context;
     private readonly TimeProvider timeProvider;
 
@@ -41,19 +42,19 @@ public sealed partial class ListingService : IListingService
         if (ownerId is null)
         {
             return ListingServiceResult<Listing>.Failure(ListingServiceStatus.Unauthenticated,
-                new ListingValidationError(nameof(Listing.OwnerId), SIGN_IN_MESSAGE));
+                new ListingValidationError(nameof(Listing.OwnerId), SignInMessage));
         }
 
         if (!await context.Users.AnyAsync(owner => owner.Id == ownerId, cancellationToken))
         {
             return ListingServiceResult<Listing>.Failure(ListingServiceStatus.NotFound,
-                new ListingValidationError(nameof(Listing.OwnerId), "Your account could not be found."));
+                new ListingValidationError(nameof(Listing.OwnerId), SharedResource.Get("ListingValidation.YourAccountCouldNotBeFound")));
         }
 
         if (details is null)
         {
             return ListingServiceResult<Listing>.Failure(ListingServiceStatus.ValidationFailed,
-                new ListingValidationError(string.Empty, "Listing details are required."));
+                new ListingValidationError(string.Empty, SharedResource.Get("ListingValidation.ListingDetailsAreRequired")));
         }
 
         var now = timeProvider.GetUtcNow().UtcDateTime;
@@ -128,7 +129,7 @@ public sealed partial class ListingService : IListingService
         if (details is null)
         {
             return ListingServiceResult<Listing>.Failure(ListingServiceStatus.ValidationFailed,
-                new ListingValidationError(string.Empty, "Listing details are required."));
+                new ListingValidationError(string.Empty, SharedResource.Get("ListingValidation.ListingDetailsAreRequired")));
         }
 
         var windows = details.AvailabilityWindows?.ToArray();
@@ -195,7 +196,7 @@ public sealed partial class ListingService : IListingService
         if (!owned.IsSuccess || owned.Value!.Status == ListingStatus.Archived)
         {
             return ListingServiceResult<bool>.Failure(owned.IsSuccess ? ListingServiceStatus.InvalidState : owned.Status,
-                new ListingValidationError(string.Empty, owned.IsSuccess ? "Archived listings are read-only." : "The listing is not available to this account."));
+                new ListingValidationError(string.Empty, owned.IsSuccess ? SharedResource.Get("ListingEditor.ArchivedHelp") : SharedResource.Get("ListingValidation.TheListingIsNotAvailableToThisAccount")));
         }
         var candidate = new Listing { ListingId = listingId, OwnerId = owned.Value.OwnerId, Status = owned.Value.Status };
         ApplyEditableDetails(details, candidate);
@@ -262,7 +263,7 @@ public sealed partial class ListingService : IListingService
         if (ownerId is null)
         {
             return ListingServiceResult<IReadOnlyList<Listing>>.Failure(ListingServiceStatus.Unauthenticated,
-                new ListingValidationError(nameof(Listing.OwnerId), SIGN_IN_MESSAGE));
+                new ListingValidationError(nameof(Listing.OwnerId), SignInMessage));
         }
 
         var listings = await context.Listings.AsNoTracking()
@@ -339,13 +340,13 @@ public sealed partial class ListingService : IListingService
         if (listingId <= 0)
         {
             return ListingServiceResult<ListingDetails>.Failure(ListingServiceStatus.ValidationFailed,
-                new ListingValidationError(nameof(Listing.ListingId), "Listing ID must be positive."));
+                new ListingValidationError(nameof(Listing.ListingId), SharedResource.Get("ListingValidation.ListingIDMustBePositive")));
         }
 
         var details = await BuildDetailsQuery(listingId).SingleOrDefaultAsync(cancellationToken);
         return details is null
             ? ListingServiceResult<ListingDetails>.Failure(ListingServiceStatus.NotFound,
-                new ListingValidationError(nameof(Listing.ListingId), "The listing could not be found."))
+                new ListingValidationError(nameof(Listing.ListingId), SharedResource.Get("ListingValidation.TheListingCouldNotBeFound")))
             : ListingServiceResult<ListingDetails>.Success(details);
     }
 
@@ -440,52 +441,52 @@ public sealed partial class ListingService : IListingService
         var errors = new List<ListingValidationError>();
         if (parameters.Category.HasValue && !Enum.IsDefined(parameters.Category.Value))
         {
-            errors.Add(new(nameof(parameters.Category), "Select a valid item category."));
+            errors.Add(new(nameof(parameters.Category), SharedResource.Get("Validation.InvalidCategory")));
         }
         if (parameters.Condition.HasValue && !Enum.IsDefined(parameters.Condition.Value))
         {
-            errors.Add(new(nameof(parameters.Condition), "Select a valid item condition."));
+            errors.Add(new(nameof(parameters.Condition), SharedResource.Get("Validation.InvalidCondition")));
         }
         if (!Enum.IsDefined(parameters.SortOrder))
         {
-            errors.Add(new(nameof(parameters.SortOrder), "Select a valid listing sort order."));
+            errors.Add(new(nameof(parameters.SortOrder), SharedResource.Get("Validation.InvalidSort")));
         }
         if (parameters.MinimumDailyPriceCents < 0)
         {
-            errors.Add(new(nameof(parameters.MinimumDailyPriceCents), "Minimum daily price cannot be negative."));
+            errors.Add(new(nameof(parameters.MinimumDailyPriceCents), SharedResource.Get("Validation.MinimumPrice")));
         }
         if (parameters.MaximumDailyPriceCents < 0)
         {
-            errors.Add(new(nameof(parameters.MaximumDailyPriceCents), "Maximum daily price cannot be negative."));
+            errors.Add(new(nameof(parameters.MaximumDailyPriceCents), SharedResource.Get("Validation.MaximumPrice")));
         }
         if (parameters.MinimumDailyPriceCents > parameters.MaximumDailyPriceCents)
         {
-            errors.Add(new(nameof(parameters.MaximumDailyPriceCents), "Maximum daily price must be at least the minimum."));
+            errors.Add(new(nameof(parameters.MaximumDailyPriceCents), SharedResource.Get("Validation.PriceRange")));
         }
         if (parameters.PageNumber < 1)
         {
-            errors.Add(new(nameof(parameters.PageNumber), "Page number must be at least 1."));
+            errors.Add(new(nameof(parameters.PageNumber), SharedResource.Get("Validation.PageNumber")));
         }
         if (parameters.PageSize < 1 || parameters.PageSize > ListingSearchParameters.MAX_PAGE_SIZE)
         {
-            errors.Add(new(nameof(parameters.PageSize), $"Page size must be between 1 and {ListingSearchParameters.MAX_PAGE_SIZE}."));
+            errors.Add(new(nameof(parameters.PageSize), SharedResource.Get("Validation.PageSize", ListingSearchParameters.MAX_PAGE_SIZE)));
         }
         if (parameters.PageNumber > 0 && parameters.PageSize > 0
             && ((long)parameters.PageNumber - 1) * parameters.PageSize > int.MaxValue)
         {
-            errors.Add(new(nameof(parameters.PageNumber), "The requested page exceeds the supported pagination range."));
+            errors.Add(new(nameof(parameters.PageNumber), SharedResource.Get("Validation.PageRange")));
         }
         if (parameters.SearchText?.Length > ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH)
         {
-            errors.Add(new(nameof(parameters.SearchText), $"Search text cannot exceed {ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH} characters."));
+            errors.Add(new(nameof(parameters.SearchText), SharedResource.Get("Validation.SearchLength", ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH)));
         }
         else if (GetSearchTerms(parameters.SearchText).Length > ListingSearchParameters.MAX_SEARCH_TERMS)
         {
-            errors.Add(new(nameof(parameters.SearchText), $"Search supports at most {ListingSearchParameters.MAX_SEARCH_TERMS} distinct terms."));
+            errors.Add(new(nameof(parameters.SearchText), SharedResource.Get("Validation.SearchTerms", ListingSearchParameters.MAX_SEARCH_TERMS)));
         }
         if (parameters.PickupArea?.Length > ListingSearchParameters.MAX_PICKUP_AREA_LENGTH)
         {
-            errors.Add(new(nameof(parameters.PickupArea), $"Pickup area cannot exceed {ListingSearchParameters.MAX_PICKUP_AREA_LENGTH} characters."));
+            errors.Add(new(nameof(parameters.PickupArea), SharedResource.Get("Validation.PickupLength", ListingSearchParameters.MAX_PICKUP_AREA_LENGTH)));
         }
         return errors;
     }
@@ -512,34 +513,34 @@ public sealed partial class ListingService : IListingService
         var errors = ValidateDraft(listing, null);
         if (string.IsNullOrWhiteSpace(listing.Title))
         {
-            errors.Add(new(nameof(Listing.Title), "Enter an item title before publishing."));
+            errors.Add(new(nameof(Listing.Title), SharedResource.Get("ListingValidation.EnterAnItemTitleBeforePublishing")));
         }
         if (string.IsNullOrWhiteSpace(listing.Description))
         {
-            errors.Add(new(nameof(Listing.Description), "Enter an item description before publishing."));
+            errors.Add(new(nameof(Listing.Description), SharedResource.Get("ListingValidation.EnterAnItemDescriptionBeforePublishing")));
         }
         if (!listing.Category.HasValue)
         {
-            errors.Add(new(nameof(Listing.Category), "Select an item category before publishing."));
+            errors.Add(new(nameof(Listing.Category), SharedResource.Get("ListingValidation.SelectAnItemCategoryBeforePublishing")));
         }
         if (!listing.Condition.HasValue)
         {
-            errors.Add(new(nameof(Listing.Condition), "Select the item's condition before publishing."));
+            errors.Add(new(nameof(Listing.Condition), SharedResource.Get("ListingValidation.SelectTheItemSConditionBeforePublishing")));
         }
         if (!listing.DailyPriceCents.HasValue || listing.DailyPriceCents == 0)
         {
-            errors.Add(new(nameof(Listing.DailyPriceCents), "Enter a daily price greater than CA$0 before publishing."));
+            errors.Add(new(nameof(Listing.DailyPriceCents), SharedResource.Get("ListingValidation.EnterADailyPriceGreaterThanCA0Before")));
         }
         if (string.IsNullOrWhiteSpace(listing.PickupArea))
         {
-            errors.Add(new(nameof(Listing.PickupArea), "Enter a pickup area before publishing."));
+            errors.Add(new(nameof(Listing.PickupArea), SharedResource.Get("ListingValidation.EnterAPickupAreaBeforePublishing")));
         }
 
         var images = await context.ListingImages.AsNoTracking()
             .Where(image => image.ListingId == listing.ListingId).ToListAsync(cancellationToken);
         if (!images.Any(HasStoredImageMetadata))
         {
-            errors.Add(new(nameof(Listing.Images), "Add at least one stored listing image before publishing."));
+            errors.Add(new(nameof(Listing.Images), SharedResource.Get("ListingValidation.AddAtLeastOneStoredListingImageBeforePublishing")));
         }
 
         var windows = proposedWindows ?? await context.AvailabilityWindows.AsNoTracking()
@@ -548,7 +549,7 @@ public sealed partial class ListingService : IListingService
             .ToListAsync(cancellationToken);
         if (windows.Count == 0)
         {
-            errors.Add(new(nameof(Listing.AvailabilityWindows), "Add at least one availability window before publishing."));
+            errors.Add(new(nameof(Listing.AvailabilityWindows), SharedResource.Get("ListingValidation.AddAtLeastOneAvailabilityWindowBeforePublishing")));
         }
         errors.AddRange(ValidateAvailabilityWindows(windows));
         return errors;
@@ -563,26 +564,26 @@ public sealed partial class ListingService : IListingService
         var results = new List<ValidationResult>();
         Validator.TryValidateObject(listing, new ValidationContext(listing), results, validateAllProperties: true);
         var errors = results.SelectMany(result => result.MemberNames.DefaultIfEmpty(string.Empty)
-            .Select(field => new ListingValidationError(field, result.ErrorMessage ?? "The value is invalid."))).ToList();
+            .Select(field => new ListingValidationError(field, ResourceValidation.Message(listing, field)))).ToList();
         if (listing.Category.HasValue && !Enum.IsDefined(listing.Category.Value))
         {
-            errors.Add(new(nameof(Listing.Category), "Select a valid item category."));
+            errors.Add(new(nameof(Listing.Category), SharedResource.Get("Validation.InvalidCategory")));
         }
         if (listing.Condition.HasValue && !Enum.IsDefined(listing.Condition.Value))
         {
-            errors.Add(new(nameof(Listing.Condition), "Select a valid item condition."));
+            errors.Add(new(nameof(Listing.Condition), SharedResource.Get("Validation.InvalidCondition")));
         }
         if (listing.DailyPriceCents < 0)
         {
-            errors.Add(new(nameof(Listing.DailyPriceCents), "Daily price cannot be negative."));
+            errors.Add(new(nameof(Listing.DailyPriceCents), SharedResource.Get("ListingValidation.DailyPriceCannotBeNegative")));
         }
         if (listing.Latitude.HasValue && (!double.IsFinite(listing.Latitude.Value) || listing.Latitude < -90 || listing.Latitude > 90))
         {
-            errors.Add(new(nameof(Listing.Latitude), "Latitude must be between -90 and 90."));
+            errors.Add(new(nameof(Listing.Latitude), SharedResource.Get("ListingValidation.LatitudeMustBeBetween90And90")));
         }
         if (listing.Longitude.HasValue && (!double.IsFinite(listing.Longitude.Value) || listing.Longitude < -180 || listing.Longitude > 180))
         {
-            errors.Add(new(nameof(Listing.Longitude), "Longitude must be between -180 and 180."));
+            errors.Add(new(nameof(Listing.Longitude), SharedResource.Get("ListingValidation.LongitudeMustBeBetween180And180")));
         }
         if (windows is not null)
         {
@@ -602,11 +603,11 @@ public sealed partial class ListingService : IListingService
             var window = windows[index];
             if (window is null || window.StartDate == default || window.EndDate == default || window.StartDate >= window.EndDate)
             {
-                yield return new($"{nameof(Listing.AvailabilityWindows)}[{index}]", "Choose availability dates with the start before the end.");
+                yield return new($"{nameof(Listing.AvailabilityWindows)}[{index}]", SharedResource.Get("ListingValidation.ChooseAvailabilityDatesWithTheStartBeforeTheEnd"));
             }
             else if (!seen.Add(window))
             {
-                yield return new($"{nameof(Listing.AvailabilityWindows)}[{index}]", "An availability window with these dates already exists.");
+                yield return new($"{nameof(Listing.AvailabilityWindows)}[{index}]", SharedResource.Get("ListingValidation.AnAvailabilityWindowWithTheseDatesAlreadyExists"));
             }
         }
     }
@@ -643,5 +644,5 @@ public sealed partial class ListingService : IListingService
     /// </summary>
     private static ListingServiceResult<Listing> ArchivedFailure() =>
         ListingServiceResult<Listing>.Failure(ListingServiceStatus.InvalidState,
-            new ListingValidationError(nameof(Listing.Status), "Archived listings cannot be edited or published."));
+            new ListingValidationError(nameof(Listing.Status), SharedResource.Get("ListingValidation.ArchivedListingsCannotBeEditedOrPublished")));
 }

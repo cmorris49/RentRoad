@@ -1,6 +1,7 @@
 /** Provides a bounded sequential selection queue; each selected entry can be submitted only once. */
 (function initializeListingUploadQueue() {
     "use strict";
+    const text = window.RentRoadText;
 
     /** Connects local selection and drop previews without uploading or asserting server validation. */
     function connect(form, options) {
@@ -24,7 +25,7 @@
                 if (item.url) {
                     const image = document.createElement("img");
                     image.src = item.url;
-                    image.alt = "Local preview of " + item.file.name;
+                    image.alt = text("UploadQueue.LocalPreview", item.file.name);
                     row.append(image);
                 }
                 const body = document.createElement("div");
@@ -32,7 +33,7 @@
                 name.textContent = item.file.name;
                 const details = document.createElement("p");
                 details.className = "form-text";
-                details.textContent = (item.file.size / 1024).toLocaleString("en-CA", { maximumFractionDigits: 1 }) + " KiB · " + item.status;
+                details.textContent = text("UploadQueue.FileStatus", (item.file.size / 1024).toLocaleString(document.documentElement?.lang, { maximumFractionDigits: 1 }), text("UploadQueue." + (item.status === "Check saved photos" ? "CheckSavedPhotos" : item.status)));
                 const message = document.createElement("p");
                 message.className = item.error ? "field-validation-error" : "form-text";
                 message.textContent = item.message || "";
@@ -41,14 +42,14 @@
                     const progress = document.createElement("progress");
                     progress.max = 100;
                     if (item.progress !== null) progress.value = item.progress;
-                    progress.setAttribute("aria-label", "Upload progress for " + item.file.name);
+                    progress.setAttribute("aria-label", text("UploadQueue.Progress", item.file.name));
                     body.append(progress);
                 }
                 const remove = document.createElement("button");
                 remove.type = "button";
                 remove.className = "btn btn-sm btn-outline-primary";
-                remove.textContent = item.attempted ? "Dismiss" : "Remove";
-                remove.setAttribute("aria-label", remove.textContent + " " + item.file.name);
+                remove.textContent = item.attempted ? text("UploadQueue.Dismiss") : text("Common.Remove");
+                remove.setAttribute("aria-label", text(item.attempted ? "UploadQueue.DismissFile" : "UploadQueue.RemoveFile", item.file.name));
                 remove.disabled = running;
                 remove.addEventListener("click", () => {
                     release(item);
@@ -60,7 +61,7 @@
                 list.append(row);
             }
             input.disabled = running;
-            summary.textContent = items.length ? `${items.filter(item => item.status === "Uploaded").length} uploaded · ${items.filter(item => item.status === "Ready").length} ready · ${items.filter(item => item.error).length} need attention` : "";
+            summary.textContent = items.length ? text("UploadQueue.Summary", items.filter(item => item.status === "Uploaded").length, items.filter(item => item.status === "Ready").length, items.filter(item => item.error).length) : "";
         }
 
         /** Performs advisory checks against configured storage limits, retaining invalid files for explicit feedback. */
@@ -72,13 +73,13 @@
                 const supported = ["image/jpeg", "image/png", "image/webp"].includes(file.type);
                 const valid = supported && file.size > 0 && file.size <= options.maxSizeBytes;
                 const item = { id: ++serial, file, status: valid ? "Ready" : "Invalid", attempted: false, error: !valid, progress: null,
-                    message: valid ? "Local preview · server validation pending" : `Choose a nonempty JPEG, PNG or WebP up to ${(options.maxSizeBytes / 1048576).toLocaleString("en-CA")} MiB.`, url: null };
+                    message: valid ? text("UploadQueue.LocalPreviewServerValidationPending") : text("UploadQueue.InvalidFile", options.maxSizeBytes / 1048576), url: null };
                 if (valid) item.url = URL.createObjectURL(file);
                 items.push(item);
             }
             input.value = "";
             render();
-            if (duplicates) summary.textContent += ` · ${duplicates} duplicate selection(s) ignored`;
+            if (duplicates) summary.textContent = text("UploadQueue.Duplicates", summary.textContent, duplicates);
             options.changed?.();
         }
 
@@ -98,18 +99,18 @@
                     try {
                         await send(item.file, progress => { item.progress = progress; render(); });
                         item.status = "Uploaded";
-                        item.message = "Saved to this listing.";
+                        item.message = text("UploadQueue.SavedToThisListing");
                         uploaded++;
                     } catch (error) {
                         const definite = ["ValidationFailed", "StorageFailed", "InvalidState", "Forbidden", "NotFound"].includes(error.feedback?.status);
                         item.error = true;
                         item.status = definite ? "Rejected" : "Check saved photos";
                         item.message = error.feedback?.errors?.map(entry => entry.message).join(" ") || error.message;
-                        if (error.feedback?.status === "CleanupPending") item.message += " Storage cleanup is pending.";
+                        if (error.feedback?.status === "CleanupPending") item.message = text("UploadQueue.CleanupPending", item.message);
                         if (definite) rejected++;
                         else {
                             uncertain = true;
-                            item.message += " No automatic retry. Check saved photos and any cleanup outcome before selecting this file again.";
+                            item.message = text("UploadQueue.CheckBeforeRetry", item.message);
                         }
                         if (uncertain || ["Forbidden", "NotFound", "InvalidState"].includes(error.feedback?.status)) break;
                     } finally { render(); }
@@ -146,7 +147,7 @@
             xhr.upload.addEventListener("progress", event => progress(event.lengthComputable ? Math.round(event.loaded / event.total * 100) : null));
             /** Converts safe structured service feedback or an ambiguous connection failure into a queue outcome. */
             function failure() {
-                const error = new Error("Upload outcome could not be confirmed.");
+                const error = new Error(text("UploadQueue.UploadOutcomeCouldNotBeConfirmed"));
                 try { error.feedback = JSON.parse(xhr.responseText); } catch { }
                 reject(error);
             }

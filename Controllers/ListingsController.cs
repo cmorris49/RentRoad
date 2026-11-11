@@ -45,7 +45,7 @@ public sealed class ListingsController : Controller
         }
         if (!result.IsSuccess)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, title: "Listings could not be loaded.");
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, title: SharedResource.Get("Validation.ListingsUnavailable"));
         }
         return View("Index", new ListingSearchResultsViewModel(input, result.Value!));
     }
@@ -59,7 +59,7 @@ public sealed class ListingsController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return ValidationProblem(ModelState);
+            return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
         var result = await listings.GetPublishedDetailsAsync(id, cancellationToken);
         if (result.Status == ListingServiceStatus.NotFound)
@@ -72,11 +72,11 @@ public sealed class ListingsController : Controller
             {
                 ModelState.AddModelError(nameof(id), error.Message);
             }
-            return ValidationProblem(ModelState);
+            return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
         if (!result.IsSuccess)
         {
-            return Problem(statusCode: StatusCodes.Status500InternalServerError, title: "The listing could not be loaded.");
+            return Problem(statusCode: StatusCodes.Status500InternalServerError, title: SharedResource.Get("ListingFeedback.TheListingCouldNotBeLoaded"));
         }
         var similar = await listings.GetSimilarListingsAsync(id, cancellationToken);
         return View("Details", ListingDetailsViewModel.FromResult(result.Value!) with

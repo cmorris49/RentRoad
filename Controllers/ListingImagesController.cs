@@ -40,7 +40,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.GetImagesAsync(listingId, User, cancellationToken);
         return result.IsSuccess
             ? await ManagementViewAsync(listingId, result.Value!, null, null, null, null, cancellationToken)
-            : TerminalFailure(result.Status) ?? Problem(statusCode: StatusCodeFor(result.Status), title: "Listing images could not be loaded.");
+            : TerminalFailure(result.Status) ?? Problem(statusCode: StatusCodeFor(result.Status), title: SharedResource.Get("ImageFeedback.ListingImagesCouldNotBeLoaded"));
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public sealed class ListingImagesController : Controller
     {
         if (input.File is null && ModelState.GetFieldValidationState(nameof(input.File)) != ModelValidationState.Invalid)
         {
-            ModelState.AddModelError(nameof(input.File), "Choose an image to upload.");
+            ModelState.AddModelError(nameof(input.File), SharedResource.Get("ListingImages.FileRequired"));
         }
         if (!ModelState.IsValid || input.File is null)
         {
@@ -67,7 +67,7 @@ public sealed class ListingImagesController : Controller
         if (result.IsSuccess)
         {
             if (IsEditorRequest()) return Json(new { status = "Success" });
-            TempData["ListingImageSuccess"] = "Your image was uploaded and added to the listing.";
+            TempData["ListingImageSuccess"] = SharedResource.Get("ImageFeedback.YourImageWasUploadedAndAddedToTheListing");
             return RedirectToAction("Index", new { listingId });
         }
         return await FailureAsync(listingId, result.Status, result.Errors, input, null, null, cancellationToken);
@@ -83,13 +83,13 @@ public sealed class ListingImagesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return ValidationProblem(ModelState);
+            return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
         var result = await images.DeleteAsync(listingId, imageId, User, cancellationToken);
         if (result.IsSuccess)
         {
             if (IsEditorRequest()) return Json(new { status = "Success" });
-            TempData["ListingImageSuccess"] = "The image was removed from your listing and storage.";
+            TempData["ListingImageSuccess"] = SharedResource.Get("ImageFeedback.TheImageWasRemovedFromYourListingAndStorage");
             return RedirectToAction("Index", new { listingId });
         }
         return await FailureAsync(listingId, result.Status, result.Errors, null, null, result.Value, cancellationToken);
@@ -105,13 +105,13 @@ public sealed class ListingImagesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return ValidationProblem(ModelState);
+            return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
         var result = await images.SetPrimaryAsync(listingId, imageId, User, cancellationToken);
         if (result.IsSuccess)
         {
             if (IsEditorRequest()) return Json(new { status = "Success" });
-            TempData["ListingImageSuccess"] = "Your primary image has been updated.";
+            TempData["ListingImageSuccess"] = SharedResource.Get("ImageFeedback.YourPrimaryImageHasBeenUpdated");
             return RedirectToAction("Index", new { listingId });
         }
         return await FailureAsync(listingId, result.Status, result.Errors, null, null, null, cancellationToken);
@@ -129,7 +129,7 @@ public sealed class ListingImagesController : Controller
         {
             if (input.ImageIds is null && ModelState.GetFieldValidationState(nameof(input.ImageIds)) != ModelValidationState.Invalid)
             {
-                ModelState.AddModelError(nameof(input.ImageIds), "Supply the listing's image order.");
+                ModelState.AddModelError(nameof(input.ImageIds), SharedResource.Get("ListingImages.OrderRequired"));
             }
             return await FailureAsync(listingId, ListingServiceStatus.ValidationFailed, Array.Empty<ListingValidationError>(),
                 null, input, null, cancellationToken);
@@ -138,7 +138,7 @@ public sealed class ListingImagesController : Controller
         if (result.IsSuccess)
         {
             if (IsEditorRequest()) return Json(new { status = "Success" });
-            TempData["ListingImageSuccess"] = "Your image display order has been saved.";
+            TempData["ListingImageSuccess"] = SharedResource.Get("ImageFeedback.YourImageDisplayOrderHasBeenSaved");
             return RedirectToAction("Index", new { listingId });
         }
         return await FailureAsync(listingId, result.Status, result.Errors, null, input, null, cancellationToken);
@@ -178,7 +178,7 @@ public sealed class ListingImagesController : Controller
             }
             return Problem(statusCode: status is ListingServiceStatus.CleanupPending or ListingServiceStatus.ReconciliationRequired
                     ? StatusCodes.Status409Conflict : StatusCodeFor(current.Status),
-                title: "The image operation did not fully complete and image metadata could not be refreshed.",
+                title: SharedResource.Get("ImageFeedback.TheImageOperationDidNotFullyCompleteAndImage"),
                 extensions: new Dictionary<string, object?> { ["operation"] = outcome });
         }
         if (IsEditorRequest())
@@ -206,10 +206,10 @@ public sealed class ListingImagesController : Controller
             if (outcome?.Status is ListingServiceStatus.CleanupPending or ListingServiceStatus.ReconciliationRequired)
             {
                 return Problem(statusCode: StatusCodes.Status409Conflict,
-                    title: "The image operation did not fully complete and listing information could not be refreshed.",
+                    title: SharedResource.Get("ImageFeedback.TheImageOperationDidNotFullyCompleteAndListing"),
                     extensions: new Dictionary<string, object?> { ["operation"] = outcome });
             }
-            return TerminalFailure(listing.Status) ?? Problem(statusCode: StatusCodeFor(listing.Status), title: "The listing could not be loaded.");
+            return TerminalFailure(listing.Status) ?? Problem(statusCode: StatusCodeFor(listing.Status), title: SharedResource.Get("ListingFeedback.TheListingCouldNotBeLoaded"));
         }
         var view = View("Index", new ListingImageManagementViewModel(listingId, metadata, upload, order, outcome)
         {

@@ -1,19 +1,20 @@
 @model ListingImageManagementViewModel
 @{
-    ViewData["Title"] = "Manage listing images";
-    var title = string.IsNullOrWhiteSpace(Model.ListingTitle) ? "Untitled listing" : Model.ListingTitle;
+    ViewData["ClientResources"] = "images";
+    ViewData["Title"] = Text["ListingImages.PageTitle"].Value;
+    var title = string.IsNullOrWhiteSpace(Model.ListingTitle) ? Text["MyListings.Untitled"].Value : Model.ListingTitle;
     var success = TempData["ListingImageSuccess"] as string;
     var incomplete = Model.Outcome?.Status is ListingServiceStatus.CleanupPending or ListingServiceStatus.ReconciliationRequired;
 }
 <div class="owner-page image-manager">
-    <nav class="owner-listing-actions mb-4" aria-label="Listing management">
-        <a class="owner-back-link mb-0" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId">← Back to Edit Listing</a>
-        <a class="btn btn-primary" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId" asp-fragment="editor-photos">Open listing editor</a>
-        <a class="owner-back-link mb-0" asp-controller="ListingAvailability" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.CanEdit ? "Manage availability" : "View availability")</a>
+    <nav class="owner-listing-actions mb-4" aria-label="@Text["MyListings.ManagementLabel"]">
+        <a class="owner-back-link mb-0" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId">@Text["ListingEditor.BackToEdit"]</a>
+        <a class="btn btn-primary" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId" asp-fragment="editor-photos">@Text["ListingEditor.OpenEditor"]</a>
+        <a class="owner-back-link mb-0" asp-controller="ListingAvailability" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.CanEdit ? Text["Availability.Manage"].Value : Text["Availability.View"].Value)</a>
     </nav>
     <header class="page-header owner-page-heading">
         <div>
-            <h1>Listing images</h1>
+            <h1>@Text["ListingImages.Heading"]</h1>
             <p class="image-listing-title">@title</p>
         </div>
         <partial name="~/Views/MyListings/_ListingStatus.cshtml" model="Model.Status" />
@@ -25,19 +26,19 @@
     @if (incomplete)
     {
         <div class="alert alert-warning" role="alert" aria-labelledby="image-operation-heading">
-            <h2 id="image-operation-heading" class="h5">The image operation did not fully complete.</h2>
+            <h2 id="image-operation-heading" class="h5">@Text["ListingImages.IncompleteHeading"]</h2>
             @if (Model.Outcome!.Status == ListingServiceStatus.CleanupPending && Model.Outcome.MetadataRemoved == true)
             {
-                <p>The image was removed from this listing, but its file could not be fully removed from storage. Cleanup is pending.</p>
-                <p>Do not repeat this deletion. The remaining storage file needs cleanup review.</p>
+                <p>@Text["ListingImages.DeletionCleanupPending"]</p>
+                <p>@Text["ListingImages.DoNotRepeatDeletion"]</p>
             }
             else if (Model.Outcome!.Status == ListingServiceStatus.CleanupPending)
             {
-                <p>Storage cleanup is pending after an unsuccessful image operation. A file may remain without an associated listing image. Avoid uploading it again until cleanup has been reviewed.</p>
+                <p>@Text["ListingImages.UploadCleanupPending"]</p>
             }
             else
             {
-                <p>This operation needs reconciliation. Its final outcome could not be confirmed. Review the current images and contact support before repeating the operation.</p>
+                <p>@Text["ListingImages.ReconciliationRequired"]</p>
             }
             <div asp-validation-summary="All"></div>
         </div>
@@ -45,41 +46,41 @@
     else if (!ViewData.ModelState.IsValid || Model.Outcome is not null)
     {
         <div class="alert alert-danger" role="alert" aria-labelledby="image-error-heading">
-            <h2 id="image-error-heading" class="h5">We couldn’t complete that image action.</h2>
-            <p>Review the messages below. If an upload failed, choose the file again before retrying.</p>
+            <h2 id="image-error-heading" class="h5">@Text["ListingImages.ActionFailed"]</h2>
+            <p>@Text["ListingImages.FailureHelp"]</p>
             <div asp-validation-summary="All"></div>
         </div>
     }
     @if (!Model.CanEdit)
     {
-        <div class="alert alert-info">This listing is archived. Its images are available to you for reference and cannot be changed.</div>
+        <div class="alert alert-info">@Text["ListingImages.ArchivedHelp"]</div>
     }
     <div class="image-management-layout">
         <aside class="image-upload-panel" aria-labelledby="upload-heading">
             <div>
                 <div>
-                    <h2 id="upload-heading" class="h4">@(Model.CanEdit ? "Add an image" : "Listing photos")</h2>
+                    <h2 id="upload-heading" class="h4">@(Model.CanEdit ? Text["ListingImages.AddImage"].Value : Text["ListingImages.Photos"].Value)</h2>
                     @if (Model.CanEdit)
                     {
                         <form asp-action="Upload" asp-route-listingId="@Model.ListingId" method="post" enctype="multipart/form-data" data-image-upload>
                             <div class="mb-3">
-                                <label asp-for="File" class="form-label">Choose an image</label>
+                                <label asp-for="File" class="form-label">@Text["ListingImages.ChooseImage"]</label>
                                 <input asp-for="File" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="form-control" aria-describedby="upload-help file-error" required data-image-file />
-                                <div id="upload-help" class="form-text">JPEG, PNG or WebP · up to @Model.MaxImageSizeLabel.</div>
+                                <div id="upload-help" class="form-text">@Text["ListingImages.SizeHelp", Model.MaxImageSizeLabel]</div>
                                 <span asp-validation-for="File" id="file-error"></span>
                             </div>
                             <figure class="image-upload-preview" data-upload-preview hidden>
-                                <img alt="Preview of the selected upload" data-upload-preview-image />
+                                <img alt="@Text["ListingImages.SelectedUploadPreview"]" data-upload-preview-image />
                                 <figcaption class="form-text" data-upload-preview-caption></figcaption>
                             </figure>
                             <p class="form-text" role="status" aria-live="polite" data-upload-preview-status></p>
                             <div class="mb-3">
-                                <label asp-for="AltText" class="form-label">Image description <span class="text-muted">(optional)</span></label>
-                                <input asp-for="AltText" maxlength="250" class="form-control" aria-describedby="alt-help alt-error" placeholder="e.g. Drill and accessories in a carry case" />
-                                <div id="alt-help" class="form-text">Describe the photo for screen readers.</div>
+                                <label asp-for="AltText" class="form-label">@Text["ListingImages.Description"] <span class="text-muted">@Text["Common.Optional"]</span></label>
+                                <input asp-for="AltText" maxlength="250" class="form-control" aria-describedby="alt-help alt-error" placeholder="@Text["ListingImages.AltPlaceholder"]" />
+                                <div id="alt-help" class="form-text">@Text["ListingImages.DescriptionHelp"]</div>
                                 <span asp-validation-for="AltText" id="alt-error"></span>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100" data-upload-submit>Upload image</button>
+                            <button type="submit" class="btn btn-primary w-100" data-upload-submit>@Text["ListingImages.UploadImage"]</button>
 
                         </form>
                     }
@@ -88,23 +89,23 @@
         </aside>
         <section class="image-collection" aria-labelledby="images-heading">
             <div class="owner-section-heading">
-                <h2 id="images-heading" class="h4">Your images <span class="owner-listing-count">(@Model.Images.Count)</span></h2>
-                <p class="text-muted">Saved order · bulk uploads and dragging in the editor</p>
+                <h2 id="images-heading" class="h4">@Text["ListingImages.YourImages"] <span class="owner-listing-count">@Text["Common.CountInParentheses", Model.Images.Count]</span></h2>
+                <p class="text-muted">@Text["ListingImages.SavedOrderHelp"]</p>
             </div>
             @Html.ValidationMessage("ImageIds")
             @Html.ValidationMessage("Images")
             @if (Model.Images.Count == 0)
             {
                 <div class="empty-state">
-                    <h3 class="h5">@(Model.CanEdit ? "Give your listing its first photo." : "No listing images")</h3>
-                    <p>@(Model.CanEdit ? "Choose a photo and upload it to get started. Your first image will become the primary image." : "There are no images attached to this archived listing.")</p>
+                    <h3 class="h5">@(Model.CanEdit ? Text["ListingImages.FirstPhoto"].Value : Text["ListingImages.NoImages"].Value)</h3>
+                    <p>@(Model.CanEdit ? Text["ListingImages.FirstPhotoHelp"].Value : Text["ListingImages.ArchivedEmpty"].Value)</p>
                 </div>
             }
             else
             {
                 @if (!Model.CanDeleteImages && Model.CanEdit)
                 {
-                    <div class="alert alert-info">Published and unavailable listings must keep at least one stored image. Upload another image before removing this one.</div>
+                    <div class="alert alert-info">@Text["ListingImages.RequiredImageHelp"]</div>
                 }
                 <div class="managed-image-grid">
                     @for (var index = 0; index < Model.Images.Count; index++)
@@ -117,14 +118,14 @@
                             <partial name="_ListingGallery" model="@(new ListingGalleryViewModel(title, new[] { new ListingGalleryPhotoViewModel(imageUrl!, image.AltText, image.IsPrimary) }))" />
                             <div class="card-body managed-image-body">
                                 <div class="owner-listing-title-row">
-                                    <h3 id="image-heading-@image.ListingImageId" class="h5">Image @photoNumber</h3>
+                                    <h3 id="image-heading-@image.ListingImageId" class="h5">@Text["ListingImages.ImageNumber", photoNumber]</h3>
                                     @if (image.IsPrimary)
                                     {
-                                        <span class="badge-soft">Primary image</span>
+                                        <span class="badge-soft">@Text["ListingImages.PrimaryImage"]</span>
                                     }
                                 </div>
                                 <p class="managed-image-name">@photo.OriginalFileName</p>
-                                <p class="listing-card-meta">@((photo.SizeBytes / 1024m).ToString("0.#")) KiB <span aria-hidden="true">·</span> @image.ContentType</p>
+                                <p class="listing-card-meta">@Text["ListingImages.SizeKiB", photo.SizeBytes / 1024m] <span aria-hidden="true">·</span> @image.ContentType</p>
                                 @if (!string.IsNullOrWhiteSpace(image.AltText))
                                 {
                                     <p class="managed-image-description">@image.AltText</p>
@@ -134,13 +135,13 @@
                                     @if (!image.IsPrimary)
                                     {
                                         <form asp-action="SetPrimary" asp-route-listingId="@Model.ListingId" asp-route-imageId="@image.ListingImageId" method="post">
-                                            <button type="submit" class="btn btn-outline-primary w-100">Set as primary<span class="visually-hidden">: image @photoNumber</span></button>
+                                            <button type="submit" class="btn btn-outline-primary w-100">@Text["ListingImages.SetPrimary"]<span class="visually-hidden">@Text["ListingImages.ImageReference", photoNumber]</span></button>
                                         </form>
                                     }
-                                    <div class="image-order-controls" role="group" aria-label="Display order for image @photoNumber">
+                                    <div class="image-order-controls" role="group" aria-label="@Text["ListingImages.OrderLabel", photoNumber]">
                                         @foreach (var offset in new[] { -1, 1 })
                                         {
-                                            var label = offset == -1 ? "Move up" : "Move down";
+                                            var label = offset == -1 ? Text["Common.MoveUp"].Value : Text["Common.MoveDown"].Value;
                                             @if (index + offset >= 0 && index + offset < Model.Images.Count)
                                             {
                                                 <form asp-action="SetDisplayOrder" asp-route-listingId="@Model.ListingId" method="post">
@@ -148,23 +149,23 @@
                                                     {
                                                         <input type="hidden" name="ImageIds" value="@imageId" />
                                                     }
-                                                    <button type="submit" class="btn btn-outline-primary w-100">@label<span class="visually-hidden">: image @photoNumber</span></button>
+                                                    <button type="submit" class="btn btn-outline-primary w-100">@label<span class="visually-hidden">@Text["ListingImages.ImageReference", photoNumber]</span></button>
                                                 </form>
                                             }
                                             else
                                             {
-                                                <button type="button" class="btn btn-outline-primary" disabled>@label<span class="visually-hidden">: image @photoNumber</span></button>
+                                                <button type="button" class="btn btn-outline-primary" disabled>@label<span class="visually-hidden">@Text["ListingImages.ImageReference", photoNumber]</span></button>
                                             }
                                         }
                                     </div>
                                     @if (Model.CanDeleteImages)
                                     {
                                         <details class="owner-archive image-delete-confirmation">
-                                            <summary class="btn btn-outline-danger">Delete image<span class="visually-hidden"> @photoNumber</span></summary>
+                                            <summary class="btn btn-outline-danger">@Text["ListingImages.DeleteImage"]<span class="visually-hidden"> @photoNumber</span></summary>
                                             <div class="owner-archive-confirmation">
-                                                <p>Delete image @photoNumber? A remaining photo becomes primary if needed.</p>
+                                                <p>@Text["ListingImages.DeletePrompt", photoNumber]</p>
                                                 <form asp-action="Delete" asp-route-listingId="@Model.ListingId" asp-route-imageId="@image.ListingImageId" method="post">
-                                                    <button type="submit" class="btn btn-outline-danger">Confirm delete<span class="visually-hidden">: image @photoNumber</span></button>
+                                                    <button type="submit" class="btn btn-outline-danger">@Text["Common.ConfirmDelete"]<span class="visually-hidden">@Text["ListingImages.ImageReference", photoNumber]</span></button>
                                                 </form>
                                             </div>
                                         </details>

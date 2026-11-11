@@ -21,14 +21,14 @@ public class ListingSearchInputViewModel
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = ListingSearchParameters.DEFAULT_PAGE_SIZE;
 
-    [Display(Name = "Minimum daily price")]
+    [Display(Name = "Browse.MinimumDailyPrice")]
     public decimal? MinimumDailyPriceCad
     {
         get => MinimumDailyPriceCents / 100m;
         set => MinimumDailyPriceCents = ConvertCadToCents(value);
     }
 
-    [Display(Name = "Maximum daily price")]
+    [Display(Name = "Browse.MaximumDailyPrice")]
     public decimal? MaximumDailyPriceCad
     {
         get => MaximumDailyPriceCents / 100m;
@@ -46,12 +46,12 @@ public class ListingSearchInputViewModel
         }
         if (amount > long.MaxValue / 100m || amount < long.MinValue / 100m)
         {
-            throw new FormatException("Enter a price within the supported range.");
+            throw new FormatException(SharedResource.Get("Validation.PriceRangeSupported"));
         }
         var cents = amount.Value * 100m;
         if (cents != decimal.Truncate(cents))
         {
-            throw new FormatException("Enter a price with no more than two decimal places.");
+            throw new FormatException(SharedResource.Get("Validation.FractionalCents"));
         }
         return (long)cents;
     }

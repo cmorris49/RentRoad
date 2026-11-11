@@ -1,10 +1,11 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IHtmlLocalizer<SharedResource> HtmlText
 @using Microsoft.AspNetCore.Mvc.ModelBinding
 @using RentRoad.Models.Enums
 @using RentRoad.Services.Listings
 @using RentRoad.ViewModels.Listings
 @model ListingSearchResultsViewModel
 @{
-    ViewData["Title"] = "Browse rentals";
+    ViewData["Title"] = Text["Browse.PageTitle"];
     var pagination = Model.Pagination;
     var minimumPriceInvalid = ViewData.ModelState.GetFieldValidationState(nameof(Model.MinimumDailyPriceCad)) == ModelValidationState.Invalid
         || ViewData.ModelState.GetFieldValidationState(nameof(Model.MinimumDailyPriceCents)) == ModelValidationState.Invalid;
@@ -14,33 +15,33 @@
 
 <div class="browse-page">
 <header class="page-header browse-heading">
-    <p class="eyebrow">The RentRoad marketplace</p>
-    <h1>Find your next rental.</h1>
-    <p>Something for your plans, without the commitment of owning it.</p>
+    <p class="eyebrow">@Text["Browse.Eyebrow"]</p>
+    <h1>@Text["Browse.Heading"]</h1>
+    <p>@Text["Browse.Introduction"]</p>
 </header>
 
 @if (!Model.HasValidSearch)
 {
     <div class="alert alert-danger" role="alert" aria-labelledby="search-error-heading">
-        <h2 id="search-error-heading" class="h5">We couldn’t use those search filters.</h2>
-        <p>Check the values below and apply your filters again, or <a asp-controller="Listings" asp-action="Index">reset your search</a>.</p>
+        <h2 id="search-error-heading" class="h5">@Text["Browse.InvalidHeading"]</h2>
+        <p>@HtmlText["Browse.InvalidHint", Url.Action("Index", "Listings")!]</p>
         <div asp-validation-summary="All"></div>
     </div>
 }
 
 <div class="browse-layout">
     <aside class="browse-sidebar" aria-labelledby="filters-heading">
-        <button class="btn btn-outline-primary filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filter-panel" aria-controls="filter-panel" aria-expanded="@(!Model.HasValidSearch ? "true" : "false")">Refine search <span aria-hidden="true">⌄</span></button>
+        <button class="btn btn-outline-primary filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filter-panel" aria-controls="filter-panel" aria-expanded="@(!Model.HasValidSearch ? "true" : "false")">@Text["Browse.Refine"] <span aria-hidden="true">⌄</span></button>
         <div class="collapse d-lg-block @(!Model.HasValidSearch ? "show" : null)" id="filter-panel">
             <form id="listing-filters" class="filter-panel" method="get" asp-controller="Listings" asp-action="Index">
                 <div class="filter-heading">
-                    <h2 id="filters-heading" class="h5">Refine your search</h2>
-                    <a asp-controller="Listings" asp-action="Index">Reset</a>
+                    <h2 id="filters-heading" class="h5">@Text["Browse.FiltersHeading"]</h2>
+                    <a asp-controller="Listings" asp-action="Index">@Text["Common.Reset"]</a>
                 </div>
                 <div>
-                    <label asp-for="Category" class="form-label">Category</label>
+                    <label asp-for="Category" class="form-label">@Text["Browse.Category"]</label>
                     <select asp-for="Category" class="form-select" aria-describedby="category-error">
-                        <option value="">All categories</option>
+                        <option value="">@Text["Browse.AllCategories"]</option>
                         @foreach (var category in Enum.GetValues<ListingCategory>())
                         {
                             <option value="@category">@ListingDisplayText.Category(category)</option>
@@ -49,9 +50,9 @@
                     <span asp-validation-for="Category" id="category-error"></span>
                 </div>
                 <div>
-                    <label asp-for="Condition" class="form-label">Item condition</label>
+                    <label asp-for="Condition" class="form-label">@Text["Browse.Condition"]</label>
                     <select asp-for="Condition" class="form-select" aria-describedby="condition-error">
-                        <option value="">Any condition</option>
+                        <option value="">@Text["Browse.AnyCondition"]</option>
                         @foreach (var condition in Enum.GetValues<ItemCondition>())
                         {
                             <option value="@condition">@ListingDisplayText.Condition(condition)</option>
@@ -60,24 +61,24 @@
                     <span asp-validation-for="Condition" id="condition-error"></span>
                 </div>
                 <fieldset>
-                    <legend class="form-label">Daily price (CAD)</legend>
+                    <legend class="form-label">@Text["Browse.DailyPrice"]</legend>
                     <div class="price-filter-grid">
                         <div>
-                            <label asp-for="MinimumDailyPriceCad" class="price-bound-label">Minimum</label>
+                            <label asp-for="MinimumDailyPriceCad" class="price-bound-label">@Text["Browse.Minimum"]</label>
                             <div class="input-group">
                                 <span class="input-group-text" aria-hidden="true">$</span>
-                                <input asp-for="MinimumDailyPriceCad" asp-format="{0:0.00}" type="number" min="0" step="0.01" class="form-control @(minimumPriceInvalid ? "input-validation-error" : null)" placeholder="Any" aria-invalid="@(minimumPriceInvalid ? "true" : null)" aria-describedby="price-help minimum-price-errors" />
+                                <input asp-for="MinimumDailyPriceCad" asp-format="{0:0.00}" type="number" min="0" step="0.01" class="form-control @(minimumPriceInvalid ? "input-validation-error" : null)" placeholder="@Text["Browse.AnyPrice"]" aria-invalid="@(minimumPriceInvalid ? "true" : null)" aria-describedby="price-help minimum-price-errors" />
                             </div>
                         </div>
                         <div>
-                            <label asp-for="MaximumDailyPriceCad" class="price-bound-label">Maximum</label>
+                            <label asp-for="MaximumDailyPriceCad" class="price-bound-label">@Text["Browse.Maximum"]</label>
                             <div class="input-group">
                                 <span class="input-group-text" aria-hidden="true">$</span>
-                                <input asp-for="MaximumDailyPriceCad" asp-format="{0:0.00}" type="number" min="0" step="0.01" class="form-control @(maximumPriceInvalid ? "input-validation-error" : null)" placeholder="Any" aria-invalid="@(maximumPriceInvalid ? "true" : null)" aria-describedby="price-help maximum-price-errors" />
+                                <input asp-for="MaximumDailyPriceCad" asp-format="{0:0.00}" type="number" min="0" step="0.01" class="form-control @(maximumPriceInvalid ? "input-validation-error" : null)" placeholder="@Text["Browse.AnyPrice"]" aria-invalid="@(maximumPriceInvalid ? "true" : null)" aria-describedby="price-help maximum-price-errors" />
                             </div>
                         </div>
                     </div>
-                    <div id="price-help" class="form-text">Per day, with up to two decimal places.</div>
+                    <div id="price-help" class="form-text">@Text["Browse.PriceHelp"]</div>
                     <div id="minimum-price-errors">
                         <span asp-validation-for="MinimumDailyPriceCad"></span>
                         <span asp-validation-for="MinimumDailyPriceCents"></span>
@@ -88,46 +89,46 @@
                     </div>
                 </fieldset>
                 <div>
-                    <label asp-for="PickupArea" class="form-label">Pickup area</label>
-                    <input asp-for="PickupArea" class="form-control" placeholder="e.g. Kitsilano, Vancouver" maxlength="@ListingSearchParameters.MAX_PICKUP_AREA_LENGTH" aria-describedby="pickup-error" />
+                    <label asp-for="PickupArea" class="form-label">@Text["Browse.PickupArea"]</label>
+                    <input asp-for="PickupArea" class="form-control" placeholder="@Text["Browse.PickupPlaceholder"]" maxlength="@ListingSearchParameters.MAX_PICKUP_AREA_LENGTH" aria-describedby="pickup-error" />
                     <span asp-validation-for="PickupArea" id="pickup-error"></span>
                 </div>
                 <div>
-                    <label asp-for="PageSize" class="form-label">Results per page</label>
+                    <label asp-for="PageSize" class="form-label">@Text["Browse.PageSize"]</label>
                     <input asp-for="PageSize" type="number" min="1" max="@ListingSearchParameters.MAX_PAGE_SIZE" step="1" class="form-control" aria-describedby="page-size-error" required />
                     <span asp-validation-for="PageSize" id="page-size-error"></span>
                 </div>
-                <button class="btn btn-primary" type="submit">Apply filters</button>
+                <button class="btn btn-primary" type="submit">@Text["Browse.ApplyFilters"]</button>
             </form>
         </div>
     </aside>
 
     <section class="browse-results" aria-labelledby="results-heading">
-        <div class="browse-search" role="search" aria-label="Search rental listings">
-            <label asp-for="SearchText" class="form-label">Search rentals</label>
+        <div class="browse-search" role="search" aria-label="@Text["Browse.SearchLabel"]">
+            <label asp-for="SearchText" class="form-label">@Text["Browse.SearchPrompt"]</label>
             <div class="browse-search-controls">
-                <input asp-for="SearchText" type="search" form="listing-filters" class="form-control" placeholder="What are you looking for?" maxlength="@ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH" aria-describedby="keyword-error" />
-                <button class="btn btn-primary" type="submit" form="listing-filters">Search</button>
+                <input asp-for="SearchText" type="search" form="listing-filters" class="form-control" placeholder="@Text["Browse.SearchPlaceholder"]" maxlength="@ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH" aria-describedby="keyword-error" />
+                <button class="btn btn-primary" type="submit" form="listing-filters">@Text["Common.Search"]</button>
             </div>
             <span asp-validation-for="SearchText" id="keyword-error"></span>
         </div>
         <div class="results-toolbar">
             <div>
-                <h2 id="results-heading" class="h4">@(string.IsNullOrWhiteSpace(Model.SearchText) ? "Explore the marketplace" : $"Results for “{Model.SearchText}”")</h2>
+                <h2 id="results-heading" class="h4">@(string.IsNullOrWhiteSpace(Model.SearchText) ? Text["Browse.Explore"].Value : Text["Browse.ResultsFor", Model.SearchText!].Value)</h2>
                 @if (pagination is not null)
                 {
-                    <p class="results-count">@pagination.TotalCount.ToString("N0") @(pagination.TotalCount == 1 ? "rental" : "rentals") found <span aria-hidden="true">·</span> Prices per day in CAD</p>
+                    <p class="results-count">@Text[pagination.TotalCount == 1 ? "Browse.ResultCountOne" : "Browse.ResultCountMany", pagination.TotalCount]</p>
                 }
             </div>
             <div class="sort-controls">
-                <label asp-for="SortOrder" class="form-label">Sort by</label>
+                <label asp-for="SortOrder" class="form-label">@Text["Browse.SortBy"]</label>
                 <div class="sort-inputs">
                     <select asp-for="SortOrder" class="form-select sort-select" form="listing-filters" aria-describedby="sort-error">
-                        <option value="@ListingSortOrder.NewestFirst">Newest first</option>
-                        <option value="@ListingSortOrder.PriceLowToHigh">Price: low to high</option>
-                        <option value="@ListingSortOrder.PriceHighToLow">Price: high to low</option>
+                        <option value="@ListingSortOrder.NewestFirst">@Text["Browse.SortNewest"]</option>
+                        <option value="@ListingSortOrder.PriceLowToHigh">@Text["Browse.SortPriceAscending"]</option>
+                        <option value="@ListingSortOrder.PriceHighToLow">@Text["Browse.SortPriceDescending"]</option>
                     </select>
-                    <button class="btn btn-link sort-apply" type="submit" form="listing-filters">Update</button>
+                    <button class="btn btn-link sort-apply" type="submit" form="listing-filters">@Text["Common.Update"]</button>
                 </div>
                 <span asp-validation-for="SortOrder" id="sort-error"></span>
             </div>
@@ -147,10 +148,10 @@
             else if (pagination!.TotalCount > 0)
             {
                 <div class="empty-state">
-                    <p class="eyebrow">Let’s get you back on track</p>
-                    <h3>That page has no rentals.</h3>
-                    <p>Your search has matches, but this page is beyond the results.</p>
-                    <a class="btn btn-primary" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(1)">Back to the first page</a>
+                    <p class="eyebrow">@Text["Browse.PageEmptyEyebrow"]</p>
+                    <h3>@Text["Browse.PageEmptyHeading"]</h3>
+                    <p>@Text["Browse.PageEmptyIntroduction"]</p>
+                    <a class="btn btn-primary" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(1)">@Text["Browse.FirstPage"]</a>
                 </div>
             }
             else
@@ -159,20 +160,20 @@
                     <svg class="empty-state-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
                         <circle cx="14" cy="14" r="9" /><path d="m21 21 7 7M10 14h8" stroke-linecap="round" />
                     </svg>
-                    <h3>No rentals to show just yet.</h3>
-                    <p>Try a different keyword, category, or price range. New listings will appear as owners publish them.</p>
-                    <a class="btn btn-outline-primary" asp-controller="Listings" asp-action="Index">Reset filters</a>
+                    <h3>@Text["Browse.NoResults"]</h3>
+                    <p>@Text["Browse.NoResultsHelp"]</p>
+                    <a class="btn btn-outline-primary" asp-controller="Listings" asp-action="Index">@Text["Browse.ResetFilters"]</a>
                 </div>
             }
 
             @if (pagination!.TotalPages > 1 && Model.Listings.Count > 0)
             {
-                <nav class="results-pagination" aria-label="Listing result pages">
-                    <p class="results-count">Page @pagination.PageNumber.ToString("N0") of @pagination.TotalPages.ToString("N0")</p>
+                <nav class="results-pagination" aria-label="@Text["Browse.PaginationLabel"]">
+                    <p class="results-count">@Text["Browse.PageOf", pagination.PageNumber, pagination.TotalPages]</p>
                     <ul class="pagination">
                         @if (pagination.PreviousPageNumber is int previous)
                         {
-                            <li class="page-item"><a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(previous)" rel="prev" aria-label="Previous page">←</a></li>
+                            <li class="page-item"><a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(previous)" rel="prev" aria-label="@Text["Browse.PreviousPage"]">←</a></li>
                         }
                         @foreach (var pageNumber in pagination.VisiblePageNumbers)
                         {
@@ -183,13 +184,13 @@
                                 }
                                 else
                                 {
-                                    <a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(pageNumber)" aria-label="Page @pageNumber">@pageNumber</a>
+                                    <a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(pageNumber)" aria-label="@Text["Browse.PageLabel", pageNumber]">@pageNumber</a>
                                 }
                             </li>
                         }
                         @if (pagination.NextPageNumber is int next)
                         {
-                            <li class="page-item"><a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(next)" rel="next" aria-label="Next page">→</a></li>
+                            <li class="page-item"><a class="page-link" asp-controller="Listings" asp-action="Index" asp-all-route-data="@Model.GetPageRouteValues(next)" rel="next" aria-label="@Text["Browse.NextPage"]">→</a></li>
                         }
                     </ul>
                 </nav>

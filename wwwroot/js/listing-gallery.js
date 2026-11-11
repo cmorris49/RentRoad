@@ -1,6 +1,7 @@
 /** Shares ordered image selection, compact carousels and native modal galleries across public and private previews. */
 (function initializeListingGalleries() {
     "use strict";
+    const text = window.RentRoadText;
 
     /** Creates a text-safe DOM element without parsing image metadata as markup. */
     function node(tag, className, text) {
@@ -75,7 +76,7 @@
         const navigation = node("div", "rr-gallery-navigation");
         navigation.dataset.galleryControls = "";
         const strip = node("div", "rr-gallery-thumbnails");
-        strip.setAttribute("aria-label", "Choose a photo");
+        strip.setAttribute("aria-label", text("Gallery.Choose"));
 
         /** Selects a photo in the main view, thumbnail strip and any open lightbox. */
         function showPhoto(index) {
@@ -85,7 +86,7 @@
                 slide.hidden = position !== selected;
                 thumbnails[position]?.setAttribute("aria-pressed", String(position === selected));
             });
-            status.textContent = `${selected + 1} / ${slides.length}`;
+            status.textContent = text("Gallery.Position", selected + 1, slides.length);
             const chosen = thumbnails[selected];
             if (chosen && strip.clientWidth) {
                 strip.scrollTo({ left: chosen.offsetLeft - strip.offsetLeft - (strip.clientWidth - chosen.offsetWidth) / 2, behavior: "auto" });
@@ -96,7 +97,7 @@
                 lightboxImage.parentElement.querySelector("[data-image-fallback]").setAttribute("aria-hidden", "true");
                 lightboxImage.src = image.src;
                 lightboxImage.alt = image.alt;
-                lightboxStatus.textContent = `Photo ${selected + 1} of ${slides.length}`;
+                lightboxStatus.textContent = text("Gallery.PhotoOf", selected + 1, slides.length);
             }
         }
 
@@ -125,13 +126,13 @@
         /** Creates a native modal, including a focus cycle for consistent keyboard behaviour. */
         function createLightbox() {
             lightbox = node("dialog", "rr-lightbox");
-            lightbox.setAttribute("aria-label", "Listing photo viewer");
+            lightbox.setAttribute("aria-label", text("Gallery.Viewer"));
             const toolbar = node("div", "rr-lightbox-toolbar");
             lightboxStatus = node("p", "rr-gallery-status");
             lightboxStatus.setAttribute("aria-live", "polite");
-            toolbar.append(lightboxStatus, button("Close photo viewer", "Close ✕", () => lightbox.close()));
+            toolbar.append(lightboxStatus, button(text("Gallery.CloseLabel"), text("Gallery.Close"), () => lightbox.close()));
             const media = node("div", "rr-lightbox-media");
-            const fallback = node("span", "rr-lightbox-fallback", "Photo unavailable");
+            const fallback = node("span", "rr-lightbox-fallback", text("Gallery.Unavailable"));
             fallback.dataset.imageFallback = "";
             fallback.setAttribute("aria-hidden", "true");
             lightboxImage = node("img");
@@ -140,7 +141,7 @@
             lightbox.append(toolbar, media);
             if (slides.length > 1) {
                 const controls = node("div", "rr-lightbox-navigation");
-                controls.append(button("Previous photo", "←", () => move(-1)), button("Next photo", "→", () => move(1)));
+                controls.append(button(text("Gallery.Previous"), "←", () => move(-1)), button(text("Gallery.Next"), "→", () => move(1)));
                 lightbox.append(controls);
             }
             lightbox.addEventListener("keydown", event => {
@@ -175,7 +176,7 @@
             watchImage(image);
             if (!compact) slide.querySelector("[data-gallery-open]").addEventListener("click", openLightbox);
             if (!compact && slides.length > 1) {
-                const thumbnail = button(`Show photo ${index + 1} of ${slides.length}`, "", () => showPhoto(index));
+                const thumbnail = button(text("Gallery.Show", index + 1, slides.length), "", () => showPhoto(index));
                 thumbnail.dataset.galleryIndex = String(index);
                 const small = node("img");
                 small.src = image.src;
@@ -191,7 +192,7 @@
             }
         });
         if (slides.length > 1) {
-            navigation.append(button("Previous photo", "←", () => move(-1)), status, button("Next photo", "→", () => move(1)));
+            navigation.append(button(text("Gallery.Previous"), "←", () => move(-1)), status, button(text("Gallery.Next"), "→", () => move(1)));
             stage.append(navigation);
             if (!compact) gallery.append(strip);
         }
@@ -218,7 +219,7 @@
         const stage = node("div", "rr-gallery-stage");
         stage.dataset.galleryStage = "";
         gallery.append(stage);
-        if (!photos.length) stage.append(node("div", "rr-gallery-empty", "No photos available"));
+        if (!photos.length) stage.append(node("div", "rr-gallery-empty", text("Gallery.Empty")));
         photos.forEach((photo, index) => {
             const slide = node("figure", "rr-gallery-slide");
             slide.dataset.gallerySlide = "";
@@ -226,17 +227,17 @@
             const open = node("a", "rr-gallery-open");
             open.dataset.galleryOpen = "";
             open.href = photo.url;
-            open.setAttribute("aria-label", `Open photo ${index + 1} at full size`);
+            open.setAttribute("aria-label", text("Gallery.OpenPhoto", index + 1));
             if (options.compact) { open.removeAttribute("href"); open.removeAttribute("aria-label"); }
-            const fallback = node("span", "listing-image-fallback", "Photo unavailable");
+            const fallback = node("span", "listing-image-fallback", text("Gallery.Unavailable"));
             fallback.dataset.imageFallback = "";
             fallback.setAttribute("aria-hidden", "true");
             const image = node("img");
             image.src = photo.url;
-            image.alt = photo.altText || options.title || "Listing photo";
+            image.alt = photo.altText || options.title || text("Gallery.Photo");
             open.append(fallback, image);
             slide.append(open);
-            if (photo.isPrimary && !options.compact) slide.append(node("span", "rr-gallery-primary badge-soft", "Primary photo"));
+            if (photo.isPrimary && !options.compact) slide.append(node("span", "rr-gallery-primary badge-soft", text("Gallery.Primary")));
             stage.append(slide);
         });
         return connectGallery(gallery);

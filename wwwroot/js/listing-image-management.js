@@ -1,6 +1,7 @@
 /** Adds local upload previews and duplicate-submit feedback without changing server image validation. */
 (function initializeImageManagement() {
     "use strict";
+    const text = window.RentRoadText;
 
     /** Connects one multipart form; no file is sent until its normal authenticated submission. */
     function connectUpload(form) {
@@ -37,14 +38,14 @@
             image.src = previewUrl;
             caption.textContent = file.name;
             preview.hidden = false;
-            status.textContent = "Local preview only. Choose Upload image to save it.";
+            status.textContent = text("ListingImages.LocalPreviewOnlyChooseUploadImageToSaveIt");
         }
 
         /** Keeps an undecodable preview from hiding the authoritative upload feedback. */
         function previewUnavailable() {
             preview.hidden = true;
             releasePreview();
-            status.textContent = "A preview is unavailable for this file. The server will validate any submitted image.";
+            status.textContent = text("ListingImages.PreviewUnavailable");
         }
 
         /** Waits for client validation handlers before disabling the button for an actual submission. */
@@ -65,16 +66,16 @@
 
             submitting = true;
             submit.disabled = true;
-            submit.textContent = "Uploading…";
+            submit.textContent = text("ListingImages.Uploading");
             form.setAttribute("aria-busy", "true");
-            status.textContent = "Uploading your image. Please wait.";
+            status.textContent = text("ListingImages.UploadingYourImagePleaseWait");
         }
 
         /** Restores the form if browser history returns a previously submitted document. */
         function restoreUpload() {
             submitting = false;
             submit.disabled = false;
-            submit.textContent = "Upload image";
+            submit.textContent = text("ListingImages.UploadImage");
             form.removeAttribute("aria-busy");
             previewSelection();
         }

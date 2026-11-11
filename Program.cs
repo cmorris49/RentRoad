@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RentRoad.Data;
 using RentRoad.Models;
+using RentRoad.Localization;
 using RentRoad.Services.Listings;
 using RentRoad.Services.Storage;
 
@@ -20,7 +21,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddRentRoadLocalization();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IListingImageService, ListingImageService>();
@@ -45,6 +46,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseRequestLocalization();
 
 app.UseAuthorization();
 

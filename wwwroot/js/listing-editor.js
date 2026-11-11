@@ -1,6 +1,7 @@
 /** Connects the unified owner editor without replacing entered fields or trusting submitted ownership. */
 (function initializeListingEditors() {
     "use strict";
+    const text = window.RentRoadText;
 
     /** Manages one editor's owner-bound receipt, inline operations, and private previews. */
     async function connectEditor(root) {
@@ -41,7 +42,7 @@
             const response = await fetch(url, { method: data ? "POST" : "GET", body: data, credentials: "same-origin", headers: { Accept: "application/json" } });
             const json = response.headers.get("content-type")?.includes("json") ? await response.json() : null;
             if (response.redirected || !response.ok || !json) {
-                const failure = new Error(response.redirected ? "Sign in again before saving. Your entered details are still here." : "The operation could not be confirmed. Review the saved photos and dates before retrying.");
+                const failure = new Error(response.redirected ? text("ListingEditor.SignInAgainBeforeSavingYourEnteredDetailsAre") : text("ListingEditor.TheOperationCouldNotBeConfirmedReviewTheSaved"));
                 failure.feedback = json;
                 throw failure;
             }
@@ -72,8 +73,8 @@
             const messages = feedback?.errors?.length ? feedback.errors : [{ field: "", message: error.message }];
             if (["CleanupPending", "ReconciliationRequired"].includes(feedback?.status)) {
                 messages.push({ field: "", message: feedback.metadataRemoved === true
-                    ? "The photo metadata was removed, but storage cleanup is pending. Do not repeat this removal."
-                    : "This action did not fully complete. Review cleanup or reconciliation before repeating it." });
+                    ? text("ListingEditor.ThePhotoMetadataWasRemovedButStorageCleanupIs")
+                    : text("ListingEditor.ThisActionDidNotFullyCompleteReviewCleanupOr") });
             }
             errors.className = "alert " + (["CleanupPending", "ReconciliationRequired", "Conflict"].includes(feedback?.status) ? "alert-warning" : "alert-danger");
             const list = errors.querySelector("ul");
@@ -105,12 +106,12 @@
         /** Announces the actual save state and optionally links to a confirmed public listing. */
         function announce(message, published = false, partial = false) {
             notice.className = "alert " + (partial ? "alert-info" : "alert-success");
-            if (signature() !== savedSignature) message += " Newer edits still need saving.";
+            if (signature() !== savedSignature) message = text("ListingEditor.NewerEdits", message);
             notice.replaceChildren(document.createTextNode(message));
             if (published) {
                 const link = document.createElement("a");
                 link.href = "/listings/" + state.listingId;
-                link.textContent = " View published listing";
+                link.textContent = text("ListingEditor.PublicLink");
                 notice.append(link);
             }
             notice.hidden = false;
@@ -126,15 +127,15 @@
                 try { sessionStorage.removeItem(storageKey); } catch { }
             }
             root.querySelector("[data-editor-save-state]").textContent = state.status === "Published"
-                ? "This listing is public. Saving changes and updating photos or dates updates the live listing."
-                : state.status === "Archived" ? "Archived listings are read-only." : "Your draft is private until you review and confirm publication.";
+                ? text("ListingEditor.PublishedHelp")
+                : state.status === "Archived" ? text("ListingEditor.ArchivedHelp") : text("ListingEditor.YourDraftIsPrivateUntilYouReviewAndConfirm");
             const badge = root.querySelector("[data-editor-status]");
-            badge.textContent = state.status;
+            badge.textContent = text("ListingStatus." + state.status);
             badge.className = "owner-status owner-status-" + state.status.toLowerCase();
             const save = root.querySelector("[data-editor-save]");
-            if (save) save.textContent = state.status === "Published" ? "Save changes" : "Save Draft";
+            if (save) save.textContent = state.status === "Published" ? text("Common.SaveChanges") : text("ListingEditor.SaveDraft");
             const review = root.querySelector("[data-editor-review]");
-            if (review) review.textContent = state.status === "Published" ? "Review changes" : "Upload Listing";
+            if (review) review.textContent = state.status === "Published" ? text("ListingEditor.ReviewChanges") : text("ListingEditor.UploadListing");
             updateControls();
         }
 
@@ -180,7 +181,7 @@
                 }
                 const target = form?.dataset.group ? Array.from(root.querySelectorAll("form[data-editor-period]")).find(item => item.dataset.group === form.dataset.group && item.dataset.recordId === form.dataset.recordId) : form;
                 showFailure(error, target || form);
-                if (wroteDetails) announce("Item details were saved. The following photo or date action did not fully complete.", false, true);
+                if (wroteDetails) announce(text("ListingEditor.ItemDetailsWereSavedTheFollowingPhotoOrDate"), false, true);
             }
             finally {
                 busy = false;
@@ -201,7 +202,7 @@
         function imageUnavailable(event) {
             event.target.hidden = true;
             const fallback = event.target.parentElement.querySelector("[data-editor-image-fallback]");
-            if (fallback) { fallback.hidden = false; fallback.textContent = "Photo unavailable"; fallback.setAttribute("aria-hidden", "false"); }
+            if (fallback) { fallback.hidden = false; fallback.textContent = text("Gallery.Unavailable"); fallback.setAttribute("aria-hidden", "false"); }
         }
 
         /** Renders lightweight thumbnails and existing primary/order/removal actions. */
@@ -218,20 +219,20 @@
                 const fallback = document.createElement("span");
                 fallback.dataset.editorImageFallback = "";
                 fallback.className = "listing-image-fallback";
-                fallback.textContent = "Photo unavailable";
+                fallback.textContent = text("Gallery.Unavailable");
                 fallback.hidden = true;
                 image.parentElement.append(fallback);
                 image.draggable = false;
                 image.src = photo.url;
-                image.alt = photo.altText || "Listing photo " + (index + 1);
+                image.alt = photo.altText || text("ListingEditor.PhotoAlt", index + 1);
                 image.addEventListener("error", imageUnavailable);
-                card.querySelector("[data-photo-label]").textContent = "Photo " + (index + 1);
+                card.querySelector("[data-photo-label]").textContent = text("ListingEditor.PhotoNumber", index + 1);
                 card.querySelector("[data-primary-badge]").hidden = !photo.isPrimary;
                 for (const button of card.querySelectorAll("[data-photo-action]")) {
                     button.dataset.imageId = String(photo.id);
                     button.dataset.editorWrite = "";
-                    if (button.dataset.photoAction === "up") button.setAttribute("aria-label", "Move photo " + (index + 1) + " earlier");
-                    if (button.dataset.photoAction === "down") button.setAttribute("aria-label", "Move photo " + (index + 1) + " later");
+                    if (button.dataset.photoAction === "up") button.setAttribute("aria-label", text("ListingEditor.MoveEarlier", index + 1));
+                    if (button.dataset.photoAction === "down") button.setAttribute("aria-label", text("ListingEditor.MoveLater", index + 1));
                     if (button.dataset.photoAction === "primary") button.hidden = photo.isPrimary;
                     if (button.dataset.photoAction === "up") button.hidden = index === 0;
                     if (button.dataset.photoAction === "down") button.hidden = index === state.images.length - 1;
@@ -285,7 +286,7 @@
                 if (state[group].length === 0) {
                     const empty = document.createElement("p");
                     empty.className = "form-text";
-                    empty.textContent = group === "windows" ? "No availability windows yet." : "No blocked dates.";
+                    empty.textContent = group === "windows" ? text("ListingEditor.NoAvailabilityWindowsYet") : text("ListingEditor.NoBlockedDates");
                     list.append(empty);
                 }
             }
@@ -309,7 +310,7 @@
             await request("/my/listings/" + state.listingId + "/images" + suffix, data);
             await refresh("photos");
             focusAfterAction = action === "delete" ? state.images[0]?.id ?? null : id;
-            announce("Photo changes saved." + (state.status === "Draft" ? " Your draft is still private." : ""));
+            announce(text(state.status === "Draft" ? "ListingEditor.PhotoSavedDraft" : "ListingEditor.PhotoChangesSaved"));
         }
 
         /** Submits a captured period to the existing owner endpoint without adjusting its exclusive end. */
@@ -323,7 +324,7 @@
             const unchanged = !form || JSON.stringify(Array.from(new FormData(form).entries())) === captured;
             if (form && !recordId && unchanged) { form.reset(); }
             await refresh("dates", unchanged ? group + ":" + recordId : null);
-            announce("Availability saved." + (!unchanged ? " Newer date edits still need saving." : state.status === "Draft" ? " Your draft is still private." : ""));
+            announce(text(!unchanged ? "ListingEditor.AvailabilitySavedNewer" : state.status === "Draft" ? "ListingEditor.AvailabilitySavedDraft" : "ListingEditor.AvailabilitySaved"));
         }
 
         /** Persists a complete drag or touch order before refreshing the saved thumbnail positions. */
@@ -334,12 +335,12 @@
             await request("/my/listings/" + state.listingId + "/images/order", data);
             await refresh("photos");
             focusAfterAction = moving;
-            announce("Photo order saved. Primary photo unchanged.");
+            announce(text("ListingEditor.PhotoOrderSavedPrimaryPhotoUnchanged"));
         }
 
         /** Uploads the captured selection in sequence and reports confirmed, rejected and uncertain outcomes separately. */
         async function uploadPhotos() {
-            if (!uploadQueue?.hasPending()) throw new Error("Choose at least one valid photo to upload.");
+            if (!uploadQueue?.hasPending()) throw new Error(text("ListingEditor.ChooseAtLeastOneValidPhotoToUpload"));
             const alt = upload.elements.namedItem("AltText").value;
             await saveFields();
             const result = await uploadQueue.run(async (file, progress) => {
@@ -349,7 +350,7 @@
                 return window.RentRoadUploadQueue.send("/my/listings/" + state.listingId + "/images/upload", data, progress);
             });
             await refresh("photos");
-            announce(`${result.uploaded} photo(s) uploaded. ${result.rejected} rejected.` + (result.uncertain ? " One outcome needs checking. Review the file statuses before continuing." : " Check each file's status below."), false, result.rejected > 0 || result.uncertain);
+            announce(text(result.uncertain ? "ListingEditor.UploadSummaryUncertain" : "ListingEditor.UploadSummary", result.uploaded, result.rejected), false, result.rejected > 0 || result.uncertain);
         }
 
         /** Builds safe, presentation-only previews from current unsaved fields or a frozen server review. */
@@ -357,13 +358,13 @@
             dialog.dataset.previewMode = mode;
             const input = reviewed?.fields || currentFields();
             const source = reviewed || state;
-            const optionText = (name, value) => Array.from(fields.elements.namedItem(name).options).find(option => option.value === value)?.textContent || "Not selected";
+            const optionText = (name, value) => Array.from(fields.elements.namedItem(name).options).find(option => option.value === value)?.textContent || text("ListingEditor.NotSelected");
             const amount = Number(input.dailyPriceCad);
             const values = {
-                title: input.title?.trim() || "Untitled listing", description: input.description || "No description yet.",
+                title: input.title?.trim() || text("MyListings.Untitled"), description: input.description || text("ListingEditor.NoDescriptionYet"),
                 category: optionText("Category", input.category), condition: optionText("Condition", input.condition),
-                location: input.pickupArea || "Pickup area not set", owner: source?.ownerDisplayName || "Listing owner",
-                price: input.dailyPriceCad !== "" && input.dailyPriceCad !== null && Number.isFinite(amount) ? "CA$" + amount.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "Price not set"
+                location: input.pickupArea || text("MyListings.NoPickupArea"), owner: source?.ownerDisplayName || text("ListingDetails.OwnerFallback"),
+                price: input.dailyPriceCad !== "" && input.dailyPriceCad !== null && Number.isFinite(amount) ? text("Currency.CadAmount", amount) : text("MyListings.NoPrice")
             };
             for (const [key, value] of Object.entries(values)) for (const node of dialog.querySelectorAll("[data-preview-" + key + "]")) node.textContent = value;
             const photos = [...(source?.images || [])].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.displayOrder - b.displayOrder || a.id - b.id);
@@ -378,15 +379,17 @@
                     entry.textContent = period.displayRange;
                     list.append(entry);
                 }
-                if (!list.children.length) { const entry = document.createElement("li"); entry.textContent = "None added"; list.append(entry); }
+                if (!list.children.length) { const entry = document.createElement("li"); entry.textContent = text("ListingEditor.NoneAdded"); list.append(entry); }
             }
             dialog.querySelector("[data-card-preview]").hidden = mode !== "card";
             dialog.querySelector("[data-details-preview]").hidden = mode === "card";
             dialog.querySelector("[data-review-footer]").hidden = mode !== "review";
             dialog.querySelector("[data-review-errors]").hidden = true;
             dialog.querySelector("[data-review-success]").hidden = true;
-            dialog.querySelector("[data-preview-context]").textContent = mode === "review" ? "Check these saved photos and proposed details. Nothing is published until you confirm." + (uploadQueue?.hasPending() ? " Selected local photos are not included until uploaded." : "") : "Private preview · current form values" + (uploadQueue?.hasPending() ? " · selected photos not yet uploaded" : "");
-            dialog.querySelector("#editor-dialog-title").textContent = mode === "review" ? "Review your listing" : mode === "card" ? "Browse Card Preview" : "Listing Details Preview";
+            dialog.querySelector("[data-preview-context]").textContent = text(mode === "review"
+                ? uploadQueue?.hasPending() ? "ListingEditor.ReviewContextPending" : "ListingEditor.CheckTheseSavedPhotosAndProposedDetailsNothingIs"
+                : uploadQueue?.hasPending() ? "ListingEditor.PreviewContextPending" : "ListingEditor.PreviewContext");
+            dialog.querySelector("#editor-dialog-title").textContent = mode === "review" ? text("ListingEditor.ReviewHeading") : mode === "card" ? text("ListingEditor.BrowseCardPreview") : text("ListingEditor.DetailsPreview");
             if (!dialog.open) dialog.showModal();
             updateControls();
         }
@@ -398,7 +401,7 @@
             const result = await request("/my/listings/editor/" + state.token + "/review", new FormData(fields));
             remember(result.review.state);
             if (wasNew) savedSignature = captured;
-            if (signature() !== captured) throw new Error("Your edits changed while preparing review. Choose Upload Listing again to review the latest values.");
+            if (signature() !== captured) throw new Error(text("ListingEditor.YourEditsChangedWhilePreparingReviewChooseUploadListing"));
             nonce = result.review.nonce;
             showPreview("review", result.review.state);
             const panel = dialog.querySelector("[data-review-errors]");
@@ -417,7 +420,7 @@
             remember(result.state);
             savedSignature = signature();
             nonce = null;
-            announce("Your listing is published.", true);
+            announce(text("ListingEditor.YourListingIsPublished"), true);
             const success = dialog.querySelector("[data-review-success]");
             success.replaceChildren(...Array.from(notice.childNodes).map(node => node.cloneNode(true)));
             success.hidden = false;
@@ -431,7 +434,7 @@
             event.preventDefault();
             if (!form.checkValidity()) { form.reportValidity(); return; }
             if (form === fields) {
-                perform(async () => { await saveFields(); announce(state.status === "Published" ? "Changes saved to your published listing." : "Draft saved. Only you can see it until publication."); });
+                perform(async () => { await saveFields(); announce(state.status === "Published" ? text("ListingEditor.ChangesSavedToYourPublishedListing") : text("ListingEditor.DraftSavedOnlyYouCanSeeItUntilPublication")); });
             } else if (form === upload) {
                 perform(uploadPhotos, form);
             } else perform(() => changePeriod(form), form);
@@ -485,7 +488,7 @@
                 history.replaceState(null, "", "/my/listings/create?editor=" + encodeURIComponent(state.token));
                 try { sessionStorage.setItem(storageKey, state.token); } catch { }
             }
-            if (upload) root.querySelector("[data-editor-file-help]").textContent = "JPEG, PNG or WebP · up to " + (opened.maxImageSizeBytes / 1048576).toLocaleString("en-CA", { maximumFractionDigits: 2 }) + " MiB per photo.";
+            if (upload) root.querySelector("[data-editor-file-help]").textContent = text("ListingEditor.UploadLimit", (opened.maxImageSizeBytes / 1048576).toLocaleString(document.documentElement?.lang, { maximumFractionDigits: 2 }));
             if (upload) {
                 uploadQueue = window.RentRoadUploadQueue.connect(upload, { maxSizeBytes: opened.maxImageSizeBytes, changed: () => { nonce = null; updateControls(); } });
                 if (fileInput.files?.length) uploadQueue.add(fileInput.files);

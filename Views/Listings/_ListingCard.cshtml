@@ -1,7 +1,7 @@
 @using RentRoad.ViewModels.Listings
 @model ListingSummaryViewModel
 @{
-    var title = string.IsNullOrWhiteSpace(Model.Title) ? "Rental listing" : Model.Title;
+    var title = string.IsNullOrWhiteSpace(Model.Title) ? Text["Listing.Untitled"].Value : Model.Title;
 }
 <article class="listing-card listing-card-link">
     @{
@@ -13,9 +13,9 @@
     <div class="card-body listing-card-body">
         <span class="listing-card-category">@ListingDisplayText.Category(Model.Category)</span>
         <h3 class="listing-card-title"><a class="stretched-link" asp-controller="Listings" asp-action="Details" asp-route-id="@Model.ListingId">@title</a></h3>
-        <p class="listing-card-meta">@ListingDisplayText.Condition(Model.Condition) <span aria-hidden="true">·</span> @(string.IsNullOrWhiteSpace(Model.PickupArea) ? "Pickup area not specified" : Model.PickupArea)</p>
+        <p class="listing-card-meta">@ListingDisplayText.Condition(Model.Condition) <span aria-hidden="true">·</span> @(string.IsNullOrWhiteSpace(Model.PickupArea) ? Text["Listing.NoPickupArea"].Value : Model.PickupArea)</p>
         <div class="listing-card-bottom">
-            <p><span class="listing-card-price">@Model.DailyPrice.FormattedAmount</span> <span class="listing-card-meta">/ day</span></p>
+            <p><span class="listing-card-price">@Model.DailyPrice.FormattedAmount</span> <span class="listing-card-meta">@Text["Listing.PerDay"]</span></p>
             <span class="listing-card-arrow" aria-hidden="true">↗</span>
         </div>
     </div>

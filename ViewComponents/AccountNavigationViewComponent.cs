@@ -22,7 +22,7 @@ public sealed class AccountNavigationViewComponent : ViewComponent
         if (string.IsNullOrWhiteSpace(name))
         {
             var username = user?.UserName?.Trim();
-            name = !string.IsNullOrWhiteSpace(username) && !username.Contains('@') ? username : "Account";
+            name = !string.IsNullOrWhiteSpace(username) && !username.Contains('@') ? username : SharedResource.Get("Navigation.Account");
         }
         return View(new AccountNavigationViewModel(signedIn, name));
     }

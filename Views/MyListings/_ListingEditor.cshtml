@@ -5,61 +5,61 @@
     var archived = status == ListingStatus.Archived;
 }
 <div class="listing-editor" data-listing-editor data-listing-id="@listingId" data-listing-status="@status">
-    <a class="owner-back-link" asp-controller="MyListings" asp-action="Index">← My Listings</a>
+    <a class="owner-back-link" asp-controller="MyListings" asp-action="Index">@Text["Navigation.BackToMyListingsArrow"]</a>
     <header class="editor-heading">
-        <div><p class="eyebrow">Make room for more possibilities</p><h1>@(archived ? "Your listing history" : listingId == 0 ? "Share something useful." : "Edit your listing.")</h1></div>
-        <span class="owner-status owner-status-@status.ToString().ToLowerInvariant()" data-editor-status>@status</span>
+        <div><p class="eyebrow">@Text["ListingEditor.Eyebrow"]</p><h1>@(archived ? Text["ListingEditor.HistoryHeading"].Value : listingId == 0 ? Text["ListingEditor.CreateHeading"].Value : Text["ListingEditor.EditHeading"].Value)</h1></div>
+        <span class="owner-status owner-status-@status.ToString().ToLowerInvariant()" data-editor-status>@ListingDisplayText.Status(status)</span>
     </header>
     <div data-editor-server-feedback><partial name="_ListingFeedback" /></div>
-    <p class="editor-save-state" data-editor-save-state>@(archived ? "Archived listings are read-only." : status == ListingStatus.Published ? "This listing is public. Saving changes and updating photos or dates updates the live listing." : "Your listing stays private until you review and confirm publication.")</p>
+    <p class="editor-save-state" data-editor-save-state>@(archived ? Text["ListingEditor.ArchivedHelp"].Value : status == ListingStatus.Published ? Text["ListingEditor.PublishedHelp"].Value : Text["ListingEditor.PrivateHelp"].Value)</p>
     <div class="alert alert-success" data-editor-notice role="status" hidden></div>
-    <div class="alert alert-danger" data-editor-errors role="alert" hidden><h2 class="h5">Check these details</h2><ul></ul></div>
-    <noscript><div class="alert alert-info">Enable JavaScript to use the integrated listing editor, previews, and inline photo and date tools.</div></noscript>
+    <div class="alert alert-danger" data-editor-errors role="alert" hidden><h2 class="h5">@Text["ListingEditor.CheckDetails"]</h2><ul></ul></div>
+    <noscript><div class="alert alert-info">@Text["ListingEditor.EnableJavaScript"]</div></noscript>
     <section class="editor-section" aria-labelledby="editor-basics-heading">
-        <div class="editor-section-heading"><h2 id="editor-basics-heading">1. Item details</h2><span class="text-muted">CAD per day</span></div>
+        <div class="editor-section-heading"><h2 id="editor-basics-heading">@Text["ListingEditor.ItemDetailsStep"]</h2><span class="text-muted">@Text["ListingEditor.CadPerDay"]</span></div>
         <form id="editor-fields" asp-controller="MyListings" asp-action="@(listingId == 0 ? "Create" : "Edit")" asp-route-id="@(listingId == 0 ? null : (int?)listingId)" method="post" data-editor-fields>
-            <fieldset disabled="@archived"><legend class="visually-hidden">Item details</legend><partial name="_ListingFields" model="Model" /></fieldset>
+            <fieldset disabled="@archived"><legend class="visually-hidden">@Text["ListingEditor.ItemDetails"]</legend><partial name="_ListingFields" model="Model" /></fieldset>
         </form>
     </section>
     <section class="editor-section" id="editor-photos" aria-labelledby="editor-photos-heading">
-        <div class="editor-section-heading"><h2 id="editor-photos-heading">2. Photos</h2><span class="text-muted">Drag photos to reorder them.</span></div>
+        <div class="editor-section-heading"><h2 id="editor-photos-heading">@Text["ListingEditor.PhotosStep"]</h2><span class="text-muted">@Text["ListingImages.DragHelp"]</span></div>
         @if (!archived)
         {
             <form data-editor-upload class="editor-upload" enctype="multipart/form-data" method="post">
                 @Html.AntiForgeryToken()
-                <div class="editor-upload-drop" data-upload-drop><label for="editor-file" class="form-label">Drop photos here or choose files</label><input id="editor-file" name="File" class="form-control" type="file" multiple accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-describedby="editor-file-help" /><p id="editor-file-help" class="form-text" data-editor-file-help>JPEG, PNG or WebP. Loading the configured size limit…</p></div>
-                <div><label for="editor-alt" class="form-label">Description for selected photos <span class="text-muted">(optional)</span></label><input id="editor-alt" class="form-control" name="AltText" maxlength="250" placeholder="e.g. Camera with lens and carry case" /></div>
-                <button type="submit" class="btn btn-outline-primary" data-editor-write disabled>Upload selected photos</button>
+                <div class="editor-upload-drop" data-upload-drop><label for="editor-file" class="form-label">@Text["ListingImages.DropPrompt"]</label><input id="editor-file" name="File" class="form-control" type="file" multiple accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-describedby="editor-file-help" /><p id="editor-file-help" class="form-text" data-editor-file-help>@Text["ListingImages.LoadingSizeLimit"]</p></div>
+                <div><label for="editor-alt" class="form-label">@Text["ListingImages.SelectedDescription"] <span class="text-muted">@Text["Common.Optional"]</span></label><input id="editor-alt" class="form-control" name="AltText" maxlength="250" placeholder="@Text["ListingImages.DescriptionPlaceholder"]" /></div>
+                <button type="submit" class="btn btn-outline-primary" data-editor-write disabled>@Text["ListingImages.UploadSelected"]</button>
                 <p class="form-text editor-upload-summary" data-upload-summary role="status" aria-live="polite"></p>
-                <ul class="editor-upload-queue" data-upload-queue aria-label="Selected photo statuses"></ul>
+                <ul class="editor-upload-queue" data-upload-queue aria-label="@Text["ListingImages.SelectedStatuses"]"></ul>
             </form>
         }
-        <p class="text-muted" data-editor-no-images>No uploaded photos yet. At least one is needed to publish.</p>
+        <p class="text-muted" data-editor-no-images>@Text["ListingImages.PublicationHelp"]</p>
         <div class="editor-photo-grid" data-editor-photos></div>
     </section>
     <section class="editor-section" id="editor-availability" aria-labelledby="editor-availability-heading">
-        <div class="editor-section-heading"><h2 id="editor-availability-heading">3. Availability</h2></div>
-        <p class="text-muted">Both First Day and Last Day are included.</p>
+        <div class="editor-section-heading"><h2 id="editor-availability-heading">@Text["ListingEditor.AvailabilityStep"]</h2></div>
+        <p class="text-muted">@Text["Availability.InclusiveDaysHelp"]</p>
         <div class="editor-date-columns">
             @foreach (var group in new[] { "windows", "blocks" })
             {
                 var block = group == "blocks";
                 <section aria-labelledby="editor-@group-heading">
-                    <h3 id="editor-@group-heading" class="h5">@(block ? "Blocked dates" : "Available to rent")</h3>
+                    <h3 id="editor-@group-heading" class="h5">@(block ? Text["Availability.BlockedDates"].Value : Text["Availability.AvailableToRent"].Value)</h3>
                     @if (!archived)
                     {
                         <form data-editor-period data-group="@group" data-record-id="" class="editor-date-form" method="post">
                             @Html.AntiForgeryToken()
                             <div class="editor-date-inputs">
-                                <div><label for="editor-@group-start" class="form-label">First Day</label><input id="editor-@group-start" name="StartDate" type="date" class="form-control" required /></div>
-                                <div><label for="editor-@group-end" class="form-label">Last Day</label><input id="editor-@group-end" name="LastDay" max="9999-12-30" type="date" class="form-control" required /></div>
+                                <div><label for="editor-@group-start" class="form-label">@Text["Availability.FirstDay"]</label><input id="editor-@group-start" name="StartDate" type="date" class="form-control" required /></div>
+                                <div><label for="editor-@group-end" class="form-label">@Text["Availability.LastDay"]</label><input id="editor-@group-end" name="LastDay" max="9999-12-30" type="date" class="form-control" required /></div>
                             </div>
 
                             @if (block)
                             {
-                                <label for="editor-block-reason" class="form-label mt-2">Reason <span class="text-muted">(optional, private)</span></label><input id="editor-block-reason" name="Reason" maxlength="250" class="form-control" />
+                                <label for="editor-block-reason" class="form-label mt-2">@Text["Availability.Reason"] <span class="text-muted">@Text["Availability.OptionalPrivate"]</span></label><input id="editor-block-reason" name="Reason" maxlength="250" class="form-control" />
                             }
-                            <button type="submit" class="btn btn-outline-primary mt-3" data-editor-write disabled>@(block ? "Add blocked dates" : "Add window")</button>
+                            <button type="submit" class="btn btn-outline-primary mt-3" data-editor-write disabled>@(block ? Text["Availability.AddBlock"].Value : Text["Availability.AddWindow"].Value)</button>
                         </form>
                     }
                     <div data-editor-periods="@group"></div>
@@ -68,21 +68,21 @@
         </div>
     </section>
     <section class="editor-section editor-final-section" aria-labelledby="editor-preview-heading">
-        <div><h2 id="editor-preview-heading">4. Preview &amp; finish</h2></div>
+        <div><h2 id="editor-preview-heading">@Text["ListingEditor.PreviewAndFinish"]</h2></div>
         <div class="editor-action-row">
-        <div class="owner-form-actions editor-preview-actions"><button class="btn btn-outline-primary" type="button" data-editor-preview="card">Browse Card Preview</button><button class="btn btn-outline-primary" type="button" data-editor-preview="details">Listing Details Preview</button></div>
+        <div class="owner-form-actions editor-preview-actions"><button class="btn btn-outline-primary" type="button" data-editor-preview="card">@Text["ListingEditor.BrowseCardPreview"]</button><button class="btn btn-outline-primary" type="button" data-editor-preview="details">@Text["ListingEditor.DetailsPreview"]</button></div>
         @if (!archived)
         {
-            <div class="editor-finish-actions"><button class="btn btn-primary" type="button" data-editor-review data-editor-write disabled>@(status == ListingStatus.Published ? "Review changes" : "Upload Listing")</button><button class="btn btn-outline-primary" type="submit" form="editor-fields" data-editor-save data-editor-write disabled>@(status == ListingStatus.Published ? "Save changes" : "Save Draft")</button></div>
+            <div class="editor-finish-actions"><button class="btn btn-primary" type="button" data-editor-review data-editor-write disabled>@(status == ListingStatus.Published ? Text["ListingEditor.ReviewChanges"].Value : Text["ListingEditor.UploadListing"].Value)</button><button class="btn btn-outline-primary" type="submit" form="editor-fields" data-editor-save data-editor-write disabled>@(status == ListingStatus.Published ? Text["Common.SaveChanges"].Value : Text["ListingEditor.SaveDraft"].Value)</button></div>
         }
         </div>
         @if (!archived && listingId > 0) { <div class="editor-archive"><partial name="_ArchiveListing" model="listingId" /></div> }
     </section>
     <partial name="_EditorPreviews" />
     <template data-photo-template>
-        <article class="editor-photo"><div class="listing-card-media" data-order-surface tabindex="-1"><img class="listing-card-image" alt="" /></div><div class="editor-photo-caption"><span data-photo-label></span><span class="badge-soft" data-primary-badge>Primary</span></div><div class="editor-photo-actions"><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="primary">Make primary</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="up" aria-label="Move photo up">↑</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="down" aria-label="Move photo down">↓</button></div><details class="editor-photo-remove"><summary>Remove photo</summary><p class="form-text">Remove this photo from the listing and storage?</p><button type="button" class="btn btn-sm btn-outline-danger" data-photo-action="delete">Confirm removal</button></details></article>
+        <article class="editor-photo"><div class="listing-card-media" data-order-surface tabindex="-1"><img class="listing-card-image" alt="" /></div><div class="editor-photo-caption"><span data-photo-label></span><span class="badge-soft" data-primary-badge>@Text["ListingImages.Primary"]</span></div><div class="editor-photo-actions"><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="primary">@Text["ListingImages.MakePrimary"]</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="up" aria-label="@Text["ListingImages.MovePhotoUp"]">↑</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="down" aria-label="@Text["ListingImages.MovePhotoDown"]">↓</button></div><details class="editor-photo-remove"><summary>@Text["ListingImages.RemovePhoto"]</summary><p class="form-text">@Text["ListingImages.RemovePhotoPrompt"]</p><button type="button" class="btn btn-sm btn-outline-danger" data-photo-action="delete">@Text["Common.ConfirmRemoval"]</button></details></article>
     </template>
     <template data-period-template>
-        <article class="editor-period"><p class="editor-period-range"></p><p class="editor-period-reason text-muted"></p><details data-period-edit><summary>Edit dates</summary><form data-editor-period class="editor-date-form" method="post"><div class="editor-date-inputs"><div><label class="form-label">First Day<input name="StartDate" type="date" class="form-control" required /></label></div><div><label class="form-label">Last Day<input name="LastDay" max="9999-12-30" type="date" class="form-control" required /></label></div></div><label class="form-label mt-2" data-reason-label>Reason (optional, private)<input name="Reason" class="form-control" maxlength="250" /></label><button class="btn btn-outline-primary mt-3" type="submit">Save dates</button></form></details><details data-period-remove><summary>Remove period</summary><p class="form-text">Remove this period? Existing rental and publication requirements still apply.</p><button type="button" class="btn btn-sm btn-outline-danger" data-period-delete>Confirm removal</button></details></article>
+        <article class="editor-period"><p class="editor-period-range"></p><p class="editor-period-reason text-muted"></p><details data-period-edit><summary>@Text["Availability.EditDates"]</summary><form data-editor-period class="editor-date-form" method="post"><div class="editor-date-inputs"><div><label class="form-label">@Text["Availability.FirstDay"]<input name="StartDate" type="date" class="form-control" required /></label></div><div><label class="form-label">@Text["Availability.LastDay"]<input name="LastDay" max="9999-12-30" type="date" class="form-control" required /></label></div></div><label class="form-label mt-2" data-reason-label>@Text["Availability.ReasonOptionalPrivate"]<input name="Reason" class="form-control" maxlength="250" /></label><button class="btn btn-outline-primary mt-3" type="submit">@Text["Availability.SaveDates"]</button></form></details><details data-period-remove><summary>@Text["Availability.RemovePeriod"]</summary><p class="form-text">@Text["Availability.RemovePeriodHelp"]</p><button type="button" class="btn btn-sm btn-outline-danger" data-period-delete>@Text["Common.ConfirmRemoval"]</button></details></article>
     </template>
 </div>

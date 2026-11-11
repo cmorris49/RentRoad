@@ -1,5 +1,7 @@
 using System.Globalization;
 using RentRoad.Services.Listings;
+using RentRoad.Models.Enums;
+using System.Text.Json.Serialization;
 
 namespace RentRoad.ViewModels.Listings;
 
@@ -7,6 +9,14 @@ namespace RentRoad.ViewModels.Listings;
 public sealed record ListingEditorFieldsViewModel(string? Title, string? Description, string? Category, string? Condition,
     string? DailyPriceCad, string? PickupArea, double? Latitude, double? Longitude)
 {
+    /// <summary>Supplies a translated category label for Razor review without altering the editor's enum string.</summary>
+    [JsonIgnore]
+    public string CategoryLabel => ListingDisplayText.Category(Enum.TryParse<ListingCategory>(Category, out var value) ? value : null);
+
+    /// <summary>Supplies a translated condition label for Razor review without altering the editor's enum string.</summary>
+    [JsonIgnore]
+    public string ConditionLabel => ListingDisplayText.Condition(Enum.TryParse<ItemCondition>(Condition, out var value) ? value : null);
+
     /// <summary>Preserves integer-cent precision when hydrating an owner editor or reviewed snapshot.</summary>
     public static ListingEditorFieldsViewModel FromUpdate(ListingUpdate input) => new(input.Title, input.Description,
         input.Category?.ToString(), input.Condition?.ToString(), input.DailyPriceCents.HasValue

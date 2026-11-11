@@ -5,8 +5,8 @@
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger" role="alert" aria-labelledby="listing-errors-heading">
-        <h2 id="listing-errors-heading" class="h5">We couldn’t complete that action.</h2>
-        <p>Your entered details are still here. Review the messages below and try again.</p>
+        <h2 id="listing-errors-heading" class="h5">@Text["Common.ActionFailed"]</h2>
+        <p>@Text["ListingEditor.ValidationHelp"]</p>
         <div asp-validation-summary="All"></div>
     </div>
 }

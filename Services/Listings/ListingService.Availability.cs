@@ -1,3 +1,4 @@
+using RentRoad.Localization;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,7 @@ public sealed partial class ListingService
             if (snapshot is null)
             {
                 return ListingServiceResult<Listing>.Failure(ListingServiceStatus.ValidationFailed,
-                    new ListingValidationError(nameof(Listing.AvailabilityWindows), "Supply the replacement windows, or an empty collection to clear them."));
+                    new ListingValidationError(nameof(Listing.AvailabilityWindows), SharedResource.Get("AvailabilityFeedback.SupplyTheReplacementWindowsOrAnEmptyCollectionTo")));
             }
             var listing = owned.Value!;
             var blocks = await service.context.AvailabilityBlocks.AsNoTracking().Where(block => block.ListingId == listingId).ToListAsync(token);
@@ -152,12 +153,12 @@ public sealed partial class ListingService
         if (windowId <= 0)
         {
             return ListingServiceResult<AvailabilityWindow>.Failure(ListingServiceStatus.ValidationFailed,
-                new ListingValidationError(nameof(AvailabilityWindow.AvailabilityWindowId), "Window ID must be positive."));
+                new ListingValidationError(nameof(AvailabilityWindow.AvailabilityWindowId), SharedResource.Get("AvailabilityFeedback.WindowIDMustBePositive")));
         }
         if (!remove && period is null)
         {
             return ListingServiceResult<AvailabilityWindow>.Failure(ListingServiceStatus.ValidationFailed,
-                new ListingValidationError(nameof(Listing.AvailabilityWindows), "Availability dates are required."));
+                new ListingValidationError(nameof(Listing.AvailabilityWindows), SharedResource.Get("AvailabilityFeedback.AvailabilityDatesAreRequired")));
         }
 
         var stored = await context.AvailabilityWindows.Where(window => window.ListingId == listingId)
@@ -166,7 +167,7 @@ public sealed partial class ListingService
         if (windowId.HasValue && existing is null)
         {
             return ListingServiceResult<AvailabilityWindow>.Failure(ListingServiceStatus.NotFound,
-                new ListingValidationError(nameof(AvailabilityWindow.AvailabilityWindowId), "The availability window could not be found for this listing."));
+                new ListingValidationError(nameof(AvailabilityWindow.AvailabilityWindowId), SharedResource.Get("AvailabilityFeedback.TheAvailabilityWindowCouldNotBeFoundForThis")));
         }
 
         var proposed = stored.Where(window => window.AvailabilityWindowId != windowId)
@@ -216,12 +217,12 @@ public sealed partial class ListingService
         if (blockId <= 0)
         {
             return ListingServiceResult<AvailabilityBlock>.Failure(ListingServiceStatus.ValidationFailed,
-                new ListingValidationError(nameof(AvailabilityBlock.AvailabilityBlockId), "Block ID must be positive."));
+                new ListingValidationError(nameof(AvailabilityBlock.AvailabilityBlockId), SharedResource.Get("AvailabilityFeedback.BlockIDMustBePositive")));
         }
         if (!remove && details is null)
         {
             return ListingServiceResult<AvailabilityBlock>.Failure(ListingServiceStatus.ValidationFailed,
-                new ListingValidationError(nameof(Listing.AvailabilityBlocks), "Unavailable dates are required."));
+                new ListingValidationError(nameof(Listing.AvailabilityBlocks), SharedResource.Get("AvailabilityFeedback.UnavailableDatesAreRequired")));
         }
 
         var stored = await context.AvailabilityBlocks.Where(block => block.ListingId == listingId).ToListAsync(cancellationToken);
@@ -229,7 +230,7 @@ public sealed partial class ListingService
         if (blockId.HasValue && existing is null)
         {
             return ListingServiceResult<AvailabilityBlock>.Failure(ListingServiceStatus.NotFound,
-                new ListingValidationError(nameof(AvailabilityBlock.AvailabilityBlockId), "The availability block could not be found for this listing."));
+                new ListingValidationError(nameof(AvailabilityBlock.AvailabilityBlockId), SharedResource.Get("AvailabilityFeedback.TheAvailabilityBlockCouldNotBeFoundForThis")));
         }
 
         var changed = remove ? existing! : new AvailabilityBlock
@@ -293,16 +294,16 @@ public sealed partial class ListingService
         {
             if (block.StartDate == default || block.EndDate == default || block.StartDate >= block.EndDate)
             {
-                errors.Add(new(nameof(Listing.AvailabilityBlocks), "Choose unavailable dates with the start before the end."));
+                errors.Add(new(nameof(Listing.AvailabilityBlocks), SharedResource.Get("AvailabilityFeedback.ChooseUnavailableDatesWithTheStartBeforeTheEnd")));
             }
             else if (!seenBlocks.Add(new ListingAvailabilityPeriod(block.StartDate, block.EndDate)))
             {
-                errors.Add(new(nameof(Listing.AvailabilityBlocks), "An availability block with these dates already exists."));
+                errors.Add(new(nameof(Listing.AvailabilityBlocks), SharedResource.Get("AvailabilityFeedback.AnAvailabilityBlockWithTheseDatesAlreadyExists")));
             }
             var results = new List<ValidationResult>();
             Validator.TryValidateObject(block, new ValidationContext(block), results, validateAllProperties: true);
             errors.AddRange(results.SelectMany(result => result.MemberNames.DefaultIfEmpty(nameof(Listing.AvailabilityBlocks))
-                .Select(field => new ListingValidationError(field, result.ErrorMessage ?? "The block value is invalid."))));
+                .Select(field => new ListingValidationError(field, ResourceValidation.Message(block, field)))));
         }
         if (errors.Count > 0)
         {
@@ -318,13 +319,13 @@ public sealed partial class ListingService
                 || blocks.Any(block => block.StartDate < reservation.EndDate && reservation.StartDate < block.EndDate))
             {
                 return ListingServiceResult<bool>.Failure(ListingServiceStatus.Conflict,
-                    new ListingValidationError(nameof(Listing.RentalRequests), "This change would invalidate an approved or active rental reservation."));
+                    new ListingValidationError(nameof(Listing.RentalRequests), SharedResource.Get("AvailabilityFeedback.ThisChangeWouldInvalidateAnApprovedOrActiveRental")));
             }
         }
         if (status != ListingStatus.Draft && windows.Count == 0)
         {
             return ListingServiceResult<bool>.Failure(ListingServiceStatus.ValidationFailed,
-                new ListingValidationError(nameof(Listing.AvailabilityWindows), "A published or unavailable listing must retain at least one availability window."));
+                new ListingValidationError(nameof(Listing.AvailabilityWindows), SharedResource.Get("AvailabilityFeedback.WindowRequired")));
         }
         return ListingServiceResult<bool>.Success(true);
     }

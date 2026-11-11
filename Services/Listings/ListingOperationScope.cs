@@ -31,18 +31,18 @@ internal static class ListingOperationScope
         if (ownerId is null)
         {
             return ListingServiceResult<Listing>.Failure(ListingServiceStatus.Unauthenticated,
-                new ListingValidationError(nameof(Listing.OwnerId), "Sign in to manage your listings."));
+                new ListingValidationError(nameof(Listing.OwnerId), SharedResource.Get("ListingValidation.SignInToManageYourListings")));
         }
         var listing = await context.Listings.SingleOrDefaultAsync(item => item.ListingId == listingId, cancellationToken);
         if (listing is null)
         {
             return ListingServiceResult<Listing>.Failure(ListingServiceStatus.NotFound,
-                new ListingValidationError(nameof(Listing.ListingId), "The listing could not be found."));
+                new ListingValidationError(nameof(Listing.ListingId), SharedResource.Get("ListingValidation.TheListingCouldNotBeFound")));
         }
         return string.Equals(listing.OwnerId, ownerId, StringComparison.Ordinal)
             ? ListingServiceResult<Listing>.Success(listing)
             : ListingServiceResult<Listing>.Failure(ListingServiceStatus.Forbidden,
-                new ListingValidationError(nameof(Listing.OwnerId), "Only the listing owner can perform this action."));
+                new ListingValidationError(nameof(Listing.OwnerId), SharedResource.Get("ListingValidation.OnlyTheListingOwnerCanPerformThisAction")));
     }
 
     /// <summary>
@@ -61,12 +61,12 @@ internal static class ListingOperationScope
         if (GetOwnerId(user) is null)
         {
             return ListingServiceResult<bool>.Failure(ListingServiceStatus.Unauthenticated,
-                new ListingValidationError(nameof(Listing.OwnerId), "Sign in to manage your listings."));
+                new ListingValidationError(nameof(Listing.OwnerId), SharedResource.Get("ListingValidation.SignInToManageYourListings")));
         }
         return context.Database.CurrentTransaction is not null || TrackedEntries(context, listingId)
             .Any(entry => entry.State != EntityState.Unchanged && (includeImageChanges || entry.Entity is not ListingImage))
             ? ListingServiceResult<bool>.Failure(ListingServiceStatus.Conflict,
-                new ListingValidationError(nameof(Listing.ListingId), "Save or discard pending listing changes and complete the current transaction before modifying the listing."))
+                new ListingValidationError(nameof(Listing.ListingId), SharedResource.Get("ListingValidation.SaveOrDiscardPendingListingChangesAndCompleteThe")))
             : ListingServiceResult<bool>.Success(true);
     }
 

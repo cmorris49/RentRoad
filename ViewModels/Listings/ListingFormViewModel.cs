@@ -46,12 +46,12 @@ public class ListingFormViewModel
         }
         if (amount > long.MaxValue / 100m || amount < long.MinValue / 100m)
         {
-            throw new FormatException("Enter a daily price within the supported range.");
+            throw new FormatException(SharedResource.Get("ListingEditor.PriceRange"));
         }
         var cents = amount.Value * 100m;
         if (cents != decimal.Truncate(cents))
         {
-            throw new FormatException("Enter a daily price with no more than two decimal places.");
+            throw new FormatException(SharedResource.Get("ListingEditor.PricePrecision"));
         }
         return (long)cents;
     }

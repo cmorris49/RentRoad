@@ -1,18 +1,18 @@
 @model ListingAvailabilityManagementViewModel
 @{
-    ViewData["Title"] = "Manage listing availability";
-    var title = string.IsNullOrWhiteSpace(Model.ListingTitle) ? "Untitled listing" : Model.ListingTitle;
+    ViewData["Title"] = Text["Availability.PageTitle"].Value;
+    var title = string.IsNullOrWhiteSpace(Model.ListingTitle) ? Text["MyListings.Untitled"].Value : Model.ListingTitle;
     var success = TempData["ListingAvailabilitySuccess"] as string;
 }
 <div class="owner-page availability-manager">
-    <nav class="availability-navigation" aria-label="Listing management">
-        <a class="owner-back-link" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId">← Back to Edit Listing</a>
-        <a class="btn btn-outline-primary" asp-controller="ListingImages" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.CanEdit ? "Manage images" : "View images")</a>
+    <nav class="availability-navigation" aria-label="@Text["MyListings.ManagementLabel"]">
+        <a class="owner-back-link" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId">@Text["ListingEditor.BackToEdit"]</a>
+        <a class="btn btn-outline-primary" asp-controller="ListingImages" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.CanEdit ? Text["ListingImages.Manage"].Value : Text["ListingImages.View"].Value)</a>
     </nav>
     <header class="page-header owner-page-heading">
         <div>
-            <p class="eyebrow">Make time for sharing</p>
-            <h1>Listing availability</h1>
+            <p class="eyebrow">@Text["Availability.Eyebrow"]</p>
+            <h1>@Text["Availability.ListingHeading"]</h1>
             <p class="availability-listing-title">@title</p>
         </div>
         <partial name="~/Views/MyListings/_ListingStatus.cshtml" model="Model.Status" />
@@ -24,26 +24,26 @@
     @if (!ViewData.ModelState.IsValid || Model.Feedback is not null)
     {
         <div class="alert @(Model.Feedback?.Status == ListingServiceStatus.Conflict ? "alert-warning" : "alert-danger")" role="alert" aria-labelledby="availability-error-heading">
-            <h2 id="availability-error-heading" class="h5">Your availability change was not saved.</h2>
-            <p>Review the messages below before trying again.</p>
+            <h2 id="availability-error-heading" class="h5">@Text["Availability.ChangeFailed"]</h2>
+            <p>@Text["Availability.FailureHelp"]</p>
             <div asp-validation-summary="All"></div>
         </div>
     }
     @if (!Model.CanEdit)
     {
-        <div class="alert alert-info">This listing is archived. Its availability and private notes are read-only.</div>
+        <div class="alert alert-info">@Text["Availability.ArchivedHelp"]</div>
     }
-    <p class="text-muted">First Day and Last Day are included. Blocks mark exceptions; existing reservations remain protected.</p>
+    <p class="text-muted">@Text["Availability.ManagementHelp"]</p>
     <div class="availability-sections">
         <section aria-labelledby="windows-heading">
             <div class="owner-section-heading">
-                <h2 id="windows-heading" class="h3">Available to rent <span class="owner-listing-count">(@Model.AvailabilityWindows.Count)</span></h2>
+                <h2 id="windows-heading" class="h3">@Text["Availability.AvailableToRent"] <span class="owner-listing-count">@Text["Common.CountInParentheses", Model.AvailabilityWindows.Count]</span></h2>
             </div>
             @if (Model.CanEdit)
             {
                 <div class="card availability-add-card">
                     <div class="card-body">
-                        <h3 class="h5">Add an availability window</h3>
+                        <h3 class="h5">@Text["Availability.AddWindowHeading"]</h3>
                         <partial name="_AvailabilityForm" model="Model.WindowForm()" />
                     </div>
                 </div>
@@ -51,8 +51,8 @@
             @if (Model.AvailabilityWindows.Count == 0)
             {
                 <div class="empty-state">
-                    <h3 class="h5">No availability windows</h3>
-                    <p>@(Model.CanEdit ? "Add the dates when your item can be rented. Your draft can remain unfinished until you are ready to publish." : "No availability windows are saved with this archived listing.")</p>
+                    <h3 class="h5">@Text["Availability.NoWindows"]</h3>
+                    <p>@(Model.CanEdit ? Text["Availability.EmptyWindowsHelp"].Value : Text["Availability.ArchivedEmpty"].Value)</p>
                 </div>
             }
             <div class="availability-periods">
@@ -61,12 +61,12 @@
                     var form = Model.WindowForm(window);
                     <article class="card availability-period" id="availability-window-@window.WindowId" aria-labelledby="window-heading-@window.WindowId">
                         <div class="card-body">
-                            <p class="eyebrow">Available dates</p>
+                            <p class="eyebrow">@Text["Availability.AvailableDates"]</p>
                             <h3 id="window-heading-@window.WindowId" class="h5">@window.Period.DisplayRange</h3>
                             @if (Model.CanEdit)
                             {
                                 <details class="availability-edit" open="@form.IsSubmitted">
-                                    <summary>Edit window<span class="visually-hidden"> @window.WindowId</span></summary>
+                                    <summary>@Text["Availability.EditWindow"]<span class="visually-hidden"> @window.WindowId</span></summary>
                                     <partial name="_AvailabilityForm" model="form" />
                                 </details>
                                 <partial name="_RemoveAvailability" model="form" />
@@ -78,14 +78,14 @@
         </section>
         <section aria-labelledby="blocks-heading">
             <div class="owner-section-heading">
-                <h2 id="blocks-heading" class="h3">Unavailable dates <span class="owner-listing-count">(@Model.AvailabilityBlocks.Count)</span></h2>
+                <h2 id="blocks-heading" class="h3">@Text["Availability.UnavailableDates"] <span class="owner-listing-count">@Text["Common.CountInParentheses", Model.AvailabilityBlocks.Count]</span></h2>
             </div>
-            <p class="text-muted">Block dates when you can’t share your item. Reasons are visible only to you.</p>
+            <p class="text-muted">@Text["Availability.BlockHelp"]</p>
             @if (Model.CanEdit)
             {
                 <div class="card availability-add-card">
                     <div class="card-body">
-                        <h3 class="h5">Add blocked dates</h3>
+                        <h3 class="h5">@Text["Availability.AddBlock"]</h3>
                         <partial name="_AvailabilityForm" model="Model.BlockForm()" />
                     </div>
                 </div>
@@ -93,8 +93,8 @@
             @if (Model.AvailabilityBlocks.Count == 0)
             {
                 <div class="empty-state">
-                    <h3 class="h5">No blocked dates</h3>
-                    <p>You have no exceptions saved for this listing. Reservations are protected separately and do not need to be entered as blocks.</p>
+                    <h3 class="h5">@Text["Availability.NoBlocks"]</h3>
+                    <p>@Text["Availability.NoBlocksHelp"]</p>
                 </div>
             }
             <div class="availability-periods">
@@ -103,16 +103,16 @@
                     var form = Model.BlockForm(block);
                     <article class="card availability-period" id="availability-block-@block.BlockId" aria-labelledby="block-heading-@block.BlockId">
                         <div class="card-body">
-                            <p class="eyebrow">Blocked dates</p>
+                            <p class="eyebrow">@Text["Availability.BlockedDates"]</p>
                             <h3 id="block-heading-@block.BlockId" class="h5">@block.Period.DisplayRange</h3>
                             @if (!string.IsNullOrWhiteSpace(block.Reason))
                             {
-                                <p class="availability-reason"><span class="text-muted">Private reason:</span> @block.Reason</p>
+                                <p class="availability-reason"><span class="text-muted">@Text["Availability.PrivateReason"]</span> @block.Reason</p>
                             }
                             @if (Model.CanEdit)
                             {
                                 <details class="availability-edit" open="@form.IsSubmitted">
-                                    <summary>Edit block<span class="visually-hidden"> @block.BlockId</span></summary>
+                                    <summary>@Text["Availability.EditBlock"]<span class="visually-hidden"> @block.BlockId</span></summary>
                                     <partial name="_AvailabilityForm" model="form" />
                                 </details>
                                 <partial name="_RemoveAvailability" model="form" />

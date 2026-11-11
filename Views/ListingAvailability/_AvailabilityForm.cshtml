@@ -6,5 +6,5 @@
 }
 <form id="@Model.FormId-form" asp-action="@Model.ActionName" asp-route-listingId="@Model.ListingId" asp-route-windowId="@(Model.IsBlock ? null : Model.RecordId)" asp-route-blockId="@(Model.IsBlock ? Model.RecordId : null)" method="post">
     <partial name="_AvailabilityFields" model="Model" view-data="fieldsData" />
-    <button type="submit" class="btn btn-primary">@(Model.RecordId.HasValue ? "Save dates" : Model.IsBlock ? "Block dates" : "Add window")<span class="visually-hidden">: @(Model.IsBlock ? "unavailable period" : "availability window") @(Model.RecordId?.ToString())</span></button>
+    <button type="submit" class="btn btn-primary">@(Model.RecordId.HasValue ? Text["Availability.SaveDates"].Value : Model.IsBlock ? Text["Availability.BlockDates"].Value : Text["Availability.AddWindow"].Value)<span class="visually-hidden">@Text[Model.IsBlock ? "Availability.BlockFormReference" : "Availability.WindowFormReference", Model.RecordId?.ToString() ?? string.Empty]</span></button>
 </form>
