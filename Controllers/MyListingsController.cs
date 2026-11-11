@@ -108,7 +108,7 @@ public sealed class MyListingsController : Controller
     }
 
     /// <summary>
-    /// Publishes saved listing data through the service's transactional publication validation.
+    /// Opens an owner-only review step; this endpoint never publishes without final confirmation.
     /// </summary>
     [HttpPost("{id:int}/publish")]
     [ValidateAntiForgeryToken]
@@ -118,20 +118,8 @@ public sealed class MyListingsController : Controller
         {
             return ValidationProblem(ModelState);
         }
-        var result = await listings.PublishAsync(id, User, cancellationToken);
-        if (result.IsSuccess)
-        {
-            TempData["ListingSuccess"] = "Your listing is published and visible in Browse Listings.";
-            return RedirectToAction("Edit", new { id = result.Value!.ListingId });
-        }
-        var terminal = TerminalFailure(result.Status);
-        if (terminal is not null)
-        {
-            return terminal;
-        }
-        AddErrors(result.Errors);
-        var errors = result.Status == ListingServiceStatus.ValidationFailed ? result.Errors : null;
-        return await EditFailureAsync(id, null, FailureStatusCode(result.Status), errors, cancellationToken);
+        var result = await listings.GetOwnerListingAsync(id, User, cancellationToken);
+        return result.IsSuccess ? RedirectToAction("SavedReview", "ListingEditor", new { id }) : ReadFailure(result.Status);
     }
 
     /// <summary>

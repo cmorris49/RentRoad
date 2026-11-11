@@ -3,27 +3,20 @@
 @{
     var title = string.IsNullOrWhiteSpace(Model.Title) ? "Rental listing" : Model.Title;
 }
-<a class="listing-card listing-card-link" asp-controller="Listings" asp-action="Details" asp-route-id="@Model.ListingId">
-    <div class="listing-card-media">
-        <div class="listing-image-fallback" aria-hidden="true">
-            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" focusable="false">
-                <rect x="3" y="3" width="26" height="26" rx="4" /><circle cx="11" cy="11" r="3" /><path d="m4 25 8-8 5 5 5-7 7 10" stroke-linejoin="round" />
-            </svg>
-            <span>Photo unavailable</span>
-        </div>
-        @if (Model.CoverImage is not null)
-        {
-            <img class="listing-card-image" data-listing-image src="@Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = Model.CoverImage.ListingImageId })"
-                 alt="@(string.IsNullOrWhiteSpace(Model.CoverImage.AltText) ? title : Model.CoverImage.AltText)" loading="lazy" decoding="async" width="640" height="480" />
-        }
-    </div>
+<article class="listing-card listing-card-link">
+    @{
+        var photos = Model.GalleryPhotos.Count > 0 ? Model.GalleryPhotos : Model.CoverImage is null
+            ? Array.Empty<ListingGalleryPhotoViewModel>()
+            : new[] { new ListingGalleryPhotoViewModel(Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = Model.CoverImage.ListingImageId })!, Model.CoverImage.AltText, Model.CoverImage.IsPrimary) };
+    }
+    <partial name="_ListingGallery" model="@(new ListingGalleryViewModel(title, photos, true, Url.Action("Details", "Listings", new { id = Model.ListingId })))" />
     <div class="card-body listing-card-body">
         <span class="listing-card-category">@ListingDisplayText.Category(Model.Category)</span>
-        <h3 class="listing-card-title">@title</h3>
+        <h3 class="listing-card-title"><a class="stretched-link" asp-controller="Listings" asp-action="Details" asp-route-id="@Model.ListingId">@title</a></h3>
         <p class="listing-card-meta">@ListingDisplayText.Condition(Model.Condition) <span aria-hidden="true">·</span> @(string.IsNullOrWhiteSpace(Model.PickupArea) ? "Pickup area not specified" : Model.PickupArea)</p>
         <div class="listing-card-bottom">
             <p><span class="listing-card-price">@Model.DailyPrice.FormattedAmount</span> <span class="listing-card-meta">/ day</span></p>
             <span class="listing-card-arrow" aria-hidden="true">↗</span>
         </div>
     </div>
-</a>
+</article>

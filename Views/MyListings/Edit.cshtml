@@ -1,95 +1,17 @@
 @model ListingEditViewModel
 @{
-    ViewData["Title"] = Model.Publication.CanEdit ? "Edit listing" : "Archived listing";
-    var canPublish = Model.Publication.Status is ListingStatus.Draft or ListingStatus.Unavailable;
+    ViewData["Title"] = "Edit listing";
+    ViewData["EditorListingId"] = Model.ListingId;
+    ViewData["EditorStatus"] = Model.Publication.Status;
 }
-<div class="owner-page">
-    <a class="owner-back-link" asp-action="Index">← My Listings</a>
-    <header class="page-header owner-page-heading">
-        <div>
-            <p class="eyebrow">A little care goes a long way</p>
-            <h1>@(Model.Publication.CanEdit ? "Edit your listing." : "Your listing history.")</h1>
-            <p>@(Model.Publication.CanEdit ? "Keep the details clear so renters know what to expect." : "This archived listing is preserved for your records.")</p>
-        </div>
-        <partial name="_ListingStatus" model="Model.Publication.Status" />
-    </header>
-    <partial name="_ListingFeedback" />
-    @if (!Model.Publication.CanEdit)
-    {
-        <div class="alert alert-info" role="status">Archived listings are read-only and cannot be published again. Your listing information and rental history are preserved.</div>
-    }
-    else if (Model.Publication.Status == ListingStatus.Unavailable)
-    {
-        <div class="alert alert-info">This listing is unavailable and hidden from public browsing. You can edit its details and publish again once all requirements are met.</div>
-    }
-    <div class="owner-editor-layout">
-        <section class="card owner-editor-card" aria-labelledby="listing-details-heading">
-            <div class="card-body">
-                <h2 id="listing-details-heading" class="h4">Item details</h2>
-                <p class="text-muted">@(!Model.Publication.CanEdit ? "The item details saved with this archived listing." : Model.Publication.Status == ListingStatus.Draft ? "You can leave fields blank while you work on your draft." : "Complete, valid details are required for public browsing.")</p>
-                <form asp-action="Edit" asp-route-id="@Model.ListingId" method="post">
-                    <fieldset disabled="@(!Model.Publication.CanEdit)">
-                        <legend class="visually-hidden">Editable item details</legend>
-                        <partial name="_ListingFields" model="Model" />
-                        @if (Model.Publication.CanEdit)
-                        {
-                            <div class="owner-form-actions">
-                                <button type="submit" class="btn btn-primary">Save changes</button>
-                                <a class="btn btn-outline-primary" asp-action="Index">Back to My Listings</a>
-                            </div>
-                        }
-                    </fieldset>
-                </form>
-            </div>
-        </section>
-        <aside class="owner-guidance" aria-labelledby="publication-heading">
-            <span class="badge-soft">Ready for the marketplace?</span>
-            <h2 id="publication-heading" class="h4">Before you publish</h2>
-            <p>Publication checks your saved listing. Save any changes to the details first.</p>
-            <ul class="owner-requirements">
-                <li>A title and description</li>
-                <li>A valid category and item condition</li>
-                <li>A daily price above CA$0</li>
-                <li>A pickup area</li>
-                <li>At least one stored listing photo</li>
-                <li>Valid availability windows</li>
-            </ul>
-            @if (canPublish)
-            {
-                <form asp-action="Publish" asp-route-id="@Model.ListingId" method="post">
-                    <button class="btn btn-primary w-100" type="submit">@(Model.Publication.Status == ListingStatus.Unavailable ? "Publish again" : "Publish listing")</button>
-                </form>
-            }
-            @if (Model.Publication.Status == ListingStatus.Published)
-            {
-                <a class="btn btn-outline-primary w-100" asp-controller="Listings" asp-action="Details" asp-route-id="@Model.ListingId">View public listing</a>
-            }
-            <div class="owner-next-step" id="listing-photos">
-                <h3 class="h6">Listing photos</h3>
-                <p>At least one stored photo is required before publication. Choose a clear primary photo and add detail shots.</p>
-                <a class="btn btn-outline-primary" asp-controller="ListingImages" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.Publication.CanEdit ? "Manage images" : "View images")</a>
-                @Html.ValidationMessage("Images")
-            </div>
-            <div class="owner-next-step" id="listing-availability">
-                <h3 class="h6">Availability</h3>
-                <p>At least one valid availability window is required before publication. Set your available dates and block any exceptions.</p>
-                <a class="btn btn-outline-primary" asp-controller="ListingAvailability" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.Publication.CanEdit ? "Manage availability" : "View availability")</a>
-                @Html.ValidationMessage("AvailabilityWindows")
-            </div>
-            @if (Model.Publication.CanEdit)
-            {
-                <div class="owner-archive-section">
-                    <h3 class="h6">Finished sharing this item?</h3>
-                    <partial name="_ArchiveListing" model="Model.ListingId" />
-                </div>
-            }
-        </aside>
-    </div>
-</div>
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
-
+<partial name="_ListingEditor" model="Model" />
 @section Styles {
     <link rel="stylesheet" href="~/css/owner-listings.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/listing-editor.css" asp-append-version="true" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/listing-upload-queue.js" asp-append-version="true" defer></script>
+    <script src="~/js/listing-image-ordering.js" asp-append-version="true" defer></script>
+    <script src="~/js/listing-editor.js" asp-append-version="true" defer></script>
 }

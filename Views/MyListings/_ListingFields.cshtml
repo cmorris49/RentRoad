@@ -8,14 +8,12 @@
 <div class="owner-form-fields">
     <div class="owner-field-wide">
         <label asp-for="Title" class="form-label">Listing title</label>
-        <input asp-for="Title" class="form-control" maxlength="150" placeholder="e.g. Cordless drill with carry case" aria-describedby="title-help title-error" />
-        <div id="title-help" class="form-text">Give your item a clear, descriptive name. Up to 150 characters.</div>
+        <input asp-for="Title" class="form-control" maxlength="150" placeholder="e.g. Cordless drill with carry case" aria-describedby="title-error" />
         <span asp-validation-for="Title" id="title-error"></span>
     </div>
     <div class="owner-field-wide">
         <label asp-for="Description" class="form-label">Description</label>
-        <textarea asp-for="Description" class="form-control" rows="6" maxlength="2000" placeholder="Describe your item, what’s included, and anything a renter should know." aria-describedby="description-help description-error"></textarea>
-        <div id="description-help" class="form-text">Mention useful details, included accessories and any wear. Up to 2,000 characters.</div>
+        <textarea asp-for="Description" class="form-control" rows="6" maxlength="2000" placeholder="Describe your item, what’s included, and anything a renter should know." aria-describedby="description-error"></textarea>
         <span asp-validation-for="Description" id="description-error"></span>
     </div>
     <div>
@@ -44,9 +42,8 @@
         <label asp-for="DailyPriceCad" class="form-label">Daily price (CAD)</label>
         <div class="input-group">
             <span class="input-group-text" aria-hidden="true">CA$</span>
-            <input asp-for="DailyPriceCad" asp-format="{0:0.00}" type="number" step="0.01" min="0" inputmode="decimal" class="form-control @(priceInvalid ? "input-validation-error" : null)" placeholder="0.00" aria-invalid="@(priceInvalid ? "true" : null)" aria-describedby="price-help price-errors" />
+            <input asp-for="DailyPriceCad" asp-format="{0:0.00}" type="number" step="0.01" min="0" inputmode="decimal" class="form-control @(priceInvalid ? "input-validation-error" : null)" placeholder="0.00" aria-invalid="@(priceInvalid ? "true" : null)" aria-describedby="price-errors" />
         </div>
-        <div id="price-help" class="form-text">Per day, with up to two decimal places. A price above CA$0 is needed to publish.</div>
         <div id="price-errors">
             <span asp-validation-for="DailyPriceCad"></span>
             <span asp-validation-for="DailyPriceCents"></span>

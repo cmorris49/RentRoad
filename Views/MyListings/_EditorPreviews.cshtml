@@ -1,0 +1,20 @@
+<dialog class="editor-preview-dialog" data-editor-dialog aria-labelledby="editor-dialog-title">
+    <header class="editor-dialog-header"><div><p class="eyebrow">RentRoad</p><h2 id="editor-dialog-title" class="h4">Listing preview</h2></div><button class="btn btn-outline-primary" type="button" data-editor-close>Close</button></header>
+    <div class="editor-dialog-body">
+        <p class="text-muted" data-preview-context>Private preview · current form values</p>
+        <div class="alert alert-warning" data-review-errors hidden><h3 class="h5">Still needed before publication</h3><ul></ul></div>
+        <div data-card-preview class="editor-card-preview">
+            <article class="listing-card"><div data-preview-card-gallery></div><div class="card-body listing-card-body"><span class="listing-card-category" data-preview-category></span><h3 class="listing-card-title" data-preview-title></h3><p class="listing-card-meta"><span data-preview-condition></span> · <span data-preview-location></span></p><div class="listing-card-bottom"><p><span class="listing-card-price" data-preview-price></span> <span class="listing-card-meta">/ day</span></p><span class="listing-card-arrow" aria-hidden="true">↗</span></div></div></article>
+        </div>
+        <div data-details-preview>
+            <div class="editor-detail-preview">
+                <section class="editor-preview-gallery"><div data-preview-details-gallery></div></section>
+                <section><p class="eyebrow" data-preview-category></p><h3 data-preview-title></h3><p data-preview-location></p><dl class="editor-preview-facts"><div><dt>Condition</dt><dd data-preview-condition></dd></div><div><dt>Shared by</dt><dd data-preview-owner></dd></div></dl><p class="listing-card-price" data-preview-price></p><p class="text-muted">CAD per day</p></section>
+            </div>
+            <section class="editor-preview-section"><h3 class="h5">About this item</h3><p class="editor-preview-description" data-preview-description></p></section>
+            <section class="editor-preview-section"><h3 class="h5">Availability</h3><div class="editor-date-columns"><div><h4 class="h6">Available to rent</h4><ul data-preview-windows></ul></div><div><h4 class="h6">Blocked dates</h4><ul data-preview-blocks></ul></div></div></section>
+        </div>
+        <div class="alert alert-success" data-review-success hidden></div>
+    </div>
+    <footer class="editor-dialog-footer" data-review-footer hidden><button class="btn btn-primary" type="button" data-editor-confirm>Confirm &amp; publish</button><button class="btn btn-outline-primary" type="button" data-editor-close>Keep editing</button></footer>
+</dialog>

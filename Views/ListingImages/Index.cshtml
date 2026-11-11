@@ -8,11 +8,11 @@
 <div class="owner-page image-manager">
     <nav class="owner-listing-actions mb-4" aria-label="Listing management">
         <a class="owner-back-link mb-0" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId">← Back to Edit Listing</a>
-        <a class="btn btn-outline-primary" asp-controller="ListingAvailability" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.CanEdit ? "Manage availability" : "View availability")</a>
+        <a class="btn btn-primary" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.ListingId" asp-fragment="editor-photos">Open listing editor</a>
+        <a class="owner-back-link mb-0" asp-controller="ListingAvailability" asp-action="Index" asp-route-listingId="@Model.ListingId">@(Model.CanEdit ? "Manage availability" : "View availability")</a>
     </nav>
     <header class="page-header owner-page-heading">
         <div>
-            <p class="eyebrow">Give renters a closer look</p>
             <h1>Listing images</h1>
             <p class="image-listing-title">@title</p>
         </div>
@@ -56,17 +56,16 @@
     }
     <div class="image-management-layout">
         <aside class="image-upload-panel" aria-labelledby="upload-heading">
-            <div class="card">
-                <div class="card-body">
+            <div>
+                <div>
                     <h2 id="upload-heading" class="h4">@(Model.CanEdit ? "Add an image" : "Listing photos")</h2>
-                    <p>At least one stored listing image is required before publication. A clear primary photo helps renters recognize your item.</p>
                     @if (Model.CanEdit)
                     {
                         <form asp-action="Upload" asp-route-listingId="@Model.ListingId" method="post" enctype="multipart/form-data" data-image-upload>
                             <div class="mb-3">
                                 <label asp-for="File" class="form-label">Choose an image</label>
                                 <input asp-for="File" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="form-control" aria-describedby="upload-help file-error" required data-image-file />
-                                <div id="upload-help" class="form-text">JPEG, PNG or WebP. Maximum @Model.MaxImageSizeLabel per image. Files are checked securely on the server.</div>
+                                <div id="upload-help" class="form-text">JPEG, PNG or WebP · up to @Model.MaxImageSizeLabel.</div>
                                 <span asp-validation-for="File" id="file-error"></span>
                             </div>
                             <figure class="image-upload-preview" data-upload-preview hidden>
@@ -77,25 +76,20 @@
                             <div class="mb-3">
                                 <label asp-for="AltText" class="form-label">Image description <span class="text-muted">(optional)</span></label>
                                 <input asp-for="AltText" maxlength="250" class="form-control" aria-describedby="alt-help alt-error" placeholder="e.g. Drill and accessories in a carry case" />
-                                <div id="alt-help" class="form-text">Briefly describe the photo for people using a screen reader. Up to 250 characters.</div>
+                                <div id="alt-help" class="form-text">Describe the photo for screen readers.</div>
                                 <span asp-validation-for="AltText" id="alt-error"></span>
                             </div>
                             <button type="submit" class="btn btn-primary w-100" data-upload-submit>Upload image</button>
-                            <p class="form-text mt-3 mb-0">Upload one image at a time. Selecting a file only previews it; uploading sends it through RentRoad.</p>
+
                         </form>
                     }
                 </div>
-            </div>
-            <div class="image-management-tip">
-                <h3 class="h6">A useful first impression</h3>
-                <p>Choose a clear view of the whole item as your primary image. Use the remaining photos to show details and included accessories.</p>
-                <p>Moving images changes their display order. Choosing a primary image is a separate action.</p>
             </div>
         </aside>
         <section class="image-collection" aria-labelledby="images-heading">
             <div class="owner-section-heading">
                 <h2 id="images-heading" class="h4">Your images <span class="owner-listing-count">(@Model.Images.Count)</span></h2>
-                <p class="text-muted">In saved display order</p>
+                <p class="text-muted">Saved order · bulk uploads and dragging in the editor</p>
             </div>
             @Html.ValidationMessage("ImageIds")
             @Html.ValidationMessage("Images")
@@ -120,12 +114,7 @@
                         var imageUrl = Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = image.ListingImageId });
                         var photoNumber = index + 1;
                         <article class="card managed-image-card" aria-labelledby="image-heading-@image.ListingImageId">
-                            <a class="listing-card-media managed-image-preview" href="@imageUrl" target="_blank" rel="noopener" aria-label="Open full image @photoNumber in a new tab">
-                                <div class="listing-image-fallback" data-image-fallback aria-hidden="true">
-                                    <span>Photo unavailable</span>
-                                </div>
-                                <img class="listing-card-image" data-listing-image src="@imageUrl" alt="@(string.IsNullOrWhiteSpace(image.AltText) ? $"Listing photo {photoNumber}" : image.AltText)" width="640" height="480" loading="lazy" decoding="async" />
-                            </a>
+                            <partial name="_ListingGallery" model="@(new ListingGalleryViewModel(title, new[] { new ListingGalleryPhotoViewModel(imageUrl!, image.AltText, image.IsPrimary) }))" />
                             <div class="card-body managed-image-body">
                                 <div class="owner-listing-title-row">
                                     <h3 id="image-heading-@image.ListingImageId" class="h5">Image @photoNumber</h3>
@@ -173,11 +162,10 @@
                                         <details class="owner-archive image-delete-confirmation">
                                             <summary class="btn btn-outline-danger">Delete image<span class="visually-hidden"> @photoNumber</span></summary>
                                             <div class="owner-archive-confirmation">
-                                                <p>Delete image @photoNumber from this listing and storage? This cannot be undone. Removing a primary image makes another remaining image primary.</p>
+                                                <p>Delete image @photoNumber? A remaining photo becomes primary if needed.</p>
                                                 <form asp-action="Delete" asp-route-listingId="@Model.ListingId" asp-route-imageId="@image.ListingImageId" method="post">
                                                     <button type="submit" class="btn btn-outline-danger">Confirm delete<span class="visually-hidden">: image @photoNumber</span></button>
                                                 </form>
-                                                <p class="form-text">Close “Delete image” to cancel.</p>
                                             </div>
                                         </details>
                                     }

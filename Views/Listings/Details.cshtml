@@ -18,57 +18,8 @@
     </nav>
 
     <div class="details-layout">
-        <section class="listing-gallery" data-listing-gallery aria-labelledby="photos-heading">
-            <h2 id="photos-heading" class="visually-hidden">Listing photos</h2>
-            @if (photos.Count == 0)
-            {
-                <div class="gallery-empty card">
-                    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-                        <rect x="3" y="3" width="26" height="26" rx="4" /><circle cx="11" cy="11" r="3" /><path d="m4 25 8-8 5 5 5-7 7 10" stroke-linejoin="round" />
-                    </svg>
-                    <p>No photos available</p>
-                </div>
-            }
-            else
-            {
-                <div class="gallery-slides" id="listing-photos">
-                    @for (var index = 0; index < photos.Count; index++)
-                    {
-                        var photo = photos[index];
-                        <figure class="gallery-slide card" id="listing-photo-@photo.ListingImageId" data-gallery-slide>
-                            <div class="listing-card-media gallery-frame">
-                                <div class="listing-image-fallback" data-image-fallback role="img" aria-label="Photo unavailable" aria-hidden="true">
-                                    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-                                        <rect x="3" y="3" width="26" height="26" rx="4" /><circle cx="11" cy="11" r="3" /><path d="m4 25 8-8 5 5 5-7 7 10" stroke-linejoin="round" />
-                                    </svg>
-                                    <span>Photo unavailable</span>
-                                </div>
-                                <img class="listing-card-image" data-listing-image src="@Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = photo.ListingImageId })"
-                                     alt="@(string.IsNullOrWhiteSpace(photo.AltText) ? $"{title}, photo {index + 1}" : photo.AltText)"
-                                     width="1000" height="750" loading="@(index == 0 ? "eager" : "lazy")" decoding="async" />
-                            </div>
-                            <figcaption>Photo @(index + 1) of @photos.Count @if (photo.IsPrimary) { <span class="badge-soft">Primary photo</span> }</figcaption>
-                        </figure>
-                    }
-                </div>
-                @if (photos.Count > 1)
-                {
-                    <nav class="gallery-controls" data-gallery-controls aria-label="Choose a listing photo" hidden>
-                        <div class="gallery-step-controls">
-                            <button class="btn btn-outline-primary" type="button" data-gallery-previous aria-controls="listing-photos" aria-label="Previous photo">←</button>
-                            <p class="gallery-status" data-gallery-status aria-live="polite" aria-atomic="true">Photo 1 of @photos.Count</p>
-                            <button class="btn btn-outline-primary" type="button" data-gallery-next aria-controls="listing-photos" aria-label="Next photo">→</button>
-                        </div>
-                        <div class="gallery-photo-buttons">
-                            @for (var index = 0; index < photos.Count; index++)
-                            {
-                                <button class="btn btn-outline-primary" type="button" data-gallery-index="@index" aria-controls="listing-photo-@photos[index].ListingImageId"
-                                        aria-label="Show photo @(index + 1) of @photos.Count" aria-pressed="@(index == 0 ? "true" : "false")">@(index + 1)</button>
-                            }
-                        </div>
-                    </nav>
-                }
-            }
+        <section class="listing-gallery" aria-label="Listing photos">
+            <partial name="_ListingGallery" model="@(new ListingGalleryViewModel(title, photos.Select(photo => new ListingGalleryPhotoViewModel(Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = photo.ListingImageId })!, photo.AltText, photo.IsPrimary)).ToArray()))" />
         </section>
 
         <section class="listing-overview" aria-labelledby="listing-title">
@@ -149,5 +100,4 @@
 
 @section Scripts {
     <script src="~/js/listing-images.js" asp-append-version="true" defer></script>
-    <script src="~/js/listing-gallery.js" asp-append-version="true" defer></script>
 }

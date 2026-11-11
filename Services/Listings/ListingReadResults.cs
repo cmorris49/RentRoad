@@ -26,7 +26,13 @@ public sealed record ListingSummary(
     string? PickupArea,
     DateTime CreatedAtUtc,
     DateTime? PublishedAtUtc,
-    ListingImageInfo? CoverImage);
+    ListingImageInfo? CoverImage)
+{
+    public IReadOnlyList<ListingThumbnailInfo> Images { get; init; } = Array.Empty<ListingThumbnailInfo>();
+}
+
+/// <summary>Contains ordered public gallery references without storage locations or original filenames.</summary>
+public sealed record ListingThumbnailInfo(int ListingImageId, string? AltText, int DisplayOrder, bool IsPrimary);
 
 /// <summary>
 /// Contains published listing details without account identifiers, Identity entities, or private owner data.

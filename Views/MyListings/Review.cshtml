@@ -1,0 +1,21 @@
+@model ListingEditorReviewViewModel
+@{ ViewData["Title"] = "Review listing"; }
+<div class="listing-editor">
+    <a class="owner-back-link" asp-controller="MyListings" asp-action="Edit" asp-route-id="@Model.State.ListingId">← Keep editing</a>
+    <h1>Review your listing</h1>
+    <p>Nothing is published until you confirm.</p>
+    @if (Model.Errors.Count > 0)
+    {
+        <div class="alert alert-warning" role="alert"><h2 class="h5">Still needed before publication</h2><ul>@foreach (var error in Model.Errors) { <li>@error.Message</li> }</ul></div>
+    }
+    <h2>@Model.State.Fields.Title</h2><p>@Model.State.Fields.Description</p>
+    <dl><dt>Category / condition</dt><dd>@Model.State.Fields.Category / @Model.State.Fields.Condition</dd><dt>Daily price (CAD)</dt><dd>@Model.State.Fields.DailyPriceCad</dd><dt>Pickup area</dt><dd>@Model.State.Fields.PickupArea</dd><dt>Shared by</dt><dd>@Model.State.OwnerDisplayName</dd></dl>
+    <partial name="_ListingGallery" model="@(new ListingGalleryViewModel(Model.State.Fields.Title ?? "Listing", Model.State.Images.OrderByDescending(photo => photo.IsPrimary).ThenBy(photo => photo.DisplayOrder).ThenBy(photo => photo.Id).Select(photo => new ListingGalleryPhotoViewModel(photo.Url, photo.AltText, photo.IsPrimary)).ToArray()))" />
+    <h3 class="h5">Availability</h3><ul>@foreach (var window in Model.State.Windows) { <li>@window.DisplayRange</li> }</ul>
+    <h3 class="h5">Blocked dates</h3><ul>@foreach (var block in Model.State.Blocks) { <li>@block.DisplayRange</li> }</ul>
+    @if (Model.Nonce is not null)
+    {
+        <form asp-controller="ListingEditor" asp-action="Confirm" asp-route-token="@Model.State.Token" method="post"><input type="hidden" name="nonce" value="@Model.Nonce" /><button class="btn btn-primary" type="submit">Confirm &amp; publish</button></form>
+    }
+</div>
+@section Styles { <link rel="stylesheet" href="~/css/listing-editor.css" asp-append-version="true" /> }

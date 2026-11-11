@@ -24,6 +24,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IListingImageService, ListingImageService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ListingEditorSessions>();
+builder.Services.AddScoped<ListingEditorService>();
 builder.Services.AddBlobImageStorage(builder.Configuration);
 
 var app = builder.Build();

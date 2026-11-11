@@ -1,45 +1,17 @@
 @model ListingCreateViewModel
 @{
     ViewData["Title"] = "Create a listing";
+    ViewData["EditorListingId"] = 0;
+    ViewData["EditorStatus"] = ListingStatus.Draft;
 }
-<div class="owner-page">
-    <a class="owner-back-link" asp-action="Index">← My Listings</a>
-    <header class="page-header">
-        <p class="eyebrow">Make room for more possibilities</p>
-        <h1>Share something useful.</h1>
-        <p>Start a listing for an item you own. You can save a draft at any stage.</p>
-    </header>
-    <partial name="_ListingFeedback" />
-    <div class="owner-editor-layout">
-        <section class="card owner-editor-card" aria-labelledby="listing-details-heading">
-            <div class="card-body">
-                <h2 id="listing-details-heading" class="h4">Item details</h2>
-                <p class="text-muted">Every field is optional while your listing is a draft.</p>
-                <form asp-action="Create" method="post">
-                    <partial name="_ListingFields" model="Model" />
-                    <div class="owner-form-actions">
-                        <button type="submit" class="btn btn-primary">Save draft</button>
-                        <a class="btn btn-outline-primary" asp-action="Index">Cancel</a>
-                    </div>
-                </form>
-            </div>
-        </section>
-        <aside class="owner-guidance" aria-labelledby="draft-guide-heading">
-            <span class="badge-soft">A little now, more later</span>
-            <h2 id="draft-guide-heading" class="h4">Your draft, at your pace.</h2>
-            <p>Your draft is visible only to you. Saving it won’t publish it to the marketplace.</p>
-            <ol class="owner-steps">
-                <li><strong>Describe your item.</strong><span>Add the details you have ready.</span></li>
-                <li><strong>Prepare photos and dates.</strong><span>Manage images and availability from Edit Listing after saving your draft.</span></li>
-                <li><strong>Publish when ready.</strong><span>All required details, a stored photo and valid availability are checked before publishing.</span></li>
-            </ol>
-        </aside>
-    </div>
-</div>
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
-
+<partial name="_ListingEditor" model="Model" />
 @section Styles {
     <link rel="stylesheet" href="~/css/owner-listings.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/listing-editor.css" asp-append-version="true" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/listing-upload-queue.js" asp-append-version="true" defer></script>
+    <script src="~/js/listing-image-ordering.js" asp-append-version="true" defer></script>
+    <script src="~/js/listing-editor.js" asp-append-version="true" defer></script>
 }

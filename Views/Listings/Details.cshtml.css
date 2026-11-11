@@ -27,98 +27,7 @@
     gap: clamp(1.5rem, 4vw, 3rem);
 }
 
-.details-page ::deep .gallery-slides {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-}
-
-.details-page ::deep .gallery-slide {
-    margin: 0;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.details-page ::deep .gallery-slide:first-child {
-    grid-column: 1 / -1;
-}
-
-.details-page ::deep [data-gallery-ready] .gallery-slides {
-    display: block;
-}
-
-.details-page ::deep .gallery-frame {
-    aspect-ratio: 4 / 3;
-}
-
-.details-page ::deep .gallery-frame .listing-card-image {
-    object-fit: contain;
-}
-
-.details-page ::deep .gallery-slide figcaption {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: .5rem;
-    padding: .875rem 1rem;
-    color: var(--rr-muted);
-    font-size: .85rem;
-}
-
-.details-page ::deep .gallery-empty {
-    aspect-ratio: 4 / 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    color: var(--rr-muted);
-    background: var(--rr-surface-muted);
-}
-
-.details-page ::deep .gallery-empty svg {
-    width: 48px;
-    height: 48px;
-}
-
-.details-page ::deep .gallery-empty p {
-    margin: 0;
-}
-
-.details-page ::deep .gallery-controls {
-    margin-top: 1rem;
-}
-
-.details-page ::deep .gallery-step-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: .75rem;
-}
-
-.details-page ::deep .gallery-status {
-    margin: 0;
-    color: var(--rr-muted);
-    font-size: .875rem;
-}
-
-.details-page ::deep .gallery-photo-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: .5rem;
-    margin-top: .875rem;
-}
-
-.details-page ::deep .gallery-photo-buttons .btn {
-    min-width: 44px;
-}
-
-.details-page ::deep .gallery-photo-buttons .btn[aria-pressed="true"] {
-    color: var(--rr-on-primary);
-    background: var(--rr-primary);
-    border-color: var(--rr-primary);
-}
+.details-page ::deep .listing-gallery { min-width: 0; }
 
 .details-page ::deep .listing-overview h1 {
     font-size: clamp(2rem, 3.5vw, 2.75rem);
@@ -299,10 +208,6 @@
 @media (max-width: 575.98px) {
     .details-page ::deep .availability-columns {
         grid-template-columns: 1fr;
-    }
-
-    .details-page ::deep .gallery-step-controls .btn {
-        padding-inline: .875rem;
     }
 
     .details-page ::deep .rental-summary > .btn {

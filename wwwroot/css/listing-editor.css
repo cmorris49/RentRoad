@@ -1,0 +1,89 @@
+/* Unified listing editor uses existing marketplace components and theme tokens. */
+.listing-editor { max-width: 1160px; margin-inline: auto; padding-bottom: 2rem; }
+.listing-editor .btn { transition: none; }
+.editor-heading, .editor-section-heading, .editor-dialog-header, .editor-photo-caption { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.editor-heading { align-items: flex-start; }
+.editor-heading h1 { font-size: clamp(2rem, 4vw, 3rem); }
+.editor-save-state { color: var(--rr-muted); margin: 1rem 0 0; }
+.editor-section { padding-block: 2rem; border-bottom: 1px solid var(--rr-border); }
+.editor-section h2 { font-size: 1.4rem; margin-bottom: 1.25rem; }
+.editor-section-heading h2 { margin-bottom: 0; }
+.editor-section-heading { margin-bottom: 1.5rem; }
+.editor-section-heading > span { font-size: .875rem; }
+.editor-final-section { border-bottom: 0; }
+.editor-upload > button { justify-self: start; margin-top: 0; }
+.editor-upload { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1rem; align-items: end; margin-bottom: 1rem; }
+.editor-photo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.editor-photo { min-width: 0; }
+.editor-photo .listing-card-media { border-radius: var(--rr-radius-sm); overflow: hidden; }
+.editor-photo-caption { margin-block: .5rem; font-size: .875rem; }
+.editor-photo-actions { display: flex; flex-wrap: wrap; gap: .35rem; }
+.editor-photo-remove { margin-top: .5rem; }
+.editor-photo-remove summary, .editor-period summary { color: var(--rr-primary); font-weight: 600; cursor: pointer; width: fit-content; }
+.listing-editor summary:focus-visible { outline: 3px solid var(--rr-focus); outline-offset: 3px; }
+.editor-photo-remove summary { font-size: .875rem; color: var(--rr-danger); }
+.editor-date-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+.editor-date-columns > *, .editor-date-inputs > * { min-width: 0; }
+.editor-date-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.editor-date-inputs label { width: 100%; }
+.editor-date-inputs input { min-width: 0; width: 100%; }
+.editor-date-form output { display: block; }
+.editor-date-form { margin-block: 1rem; }
+.editor-period { padding-block: 1rem; border-top: 1px solid var(--rr-border); }
+.editor-period-range { font-weight: 600; margin-bottom: .4rem; }
+.editor-period-reason { font-size: .875rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.editor-period details + details { margin-top: .75rem; }
+.editor-preview-actions { border: 0; margin-top: 0; padding-top: 0; }
+.editor-finish-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.editor-archive { margin-top: 2rem; }
+.editor-preview-dialog { width: min(1050px, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); padding: 0; border: 1px solid var(--rr-border); border-radius: var(--rr-radius); color: var(--rr-text); background: var(--rr-surface); }
+.editor-preview-dialog[data-preview-mode="card"] { width: min(480px, calc(100vw - 2rem)); }
+.editor-preview-dialog::backdrop { background: rgb(0 0 0 / 55%); }
+.editor-dialog-header, .editor-dialog-footer { padding: 1.25rem; background: var(--rr-surface); }
+.editor-dialog-header { border-bottom: 1px solid var(--rr-border); }
+.editor-dialog-header h2, .editor-dialog-header .eyebrow { margin: 0; }
+.editor-dialog-body { padding: 1.5rem; overflow-wrap: anywhere; }
+.editor-dialog-footer { display: flex; flex-wrap: wrap; gap: .75rem; border-top: 1px solid var(--rr-border); }
+.editor-card-preview { max-width: 360px; margin-inline: auto; }
+.editor-detail-preview { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2rem; }
+.editor-preview-facts { display: grid; gap: .75rem; }
+.editor-preview-facts dt { color: var(--rr-muted); font-weight: 400; }
+.editor-preview-section { margin-top: 2rem; border-top: 1px solid var(--rr-border); padding-top: 1.5rem; }
+.editor-preview-description { white-space: pre-wrap; }
+@media (max-width: 991.98px) {
+    .editor-photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 767.98px) {
+    .editor-date-columns, .editor-detail-preview { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+    .editor-photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 575.98px) {
+    .editor-upload, .editor-date-inputs, .listing-editor .owner-form-fields { grid-template-columns: minmax(0, 1fr); }
+    .editor-heading { flex-wrap: wrap; }
+    .editor-section-heading > span { display: none; }
+    .editor-dialog-body { padding: 1rem; }
+    .editor-preview-dialog { width: calc(100vw - 1rem); max-height: calc(100dvh - 1rem); }
+}
+
+/* Photo selection, individual outcomes and persisted ordering. */
+.editor-upload-drop { border: 2px dashed var(--rr-border); padding: 1rem; border-radius: var(--rr-radius-sm); background: var(--rr-surface-muted); }
+.editor-upload-drop.is-drag-over { border-color: var(--rr-primary); outline: 3px solid var(--rr-focus); }
+.editor-upload-summary, .editor-upload-queue { grid-column: 1 / -1; margin: 0; }
+.editor-upload-queue { list-style: none; padding: 0; display: grid; gap: .5rem; }
+.editor-queued-photo { display: flex; align-items: center; gap: .75rem; border-bottom: 1px solid var(--rr-border); padding-block: .75rem; min-width: 0; }
+.editor-queued-photo > img { width: 76px; height: 64px; object-fit: contain; border-radius: var(--rr-radius-sm); background: var(--rr-surface-muted); }
+.editor-queued-photo > div { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.editor-queued-photo p { margin: .2rem 0 0; }
+.editor-queued-photo progress { accent-color: var(--rr-primary); width: min(100%, 280px); }
+.editor-photo { position: relative; border-inline: 3px solid transparent; }
+.editor-photo[data-order-editable] [data-order-surface] { cursor: grab; }
+.editor-order-handle { cursor: grab; touch-action: none; margin-bottom: .5rem; }
+.editor-order-handle:active { cursor: grabbing; }
+.editor-photo.is-dragging { opacity: .45; }
+.editor-photo.drop-before { border-left-color: var(--rr-primary); }
+.editor-photo.drop-after { border-right-color: var(--rr-primary); }
+.editor-preview-gallery { min-width: 0; }
+@media (max-width: 575.98px) {
+    .editor-queued-photo { flex-wrap: wrap; }
+    .editor-queued-photo > div { flex-basis: calc(100% - 100px); }
+}

@@ -187,6 +187,23 @@ public sealed partial class ListingService : IListingService
             : ListingServiceResult<Listing>.Failure(ListingServiceStatus.ValidationFailed, errors.ToArray());
     }
 
+    /// <summary>Validates the proposed review fields with the same stored images and availability used during publication, without writing them.</summary>
+    public async Task<ListingServiceResult<bool>> ValidateProposedForPublicationAsync(int listingId, ClaimsPrincipal? user,
+        ListingUpdate details, CancellationToken cancellationToken = default)
+    {
+        var owned = await GetOwnedListingAsync(listingId, user, cancellationToken);
+        if (!owned.IsSuccess || owned.Value!.Status == ListingStatus.Archived)
+        {
+            return ListingServiceResult<bool>.Failure(owned.IsSuccess ? ListingServiceStatus.InvalidState : owned.Status,
+                new ListingValidationError(string.Empty, owned.IsSuccess ? "Archived listings are read-only." : "The listing is not available to this account."));
+        }
+        var candidate = new Listing { ListingId = listingId, OwnerId = owned.Value.OwnerId, Status = owned.Value.Status };
+        ApplyEditableDetails(details, candidate);
+        var errors = await GetPublicationErrorsAsync(candidate, null, cancellationToken);
+        return errors.Count == 0 ? ListingServiceResult<bool>.Success(true)
+            : ListingServiceResult<bool>.Failure(ListingServiceStatus.ValidationFailed, errors.ToArray());
+    }
+
     /// <summary>
     /// Publishes a valid listing, preserving its creation time and any original publication time.
     /// </summary>
@@ -350,7 +367,7 @@ public sealed partial class ListingService : IListingService
     }
 
     /// <summary>
-    /// Projects only public summary fields and the primary image, falling back to the first displayed image.
+    /// Projects bounded result summaries and ordered gallery references without loading listing or owner entities.
     /// </summary>
     private static IQueryable<ListingSummary> ProjectSummaries(IQueryable<Listing> query) =>
         query.Select(listing => new ListingSummary(
@@ -359,7 +376,12 @@ public sealed partial class ListingService : IListingService
             listing.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.DisplayOrder)
                 .ThenBy(image => image.ListingImageId)
                 .Select(image => new ListingImageInfo(image.ListingImageId, image.ContainerName, image.BlobName,
-                    image.ContentType, image.AltText, image.DisplayOrder, image.IsPrimary)).FirstOrDefault()));
+                    image.ContentType, image.AltText, image.DisplayOrder, image.IsPrimary)).FirstOrDefault())
+            {
+                Images = listing.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.DisplayOrder)
+                    .ThenBy(image => image.ListingImageId)
+                    .Select(image => new ListingThumbnailInfo(image.ListingImageId, image.AltText, image.DisplayOrder, image.IsPrimary)).ToList()
+            });
 
     /// <summary>
     /// Projects one published listing and its public child data without loading an Identity entity or private notes.

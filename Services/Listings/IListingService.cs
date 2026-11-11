@@ -16,6 +16,10 @@ namespace RentRoad.Services.Listings;
 /// </remarks>
 public interface IListingService
 {
+    /// <summary>Checks proposed scalar fields against existing publication rules without saving or publishing them.</summary>
+    Task<ListingServiceResult<bool>> ValidateProposedForPublicationAsync(int listingId, ClaimsPrincipal? user,
+        ListingUpdate details, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Retrieves one owner's listing with ordered windows and private blocks for availability management.
     /// </summary>

@@ -66,6 +66,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.UploadAsync(listingId, User, stream, input.File.ContentType, input.File.FileName, input.AltText, cancellationToken);
         if (result.IsSuccess)
         {
+            if (IsEditorRequest()) return Json(new { status = "Success" });
             TempData["ListingImageSuccess"] = "Your image was uploaded and added to the listing.";
             return RedirectToAction("Index", new { listingId });
         }
@@ -87,6 +88,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.DeleteAsync(listingId, imageId, User, cancellationToken);
         if (result.IsSuccess)
         {
+            if (IsEditorRequest()) return Json(new { status = "Success" });
             TempData["ListingImageSuccess"] = "The image was removed from your listing and storage.";
             return RedirectToAction("Index", new { listingId });
         }
@@ -108,6 +110,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.SetPrimaryAsync(listingId, imageId, User, cancellationToken);
         if (result.IsSuccess)
         {
+            if (IsEditorRequest()) return Json(new { status = "Success" });
             TempData["ListingImageSuccess"] = "Your primary image has been updated.";
             return RedirectToAction("Index", new { listingId });
         }
@@ -134,6 +137,7 @@ public sealed class ListingImagesController : Controller
         var result = await images.SetDisplayOrderAsync(listingId, input.ImageIds, User, cancellationToken);
         if (result.IsSuccess)
         {
+            if (IsEditorRequest()) return Json(new { status = "Success" });
             TempData["ListingImageSuccess"] = "Your image display order has been saved.";
             return RedirectToAction("Index", new { listingId });
         }
@@ -162,6 +166,11 @@ public sealed class ListingImagesController : Controller
         var current = await images.GetImagesAsync(listingId, User, cancellationToken);
         if (!current.IsSuccess)
         {
+            if (IsEditorRequest() && status is ListingServiceStatus.CleanupPending or ListingServiceStatus.ReconciliationRequired)
+            {
+                return StatusCode(StatusCodes.Status409Conflict, new { status = status.ToString(), errors = outcome.Errors,
+                    metadataRemoved = outcome.MetadataRemoved, blobRemoved = outcome.BlobRemoved });
+            }
             var readFailure = TerminalFailure(current.Status);
             if (readFailure is not null && status is not (ListingServiceStatus.CleanupPending or ListingServiceStatus.ReconciliationRequired))
             {
@@ -172,8 +181,17 @@ public sealed class ListingImagesController : Controller
                 title: "The image operation did not fully complete and image metadata could not be refreshed.",
                 extensions: new Dictionary<string, object?> { ["operation"] = outcome });
         }
+        if (IsEditorRequest())
+        {
+            return StatusCode(StatusCodeFor(status), new { status = status.ToString(),
+                errors = ModelState.SelectMany(pair => pair.Value!.Errors.Select(error => new ListingValidationError(pair.Key, error.ErrorMessage))).ToArray(),
+                metadataRemoved = deletion?.MetadataRemoved, blobRemoved = deletion?.BlobRemoved });
+        }
         return await ManagementViewAsync(listingId, current.Value!, upload, order, outcome, StatusCodeFor(status), cancellationToken);
     }
+
+    /// <summary>Identifies a structured editor request without changing standalone owner routes.</summary>
+    private bool IsEditorRequest() => Request.Headers.Accept.ToString().Contains("application/json", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Adds separately authorized listing context and the configured byte limit without exposing Identity or storage configuration.

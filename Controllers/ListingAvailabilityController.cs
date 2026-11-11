@@ -111,6 +111,7 @@ public sealed class ListingAvailabilityController : Controller
             var result = await submit();
             if (result.IsSuccess)
             {
+                if (IsEditorRequest()) return Json(new { status = "Success" });
                 TempData["ListingAvailabilitySuccess"] = operation switch
                 {
                     ListingAvailabilityOperation.CreateWindow => "Your availability window was added.",
@@ -140,11 +141,19 @@ public sealed class ListingAvailabilityController : Controller
         {
             return ReadFailure(current.Status);
         }
+        if (IsEditorRequest())
+        {
+            return StatusCode(FailureStatusCode(status), new { status = status.ToString(),
+                errors = ModelState.SelectMany(pair => pair.Value!.Errors.Select(error => new ListingValidationError(pair.Key, error.ErrorMessage))).ToArray() });
+        }
         var feedback = new ListingAvailabilityFeedbackViewModel(operation, recordId, status, errors.ToArray());
         var view = View("Index", new ListingAvailabilityManagementViewModel(current.Value!, input, replacement, feedback));
         view.StatusCode = FailureStatusCode(status);
         return view;
     }
+
+    /// <summary>Identifies a structured response requested by the integrated editor.</summary>
+    private bool IsEditorRequest() => Request.Headers.Accept.ToString().Contains("application/json", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Maps service period/group errors to submitted date/collection fields while keeping rental/state errors in the summary.
