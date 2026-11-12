@@ -108,6 +108,18 @@
                             {
                                 <p class="form-text mb-0">@Text["RentalManagementUi.HistoricalListingUnavailable"]</p>
                             }
+                            @if (rental.ConversationId is int conversationId)
+                            {
+                                <a class="btn btn-outline-primary" asp-controller="Messages" asp-action="Conversation" asp-route-conversationId="@conversationId">@Text[Model.IsIncoming ? "Conversations.MessageRenter" : "Conversations.MessageOwner"]<span class="visually-hidden">@Text["Common.ItemReference", rental.ListingTitle]</span></a>
+                            }
+                            else if (!Model.IsIncoming && rental.IsListingPublic)
+                            {
+                                <partial name="_MessageOwner" model="@(new RentRoad.ViewModels.Messaging.ConversationStartInputViewModel { ListingId = rental.ListingId })" />
+                            }
+                            else
+                            {
+                                <p class="form-text mb-0">@Text[Model.IsIncoming ? "Conversations.OwnerInitiationHelp" : "Conversations.HistoricalStartUnavailable"]</p>
+                            }
                             @foreach (var action in new[] { ("Cancel", rental.Actions.CanCancel), ("Approve", rental.Actions.CanApprove), ("Decline", rental.Actions.CanDecline), ("Activate", rental.Actions.CanActivate), ("Complete", rental.Actions.CanComplete) })
                             {
                                 @if (action.Item2)

@@ -1,0 +1,15 @@
+@model ConversationContextViewModel
+@if (Model.IsListingPublic)
+{
+    <a class="messages-context" asp-controller="Listings" asp-action="Details" asp-route-id="@Model.ListingId" asp-route-conversationId="@Model.ConversationId" aria-label="@Text["Conversations.ListingContext"]: @Model.ListingTitle" title="@Model.ListingTitle">
+        <partial name="_ContextImage" model="Model" />
+        <span class="messages-context-text"><span class="messages-context-label">@Text["Conversations.ListingContext"]</span><span class="messages-context-title">@Model.ListingTitle</span></span>
+    </a>
+}
+else
+{
+    <div class="messages-context" title="@Text["Conversations.PrivateListing"]">
+        <partial name="_ContextImage" model="Model" />
+        <span class="messages-context-text"><span class="messages-context-title">@Model.ListingTitle</span><span class="messages-listing-status">@Text[$"ListingStatus.{Model.ListingStatus}"]</span></span>
+    </div>
+}

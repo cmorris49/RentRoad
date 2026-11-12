@@ -1,0 +1,5 @@
+@model RentRoad.ViewModels.Messaging.ConversationStartInputViewModel
+<form asp-controller="Messages" asp-action="Start" method="post" class="message-owner-form">
+    <input type="hidden" name="ListingId" value="@Model.ListingId" />
+    <button type="submit" class="btn btn-outline-primary">@Text["Conversations.MessageOwner"]</button>
+</form>

@@ -9,6 +9,7 @@ public sealed class RentalManagementItemViewModel
 {
     public int RentalRequestId { get; }
     public int ListingId { get; }
+    public int? ConversationId { get; }
     /// <summary>Controls public links without granting access to a nonpublic listing or its images.</summary>
     public bool IsListingPublic { get; }
     public string ListingTitle { get; }
@@ -34,6 +35,7 @@ public sealed class RentalManagementItemViewModel
     {
         RentalRequestId = item.RentalRequestId;
         ListingId = item.ListingId;
+        ConversationId = item.ConversationId;
         IsListingPublic = item.IsListingPublic;
         ListingTitle = string.IsNullOrWhiteSpace(item.ListingTitle) ? SharedResource.Get("MyListings.Untitled") : item.ListingTitle;
         PrimaryImage = item.PrimaryImage;

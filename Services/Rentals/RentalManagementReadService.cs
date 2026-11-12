@@ -30,7 +30,7 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
     public Task<RentalHistoryResult> GetIncomingAsync(ClaimsPrincipal? user, RentalHistoryParameters parameters, CancellationToken cancellationToken = default) =>
         ReadAsync(user, parameters, true, cancellationToken);
 
-    /// <summary>Scopes both queries before counting and paging, then computes advisory actions from one UTC date snapshot.</summary>
+    /// <summary>Scopes rental rows before paging and projects matching conversations and advisory actions from one UTC date snapshot.</summary>
     private async Task<RentalHistoryResult> ReadAsync(ClaimsPrincipal? user, RentalHistoryParameters parameters, bool incoming, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -49,6 +49,8 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
                 .Select(request => new
                 {
                     request.RentalRequestId, request.ListingId, request.Listing.Title,
+                    ConversationId = request.Listing.Conversations.Where(conversation => conversation.RenterId == request.RenterId)
+                        .Select(conversation => (int?)conversation.ConversationId).FirstOrDefault(),
                     ImageId = request.Listing.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.DisplayOrder).ThenBy(image => image.ListingImageId)
                         .Select(image => (int?)image.ListingImageId).FirstOrDefault(),
                     ImageAlt = request.Listing.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.DisplayOrder).ThenBy(image => image.ListingImageId)
@@ -68,7 +70,7 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
                     incoming && row.Status == RentalStatus.Pending,
                     incoming && row.Status == RentalStatus.Approved && today >= row.StartDate,
                     incoming && row.Status == RentalStatus.Active && today >= row.EndDate))
-                { IsListingPublic = row.ListingStatus == ListingStatus.Published }).ToArray();
+                { IsListingPublic = row.ListingStatus == ListingStatus.Published, ConversationId = row.ConversationId }).ToArray();
             return new(RentalRequestServiceStatus.Success, new(items, total, parameters.PageNumber, parameters.PageSize), Array.Empty<RentalRequestError>());
         }
         catch (Exception exception) when (exception is DbException or RetryLimitExceededException)

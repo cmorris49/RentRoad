@@ -1,0 +1,18 @@
+@model MessageViewModel
+<li class="message-row @(Model.IsMine ? "message-row-mine" : "message-row-received")" data-message-id="@Model.MessageId" data-mine="@(Model.IsMine ? "true" : "false")" data-read="@(Model.IsRead ? "true" : "false")">
+    <article class="message-bubble">
+        <p class="message-sender">@(Model.IsMine ? Text["Messages.You"].Value : Model.SenderDisplayName)</p>
+        <p class="message-content">@Model.Content</p>
+        <footer class="message-meta">
+            <time datetime="@Model.SentAtUtc.ToString("O", CultureInfo.InvariantCulture)" data-message-time>@Model.SentAtUtc.ToString("g", CultureInfo.CurrentCulture) @Text["Messages.Utc"]</time>
+            @if (Model.IsMine)
+            {
+                <span data-read-status>@Text[Model.IsRead ? "Messages.Read" : "Messages.Saved"]</span>
+            }
+            else if (!Model.IsRead)
+            {
+                <span class="visually-hidden" data-read-status>@Text["Messages.UnreadIncoming"]</span>
+            }
+        </footer>
+    </article>
+</li>

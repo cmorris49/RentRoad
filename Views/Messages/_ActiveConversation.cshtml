@@ -1,0 +1,36 @@
+@model ConversationViewModel
+@{
+    var maximumLength = Model.MaximumContentLength;
+}
+<div class="messages-chat">
+    <header class="messages-chat-header">
+        <div class="messages-participant"><a class="messages-back" asp-action="Index" data-workspace-link>← @Text["Conversations.OtherListings"]</a><h2 class="h4" tabindex="-1" data-conversation-heading>@Model.Conversation.CounterpartyDisplayName</h2><span class="messages-unread" data-unread-count hidden></span></div>
+        <partial name="_ConversationContext" model="Model.Conversation" />
+    </header>
+    <partial name="_ConnectionFeedback" />
+    <div class="messages-history-actions">
+        <button class="btn btn-sm btn-outline-primary" type="button" data-load-older hidden="@(!Model.History.HasMore)">@Text["Messages.LoadOlder"]</button>
+        <p class="visually-hidden" data-history-status role="status"></p>
+    </div>
+    <div class="messages-history" tabindex="0" role="region" aria-label="@Text["Messages.HistoryLabel"]" data-history>
+        <ol class="messages-list" data-message-list>
+            @foreach (var message in Model.History.Messages)
+            {
+                <partial name="_Message" model="message" />
+            }
+        </ol>
+        <p class="messages-empty" data-empty-history hidden="@(Model.History.Messages.Count > 0)">@Text["Conversations.NoMessages"]</p>
+    </div>
+    <button class="messages-latest btn btn-sm btn-outline-primary" type="button" data-latest hidden>@Text["Messages.Latest"]</button>
+    <p class="visually-hidden" role="status" aria-live="polite" data-arrival-status></p>
+    <form class="messages-composer" action="@Model.Endpoints.SendUrl" method="post" data-message-form>
+        @Html.AntiForgeryToken()
+        <label for="message-content" class="visually-hidden">@Text["Messages.ComposeLabel"]</label>
+        <div class="messages-compose-row">
+            <div class="messages-compose-field"><textarea id="message-content" class="form-control" rows="2" maxlength="@maximumLength" aria-describedby="message-help message-count message-feedback" data-message-input disabled></textarea><div class="messages-composer-help"><p id="message-help" class="form-text">@Text["Messages.CharacterHelp", maximumLength]</p><span id="message-count" class="form-text" data-character-count></span></div></div>
+            <button class="btn btn-primary" type="submit" data-send disabled>@Text["Messages.Send"]</button>
+        </div>
+        <div class="messages-composer-feedback"><p id="message-feedback" role="status" aria-live="polite" data-send-status></p><p class="form-text" data-pending-help hidden>@Text["Messages.PendingHelp"]</p><button class="btn btn-sm btn-outline-primary" type="button" data-new-submission hidden>@Text["Messages.NewSubmission"]</button><p class="form-text" data-read-feedback role="status"></p></div>
+        <noscript><p class="form-text">@Text["Messages.JavaScriptRequired"]</p></noscript>
+    </form>
+</div>

@@ -920,3 +920,40 @@ a:hover {
     .account-toggle { max-width: 100%; }
     .account-display-name { max-width: min(14rem, 65vw); }
 }
+
+/* Authenticated messages share the account menu without loading unread counts in Razor. */
+.messages-navigation-link { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.messages-navigation-unread { border-radius: 2rem; padding: .1rem .5rem; background: var(--rr-highlight); color: var(--rr-highlight-text); font-weight: 700; font-size: .75rem; }
+.messages-navigation-unread[hidden] { display: none; }
+.message-owner-form { margin: 0; }
+.message-owner-form .btn { width: 100%; }
+
+.messages-navigation-item { align-self: center; }
+.messages-navigation-link.btn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: .6rem; color: var(--rr-primary); }
+.messages-navigation-link svg { width: 24px; height: 24px; }
+.messages-navigation-link .messages-navigation-unread { position: absolute; inset-block-start: -.25rem; inset-inline-end: -.35rem; min-width: 1.25rem; text-align: center; padding: .1rem .35rem; font-size: .65rem; }
+@media (max-width: 1199.98px) { .account-navigation { flex-direction: row; align-items: center; gap: .75rem; } }
+
+/* Authenticated mailbox and account controls remain visible beside the mobile menu. */
+.account-profile-icon { display: none; }
+.site-nav-container > .account-navigation { flex-direction: row; align-items: center; order: 2; padding: 0; margin-block: 0; border: 0; }
+@media (max-width: 1199.98px) {
+    .site-nav-container > .theme-toggle { order: 1; }
+    .site-nav-container > .navbar-toggler { order: 2; }
+    .site-nav-container > .account-navigation { order: 3; margin-left: 0; gap: .25rem; }
+    .site-nav-container > .navbar-collapse { order: 4; flex-basis: 100%; }
+    .site-nav-container > .account-navigation .messages-navigation-link { display: inline-flex; width: 44px; }
+}
+@media (max-width: 575.98px) {
+    .site-nav-container { gap: .3rem; }
+    .site-nav-container > .account-navigation .account-toggle { display: inline-flex; justify-content: center; align-items: center; width: 44px; height: 44px; padding: .55rem; }
+    .site-nav-container > .account-navigation .account-display-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .site-nav-container > .account-navigation .account-toggle::after { display: none; }
+    .account-profile-icon { display: block; width: 22px; height: 22px; }
+    .site-nav-container > .theme-toggle { min-width: 40px; padding: .4rem; }
+    .site-nav-container > .navbar-toggler { padding-inline: .4rem; }
+}
+@media (max-width: 359.98px) {
+    .site-nav-container > .brand .brand-mark { display: none; }
+    .site-nav-container > .brand { font-size: 1.2rem; }
+}

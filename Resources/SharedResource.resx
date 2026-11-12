@@ -1440,4 +1440,83 @@
   <data name="RentalManagementUi.RestartHistory" xml:space="preserve"><value>Reload rental history</value></data>
   <data name="RentalManagementUi.ViewOwnedListing" xml:space="preserve"><value>View your listing</value></data>
   <data name="RentalManagementUi.HistoricalListingUnavailable" xml:space="preserve"><value>This listing is no longer publicly available. Your rental history is preserved.</value></data>
+  <data name="Messages.SignInRequired" xml:space="preserve"><value>Sign in to use messaging.</value></data>
+  <data name="Messages.InvalidContent" xml:space="preserve"><value>Enter a message containing more than whitespace.</value></data>
+  <data name="Messages.ContentTooLong" xml:space="preserve"><value>Keep your message within {0:N0} characters.</value></data>
+  <data name="Messages.InvalidClientMessageId" xml:space="preserve"><value>Provide a valid submission identifier and keep it unchanged when retrying this message.</value></data>
+  <data name="Messages.DuplicateTokenConflict" xml:space="preserve"><value>This submission identifier was already used for different message text. Use a new identifier for a new message.</value></data>
+  <data name="Messages.InvalidHistoryPagination" xml:space="preserve"><value>Choose a message limit from 1 to {0} and at most one valid history cursor.</value></data>
+  <data name="Messages.InvalidCursor" xml:space="preserve"><value>Choose an observed message from this conversation as the history or read boundary.</value></data>
+  <data name="Messages.TransactionInProgress" xml:space="preserve"><value>Complete the current transaction before changing a conversation.</value></data>
+  <data name="Messages.ReadUnavailable" xml:space="preserve"><value>Messaging could not be loaded. Please try again.</value></data>
+  <data name="Messages.PersistenceUnconfirmed" xml:space="preserve"><value>The messaging change could not be confirmed. Retry with the same inputs.</value></data>
+  <data name="Messages.ConcurrentChange" xml:space="preserve"><value>A concurrent messaging change could not be completed. Retry with the same inputs.</value></data>
+  <data name="Conversations.NotAvailable" xml:space="preserve"><value>This conversation is not available to your account.</value></data>
+  <data name="Conversations.ListingNotAvailable" xml:space="preserve"><value>Start a conversation from an available published listing.</value></data>
+  <data name="Conversations.SelfConversationForbidden" xml:space="preserve"><value>You cannot start a conversation about your own listing.</value></data>
+  <data name="Conversations.InvalidPagination" xml:space="preserve"><value>Choose a supported inbox page and a page size between 1 and {0}.</value></data>
+  <data name="Messages.SubscriptionLimit" xml:space="preserve"><value>Keep at most {0} conversation subscriptions open on this connection.</value></data>
+  <data name="Conversations.InboxTitle" xml:space="preserve"><value>Your messages</value></data>
+  <data name="Conversations.ConversationTitle" xml:space="preserve"><value>Conversation</value></data>
+  <data name="Messages.InvalidAntiforgeryToken" xml:space="preserve"><value>Your messaging request could not be verified. Reload the page and try again.</value></data>
+  <data name="Messages.UnsupportedContentType" xml:space="preserve"><value>Use the documented content type for this messaging endpoint.</value></data>
+  <data name="Conversations.EmptyHeading" xml:space="preserve"><value>A conversation starts here</value></data>
+  <data name="Conversations.EmptyHelp" xml:space="preserve"><value>Your listing conversations will appear here once you start messaging.</value></data>
+  <data name="Conversations.NoMessages" xml:space="preserve"><value>No messages yet. Say hello to get started.</value></data>
+  <data name="Conversations.OtherListings" xml:space="preserve"><value>Back to Messages</value></data>
+  <data name="Conversations.ListingContext" xml:space="preserve"><value>About this listing</value></data>
+  <data name="Conversations.PrivateListing" xml:space="preserve"><value>This listing is no longer publicly available. Your conversation is still accessible.</value></data>
+  <data name="Conversations.UnreadCount" xml:space="preserve"><value>{0} unread messages</value></data>
+  <data name="Conversations.PageSummary" xml:space="preserve"><value>Conversation page {0} of {1}</value></data>
+  <data name="Conversations.Refresh" xml:space="preserve"><value>Refresh conversations</value></data>
+  <data name="Messages.ComposeLabel" xml:space="preserve"><value>Your message</value></data>
+  <data name="Messages.Send" xml:space="preserve"><value>Send</value></data>
+  <data name="Messages.Sending" xml:space="preserve"><value>Sending…</value></data>
+  <data name="Messages.Sent" xml:space="preserve"><value>Message saved.</value></data>
+  <data name="Messages.CharacterHelp" xml:space="preserve"><value>Up to {0} characters. Line breaks are preserved.</value></data>
+  <data name="Messages.CharacterCount" xml:space="preserve"><value>{0} of {1} characters</value></data>
+  <data name="Messages.LoadOlder" xml:space="preserve"><value>Load older messages</value></data>
+  <data name="Messages.LoadingHistory" xml:space="preserve"><value>Loading messages…</value></data>
+  <data name="Messages.NoOlder" xml:space="preserve"><value>You have reached the beginning of this conversation.</value></data>
+  <data name="Messages.HistoryFailed" xml:space="preserve"><value>Messages could not be refreshed. Try again to recover any missed messages.</value></data>
+  <data name="Messages.RetryHistory" xml:space="preserve"><value>Refresh messages</value></data>
+  <data name="Messages.Connecting" xml:space="preserve"><value>Connecting to live updates…</value></data>
+  <data name="Messages.Connected" xml:space="preserve"><value>Live updates connected.</value></data>
+  <data name="Messages.Reconnecting" xml:space="preserve"><value>Reconnecting to live updates. You can still send messages.</value></data>
+  <data name="Messages.Disconnected" xml:space="preserve"><value>Live updates are unavailable. You can still send and refresh messages.</value></data>
+  <data name="Messages.Reconnected" xml:space="preserve"><value>Live updates restored. Checking for missed messages.</value></data>
+  <data name="Messages.RetryConnection" xml:space="preserve"><value>Reconnect live updates</value></data>
+  <data name="Messages.Uncertain" xml:space="preserve"><value>Saving could not be confirmed. Retry this exact message with the same submission identifier.</value></data>
+  <data name="Messages.RetrySend" xml:space="preserve"><value>Retry send</value></data>
+  <data name="Messages.PendingHelp" xml:space="preserve"><value>This message is kept in this tab until saving is confirmed. Retry before composing a different message.</value></data>
+  <data name="Messages.ConflictHelp" xml:space="preserve"><value>The submission identifier conflicts with saved content. Refresh messages before choosing to compose a new message.</value></data>
+  <data name="Messages.NewSubmission" xml:space="preserve"><value>Compose a new message</value></data>
+  <data name="Messages.NewSubmissionConfirm" xml:space="preserve"><value>The previous submission may already be saved. Have you checked the refreshed history before starting a different message?</value></data>
+  <data name="Messages.SessionExpired" xml:space="preserve"><value>Your session is unavailable. Keep this tab open to preserve your draft, sign in again in another tab, then retry.</value></data>
+  <data name="Messages.JavaScriptRequired" xml:space="preserve"><value>Enable JavaScript to send messages and load live updates. Existing messages remain readable.</value></data>
+  <data name="Messages.HistoryLabel" xml:space="preserve"><value>Message history</value></data>
+  <data name="Messages.You" xml:space="preserve"><value>You</value></data>
+  <data name="Messages.Read" xml:space="preserve"><value>Read</value></data>
+  <data name="Messages.Saved" xml:space="preserve"><value>Saved</value></data>
+  <data name="Messages.UnreadIncoming" xml:space="preserve"><value>Unread received message</value></data>
+  <data name="Messages.Latest" xml:space="preserve"><value>Go to latest message</value></data>
+  <data name="Messages.NewMessages" xml:space="preserve"><value>New messages are available below.</value></data>
+  <data name="Messages.ReadFailed" xml:space="preserve"><value>Your read acknowledgment could not be confirmed. It will be retried when this conversation is active.</value></data>
+  <data name="Messages.UnreadFailed" xml:space="preserve"><value>Unread counts could not be refreshed.</value></data>
+  <data name="Messages.SavedWithoutLive" xml:space="preserve"><value>Message saved. Live delivery is temporarily unavailable; recipients can retrieve it from their history.</value></data>
+  <data name="Messages.CryptoUnavailable" xml:space="preserve"><value>Secure submission identifiers are unavailable. Open RentRoad using HTTPS and try again.</value></data>
+  <data name="Messages.Utc" xml:space="preserve"><value>UTC</value></data>
+  <data name="Conversations.MessageOwner" xml:space="preserve"><value>Message Owner</value></data>
+  <data name="Conversations.MessageRenter" xml:space="preserve"><value>Message Renter</value></data>
+  <data name="Conversations.LoginToMessage" xml:space="preserve"><value>Log in to message the owner</value></data>
+  <data name="Conversations.OwnerInitiationHelp" xml:space="preserve"><value>No conversation yet. The renter can start one while the listing is published.</value></data>
+  <data name="Conversations.HistoricalStartUnavailable" xml:space="preserve"><value>This listing is no longer public and has no existing conversation for this rental.</value></data>
+  <data name="Conversations.Navigation" xml:space="preserve"><value>Messages</value></data>
+  <data name="Conversations.UnreadUnavailable" xml:space="preserve"><value>Unread count is temporarily unavailable.</value></data>
+  <data name="Conversations.UnreadCountOne" xml:space="preserve"><value>{0} unread message</value></data>
+  <data name="Conversations.BackToConversation" xml:space="preserve"><value>Back to conversation</value></data>
+  <data name="Conversations.ChooseConversation" xml:space="preserve"><value>Choose a conversation to view your messages.</value></data>
+  <data name="Conversations.CurrentSelection" xml:space="preserve"><value>Selected: {0} · {1}</value></data>
+  <data name="Messages.Switching" xml:space="preserve"><value>Opening conversation…</value></data>
+  <data name="Messages.WaitForSend" xml:space="preserve"><value>Please wait for this submission to finish before switching conversations.</value></data>
 </root>

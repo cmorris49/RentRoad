@@ -14,6 +14,9 @@ public sealed record ListingDetailsViewModel(int ListingId, string? Title, strin
 {
     public bool IsOwnedByViewer { get; init; }
 
+    /// <summary>Contains only an existing participant-authorized conversation matching this public listing.</summary>
+    public int? ReturnConversationId { get; init; }
+
     public IReadOnlyList<ListingSummaryViewModel> SimilarListings { get; init; } = Array.Empty<ListingSummaryViewModel>();
 
     /// <summary>

@@ -1,0 +1,12 @@
+@model ConversationContextViewModel
+<div class="messages-photo">
+    @if (Model.Image is { } image && (Model.IsListingPublic || Model.IsOwner))
+    {
+        <img src="@Url.Action("Get", "ListingImageContent", new { listingId = Model.ListingId, imageId = image.ListingImageId })" alt="@(image.AltText ?? Model.ListingTitle)" loading="lazy" data-listing-image />
+        <span data-image-fallback aria-hidden="true">@Text["Gallery.Unavailable"]</span>
+    }
+    else
+    {
+        <span>@Text["Gallery.Empty"]</span>
+    }
+</div>

@@ -1,0 +1,41 @@
+@model MessagingWorkspaceViewModel
+@if (Model.Inbox.Conversations.Count == 0)
+{
+    <div class="messages-empty"><h2 class="h5">@Text["Conversations.EmptyHeading"]</h2><p>@Text["Conversations.EmptyHelp"]</p></div>
+}
+else
+{
+    <ul class="messages-inbox">
+        @foreach (var item in Model.Inbox.Conversations)
+        {
+            var conversation = item.Conversation;
+            var selected = conversation.ConversationId == Model.ActiveConversation?.Conversation.ConversationId;
+            <li class="messages-inbox-row @(item.UnreadCount > 0 ? "messages-inbox-unread" : null) @(selected ? "is-selected" : null)" data-conversation-id="@conversation.ConversationId">
+                <a class="messages-inbox-open" asp-action="Conversation" asp-route-conversationId="@conversation.ConversationId" asp-route-pageNumber="@Model.Inbox.PageNumber" asp-route-pageSize="@Model.Inbox.PageSize" data-workspace-link aria-current="@(selected ? "page" : null)">
+                    <div class="messages-inbox-person"><partial name="_ContextImage" model="conversation" /><div><span class="messages-inbox-name">@conversation.CounterpartyDisplayName</span><span class="messages-inbox-listing">@conversation.ListingTitle</span></div></div>
+                    <span class="messages-inbox-preview">@(item.LatestMessagePreview ?? Text["Conversations.NoMessages"].Value)</span>
+                    <span class="messages-inbox-meta"><time datetime="@item.LastActivityAtUtc.ToString("O", CultureInfo.InvariantCulture)" data-message-time>@item.LastActivityAtUtc.ToString("g", CultureInfo.CurrentCulture) @Text["Messages.Utc"]</time>
+                    @if (item.UnreadCount > 0)
+                    {
+                        <span class="messages-unread">@Text[item.UnreadCount == 1 ? "Conversations.UnreadCountOne" : "Conversations.UnreadCount", item.UnreadCount]</span>
+                    }
+                    </span>
+                </a>
+            </li>
+        }
+    </ul>
+}
+@if (Model.Inbox.TotalPages > 0)
+{
+    <nav class="messages-pagination" aria-label="@Text["Conversations.Navigation"]">
+        @if (Model.Inbox.HasPreviousPage)
+        {
+            <a class="btn btn-sm btn-outline-primary" asp-action="Index" asp-route-pageNumber="@(Model.Inbox.PageNumber - 1)" asp-route-pageSize="@Model.Inbox.PageSize" data-workspace-link rel="prev">@Text["Browse.PreviousPage"]</a>
+        }
+        <span class="form-text">@Text["Conversations.PageSummary", Model.Inbox.PageNumber, Model.Inbox.TotalPages]</span>
+        @if (Model.Inbox.HasNextPage)
+        {
+            <a class="btn btn-sm btn-outline-primary" asp-action="Index" asp-route-pageNumber="@(Model.Inbox.PageNumber + 1)" asp-route-pageSize="@Model.Inbox.PageSize" data-workspace-link rel="next">@Text["Browse.NextPage"]</a>
+        }
+    </nav>
+}

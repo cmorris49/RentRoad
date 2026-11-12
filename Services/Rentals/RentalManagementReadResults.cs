@@ -23,6 +23,9 @@ public sealed record RentalHistoryItem(int RentalRequestId, int ListingId, strin
 {
     /// <summary>Identifies current public visibility for safe historical navigation; unknown visibility stays private.</summary>
     public bool IsListingPublic { get; init; }
+
+    /// <summary>References only the conversation matching this already authorized listing/renter pair.</summary>
+    public int? ConversationId { get; init; }
 }
 
 /// <summary>Returns a deterministic page, preserving an out-of-range page as an empty result.</summary>

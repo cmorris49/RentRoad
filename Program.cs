@@ -6,6 +6,7 @@ using RentRoad.Localization;
 using RentRoad.Services.Listings;
 using RentRoad.Services.Storage;
 using RentRoad.Services.Rentals;
+using RentRoad.Services.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,8 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IRentalRequestService, RentalRequestService>();
 builder.Services.AddScoped<IRentalManagementReadService, RentalManagementReadService>();
+builder.Services.AddScoped<IMessagingService, MessagingService>();
+builder.Services.AddMessagingRealtime();
 builder.Services.AddScoped<IListingImageService, ListingImageService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ListingEditorSessions>();
@@ -51,9 +54,12 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseRequestLocalization();
 
+app.UseMiddleware<MessagingHubOriginMiddleware>();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+app.MapMessagesHub();
 
 app.MapControllerRoute(
     name: "default",

@@ -481,6 +481,9 @@ namespace RentRoad.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"));
 
+                    b.Property<Guid?>("ClientMessageId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(2000)
@@ -503,7 +506,13 @@ namespace RentRoad.Data.Migrations
 
                     b.HasIndex("SenderId");
 
+                    b.HasIndex("ConversationId", "MessageId");
+
                     b.HasIndex("ConversationId", "SentAtUtc");
+
+                    b.HasIndex("ConversationId", "SenderId", "ClientMessageId")
+                        .IsUnique()
+                        .HasFilter("[ClientMessageId] IS NOT NULL");
 
                     b.ToTable("Messages");
                 });

@@ -8,6 +8,11 @@ public class Message
 
     public int ConversationId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the stable submission identifier reused across send retries, or null for legacy messages.
+    /// </summary>
+    public Guid? ClientMessageId { get; set; }
+
     [Required]
     public string SenderId { get; set; } = string.Empty;
 

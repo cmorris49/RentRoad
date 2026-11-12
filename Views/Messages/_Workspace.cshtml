@@ -1,0 +1,37 @@
+@model MessagingWorkspaceViewModel
+@{
+    var active = Model.ActiveConversation;
+    var realtime = active?.Realtime ?? new MessagingConnectionViewModel(Url.Content("~/hubs/messages"));
+    var inboxUrl = Url.Action("Index", new { pageNumber = Model.Inbox.PageNumber, pageSize = Model.Inbox.PageSize });
+}
+<section class="messages-page messages-workspace @(active is not null ? "has-active-conversation" : null)" data-messaging-page data-messaging-workspace>
+    <p class="messages-workspace-error" role="status" data-page-error hidden></p>
+    <aside class="messages-sidebar" data-conversation-sidebar aria-label="@Text["Conversations.Navigation"]">
+        <header class="messages-sidebar-header"><h1 class="h4" tabindex="-1">@Text["Conversations.Navigation"]</h1></header>
+        <p class="messages-current-selection" data-current-selection hidden></p>
+        <div class="messages-inbox-scroll" data-inbox-content>
+            <partial name="_Inbox" model="Model" />
+        </div>
+    </aside>
+    <section class="messages-active-panel" data-active-panel aria-label="@Text["Conversations.ConversationTitle"]" aria-busy="false">
+        @if (active is not null)
+        {
+            <partial name="_ActiveConversation" model="active" />
+        }
+        else
+        {
+            <div class="messages-choose">
+                <p>@Text["Conversations.ChooseConversation"]</p>
+                <partial name="_ConnectionFeedback" />
+            </div>
+        }
+    </section>
+</section>
+<script type="application/json" id="messaging-config">@Json.Serialize(new {
+    mode = active is null ? "inbox" : "conversation", conversationId = active?.Conversation.ConversationId,
+    isOwner = active?.Conversation.IsOwner, participantName = active?.Conversation.CounterpartyDisplayName,
+    listingTitle = active?.Conversation.ListingTitle, history = active?.History, realtime,
+    endpoints = active?.Endpoints, antiforgeryHeaderName = active?.AntiforgeryHeaderName,
+    maximumLength = active?.MaximumContentLength, inboxUrl,
+    workspaceUrl = Url.Action("Index"), currentUrl = active is null ? inboxUrl : Url.Action("Conversation", new { conversationId = active.Conversation.ConversationId, pageNumber = Model.Inbox.PageNumber, pageSize = Model.Inbox.PageSize })
+})</script>

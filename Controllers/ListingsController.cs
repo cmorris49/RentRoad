@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RentRoad.Services.Listings;
+using RentRoad.Services.Messaging;
 using RentRoad.ViewModels.Listings;
 
 namespace RentRoad.Controllers;
@@ -12,13 +13,15 @@ namespace RentRoad.Controllers;
 public sealed class ListingsController : Controller
 {
     private readonly IListingService listings;
+    private readonly IMessagingService messaging;
 
     /// <summary>
     /// Initializes public browsing with the existing listing service.
     /// </summary>
-    public ListingsController(IListingService listings)
+    public ListingsController(IListingService listings, IMessagingService messaging)
     {
         this.listings = listings;
+        this.messaging = messaging;
     }
 
     /// <summary>
@@ -56,7 +59,7 @@ public sealed class ListingsController : Controller
     [AllowAnonymous]
     [HttpGet("{id:int}")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-    public async Task<IActionResult> DetailsAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> DetailsAsync([FromRoute] int id, CancellationToken cancellationToken = default, [FromQuery] int? conversationId = null)
     {
         if (!ModelState.IsValid)
         {
@@ -79,9 +82,16 @@ public sealed class ListingsController : Controller
         {
             return Problem(statusCode: StatusCodes.Status500InternalServerError, title: SharedResource.Get("ListingFeedback.TheListingCouldNotBeLoaded"));
         }
+        int? returnConversationId = null;
+        if (conversationId > 0 && User.Identity?.IsAuthenticated == true)
+        {
+            var conversation = await messaging.GetConversationAsync(conversationId.Value, User, cancellationToken);
+            if (conversation.IsSuccess && conversation.Value?.ListingId == id) returnConversationId = conversation.Value.ConversationId;
+        }
         var similar = await listings.GetSimilarListingsAsync(id, cancellationToken);
         return View("Details", ListingDetailsViewModel.FromResult(result.Value!) with
         {
+            ReturnConversationId = returnConversationId,
             IsOwnedByViewer = await listings.IsOwnedByAsync(id, User, cancellationToken),
             SimilarListings = similar.Select(ListingSummaryViewModel.FromResult).ToArray()
         });

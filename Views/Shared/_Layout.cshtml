@@ -1,6 +1,7 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @{
+    var isMessaging = ViewData["MessagingLayout"] is true;
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
     var isHome = controller == "Home" && action == "Index";
@@ -13,7 +14,7 @@
 <html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="@(isMessaging ? "width=device-width, initial-scale=1.0, interactive-widget=resizes-content" : "width=device-width, initial-scale=1.0")" />
     <meta name="color-scheme" content="light dark" />
     <title>@Text["Application.PageTitle", ViewData["Title"] ?? string.Empty]</title>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -24,7 +25,7 @@
     <link rel="stylesheet" href="~/css/listing-gallery.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="site-shell">
+<body class="site-shell @(isMessaging ? "site-shell--messaging" : null)">
     <a class="skip-link" href="#main-content">@Text["Navigation.SkipToContent"]</a>
     <header class="site-header">
         <nav class="navbar navbar-expand-xl" aria-label="@Text["Navigation.Main"]">
@@ -68,8 +69,15 @@
                             </li>
                         }
                     </ul>
-                    <partial name="_LoginPartial" />
+                    @if (!SignInManager.IsSignedIn(User))
+                    {
+                        <partial name="_LoginPartial" />
+                    }
                 </div>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <partial name="_LoginPartial" />
+                }
             </div>
         </nav>
     </header>
@@ -95,6 +103,12 @@
     <partial name="_ClientStrings" />
     <script src="~/js/localized-ui.js" asp-append-version="true"></script>
     <script src="~/js/listing-gallery.js" asp-append-version="true" defer></script>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js" asp-append-version="true" defer></script>
+        <script src="~/js/messaging-realtime.js" asp-append-version="true" defer></script>
+        <script src="~/js/messaging-unread.js" asp-append-version="true" defer></script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

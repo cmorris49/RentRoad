@@ -1,0 +1,12 @@
+@model MessagingInboxViewModel
+@{
+    ViewData["ClientResources"] = "messaging";
+    ViewData["MessagingLayout"] = true;
+}
+<partial name="_Workspace" model="@(new MessagingWorkspaceViewModel(Model, null))" />
+@section Styles { <link rel="stylesheet" href="~/css/messaging.css" asp-append-version="true" /> }
+@section Scripts {
+    <script src="~/js/listing-images.js" asp-append-version="true" defer></script>
+    <script src="~/js/messaging.js" asp-append-version="true" defer></script>
+    <script src="~/js/messaging-workspace.js" asp-append-version="true" defer></script>
+}

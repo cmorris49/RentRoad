@@ -537,3 +537,8 @@ Localization/ListingViews.md
 /Views/Rentals/README.md
 
 /Services/Rentals/Stage7Verification.md
+
+# Local messaging architecture plan and project instructions
+/Services/Messaging/Architecture.md
+/AGENTS.md
+/.github/copilot-instructions.md

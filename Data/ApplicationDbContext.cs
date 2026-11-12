@@ -239,7 +239,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     }
 
     /// <summary>
-    /// Configures messages, sender relationships, and chronological query indexes.
+    /// Configures messages, sender relationships, scoped retry protection, and history indexes.
     /// </summary>
     /// <param name="modelBuilder">The builder used to configure the entity model.</param>
     private static void ConfigureMessage(ModelBuilder modelBuilder)
@@ -250,6 +250,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(message => message.Content).HasMaxLength(2000).IsRequired();
             entity.Property(message => message.SentAtUtc).IsRequired();
             entity.HasIndex(message => new { message.ConversationId, message.SentAtUtc });
+            entity.HasIndex(message => new { message.ConversationId, message.MessageId });
+            entity.HasIndex(message => new { message.ConversationId, message.SenderId, message.ClientMessageId })
+                .IsUnique()
+                .HasFilter("[ClientMessageId] IS NOT NULL");
             entity.HasIndex(message => message.SenderId);
             entity.HasOne(message => message.Conversation)
                 .WithMany(conversation => conversation.Messages)

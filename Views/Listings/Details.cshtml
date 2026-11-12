@@ -12,7 +12,14 @@
 
 <div class="details-page">
     <nav class="details-breadcrumb" aria-label="@Text["Common.Breadcrumb"]">
-        <a asp-controller="Listings" asp-action="Index"><span aria-hidden="true">←</span> @Text["Navigation.BrowseListings"]</a>
+        @if (Model.ReturnConversationId is int returnConversationId)
+        {
+            <a asp-controller="Messages" asp-action="Conversation" asp-route-conversationId="@returnConversationId"><span aria-hidden="true">←</span> @Text["Conversations.BackToConversation"]</a>
+        }
+        else
+        {
+            <a asp-controller="Listings" asp-action="Index"><span aria-hidden="true">←</span> @Text["Navigation.BrowseListings"]</a>
+        }
         <span aria-hidden="true">/</span>
         <span aria-current="page">@title</span>
     </nav>
@@ -54,6 +61,17 @@
                 {
                     <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Create", "RentalRequests", new { listingId = Model.ListingId })" aria-describedby="request-note">@Text["ListingDetails.LogInToRequest"]</a>
                     <p id="request-note" class="request-note">@Text["RentalRequestUi.LoginHelp"]</p>
+                }
+                @if (!Model.IsOwnedByViewer)
+                {
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <partial name="_MessageOwner" model="@(new RentRoad.ViewModels.Messaging.ConversationStartInputViewModel { ListingId = Model.ListingId })" />
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-primary" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "Listings", new { id = Model.ListingId })">@Text["Conversations.LoginToMessage"]</a>
+                    }
                 }
             </section>
         </section>

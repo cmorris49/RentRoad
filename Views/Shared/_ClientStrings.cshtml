@@ -6,6 +6,8 @@
             "ListingImages.Uploading", "ListingImages.UploadingYourImagePleaseWait", "ListingImages.UploadImage" } : Array.Empty<string>();
     var strings = Text.GetAllStrings(includeParentCultures: true)
         .Where(value => value.Name.StartsWith("Gallery.", StringComparison.Ordinal) || shared.Contains(value.Name)
+            || User.Identity?.IsAuthenticated == true && new[] { "Conversations.UnreadCount", "Conversations.UnreadCountOne", "Conversations.UnreadUnavailable" }.Contains(value.Name)
+            || client == "messaging" && (value.Name.StartsWith("Messages.", StringComparison.Ordinal) || value.Name.StartsWith("Conversations.", StringComparison.Ordinal))
             || client == "rental" && value.Name.StartsWith("RentalRequestUi.", StringComparison.Ordinal)
             || client == "editor" && new[] { "ListingEditor.", "UploadQueue.", "ListingStatus." }
                 .Any(prefix => value.Name.StartsWith(prefix, StringComparison.Ordinal)))
