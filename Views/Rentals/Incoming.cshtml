@@ -1,0 +1,12 @@
+@using RentRoad.ViewModels.Rentals
+@model RentalManagementViewModel
+@{
+    ViewData["Title"] = Model.Heading;
+}
+<partial name="_History" model="Model" />
+@section Styles {
+    <link rel="stylesheet" href="~/css/rental-management.css" asp-append-version="true" />
+}
+@section Scripts {
+    <script src="~/js/listing-images.js" asp-append-version="true" defer></script>
+}

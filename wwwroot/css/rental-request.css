@@ -1,0 +1,37 @@
+.rental-request-page { max-width: 1160px; margin-inline: auto; overflow-wrap: anywhere; }
+.rental-request-back { margin-bottom: 1.5rem; }
+.rental-request-back a { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; font-weight: 600; }
+.rental-request-header { max-width: 48rem; margin-bottom: 2.5rem; }
+.rental-request-header h1 { font-size: clamp(2rem, 4vw, 3rem); }
+.rental-request-header > p:last-child { color: var(--rr-muted); font-size: 1.1rem; }
+.rental-request-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+.rental-request-layout > * { min-width: 0; }
+.rental-date-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-block: 1.5rem; }
+.rental-date-fields > div, .rental-date-fields input { min-width: 0; max-width: 100%; }
+.rental-request-times { margin-block: 1.5rem; border-block: 1px solid var(--rr-border); padding-block: 1rem; }
+.rental-request-times summary { cursor: pointer; min-height: 44px; padding-block: .5rem; font-weight: 600; }
+.rental-pending-note { border-inline-start: 3px solid var(--rr-accent); padding-inline-start: 1rem; color: var(--rr-muted); margin-block: 1.5rem; }
+.rental-request-summary { overflow: hidden; box-shadow: var(--rr-shadow); }
+.rental-request-photo { position: relative; aspect-ratio: 16 / 9; background: var(--rr-surface-muted); }
+.rental-request-photo img { position: relative; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.rental-photo-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 1rem; color: var(--rr-muted); }
+.rental-photo-fallback[aria-hidden="true"] { visibility: hidden; }
+.rental-request-summary-content { padding: clamp(1.25rem, 3vw, 1.75rem); }
+.rental-request-item { font-weight: 650; margin-bottom: .25rem; }
+.rental-estimate-values { margin-block: 1.5rem; }
+.rental-estimate-values > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem 1rem; margin-block: .75rem; }
+.rental-estimate-values dt { color: var(--rr-muted); font-weight: 500; }
+.rental-estimate-values dd { margin: 0; font-weight: 650; font-variant-numeric: tabular-nums; }
+.rental-estimate-values .rental-estimate-total { border-top: 1px solid var(--rr-border); padding-top: 1rem; margin-top: 1rem; }
+.rental-estimate-total dd { color: var(--rr-primary); font-size: 1.25rem; }
+.rental-estimate-status { font-size: .875rem; color: var(--rr-muted); }
+.rental-request-availability { border-top: 1px solid var(--rr-border); margin-top: 3rem; padding-top: 2rem; }
+.rental-request-availability .availability-heading > p { max-width: 30rem; }
+@media (max-width: 767.98px) {
+    .rental-request-layout { grid-template-columns: 1fr; }
+    .rental-request-summary { max-width: 36rem; width: 100%; }
+}
+@media (max-width: 399.98px) {
+    .rental-date-fields { grid-template-columns: 1fr; }
+    [data-request-submit] { width: 100%; }
+}

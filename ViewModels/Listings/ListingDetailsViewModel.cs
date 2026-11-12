@@ -12,6 +12,8 @@ public sealed record ListingDetailsViewModel(int ListingId, string? Title, strin
     IReadOnlyList<ListingImageViewModel> Images, IReadOnlyList<ListingAvailabilityViewModel> AvailabilityWindows,
     IReadOnlyList<ListingAvailabilityViewModel> AvailabilityBlocks)
 {
+    public bool IsOwnedByViewer { get; init; }
+
     public IReadOnlyList<ListingSummaryViewModel> SimilarListings { get; init; } = Array.Empty<ListingSummaryViewModel>();
 
     /// <summary>

@@ -1,0 +1,43 @@
+@using RentRoad.ViewModels.Listings
+@model PublicListingAvailabilityViewModel
+    <section class="public-availability details-section" aria-labelledby="availability-heading">
+        <div class="availability-heading">
+            <div><p class="eyebrow">@Text["Availability.PlanAhead"]</p><h2 id="availability-heading">@Text["Availability.Heading"]</h2></div>
+            <p>@Text["Availability.PublicHelp"]</p>
+        </div>
+        <p class="date-convention">@Text["Availability.DisplayInclusiveHelp"]</p>
+        <div class="availability-columns">
+            <section class="card availability-panel" aria-labelledby="windows-heading">
+                <h3 id="windows-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>@Text["Availability.ListedWindows"]</h3>
+                @if (Model.Windows.Count == 0)
+                {
+                    <p class="availability-empty">@Text["Availability.NoListedWindows"]</p>
+                }
+                else
+                {
+                    <ul class="availability-periods">
+                        @foreach (var window in Model.Windows)
+                        {
+                            <li><span class="availability-range">@window.DisplayRange</span></li>
+                        }
+                    </ul>
+                }
+            </section>
+            <section class="card availability-panel blocked-periods" aria-labelledby="blocks-heading">
+                <h3 id="blocks-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>@Text["Availability.BlockedUnavailableDates"]</h3>
+                @if (Model.Blocks.Count == 0)
+                {
+                    <p class="availability-empty">@Text["Availability.NoListedBlocks"]</p>
+                }
+                else
+                {
+                    <ul class="availability-periods">
+                        @foreach (var block in Model.Blocks)
+                        {
+                            <li><span class="availability-range">@block.DisplayRange</span></li>
+                        }
+                    </ul>
+                }
+            </section>
+        </div>
+    </section>

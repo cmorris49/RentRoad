@@ -113,103 +113,13 @@
     white-space: pre-wrap;
 }
 
-.details-page ::deep .availability-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.details-page ::deep .availability-heading h2 {
-    margin-bottom: 0;
-}
-
-.details-page ::deep .availability-heading > p {
-    max-width: 34rem;
-    margin: 0;
-    color: var(--rr-muted);
-}
-
-.details-page ::deep .date-convention {
-    color: var(--rr-muted);
-    font-size: .875rem;
-    margin-bottom: 1.5rem;
-}
-
-.details-page ::deep .availability-columns {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-}
-
-.details-page ::deep .availability-panel {
-    padding: clamp(1rem, 3vw, 1.5rem);
-}
-
-.details-page ::deep .availability-panel h3 {
-    display: flex;
-    align-items: center;
-    gap: .625rem;
-}
-
-.details-page ::deep .availability-marker {
-    flex-shrink: 0;
-    width: .65rem;
-    height: .65rem;
-    border-radius: 50%;
-    background: var(--rr-primary);
-}
-
-.details-page ::deep .blocked-periods .availability-marker {
-    border-radius: 2px;
-    background: var(--rr-accent);
-}
-
-.details-page ::deep .availability-periods {
-    list-style: none;
-    padding: 0;
-    margin: 1rem 0 0;
-}
-
-.details-page ::deep .availability-periods li {
-    display: flex;
-    flex-direction: column;
-    gap: .25rem;
-    padding-block: .875rem;
-    border-top: 1px solid var(--rr-border);
-}
-
-.details-page ::deep .availability-range {
-    font-weight: 650;
-}
-
-.details-page ::deep .availability-boundary,
-.details-page ::deep .availability-empty {
-    color: var(--rr-muted);
-    font-size: .875rem;
-}
-
-.details-page ::deep .availability-empty {
-    margin: .75rem 0 0;
-}
-
 @media (max-width: 991.98px) {
     .details-page ::deep .details-layout {
         grid-template-columns: 1fr;
     }
-
-    .details-page ::deep .availability-heading {
-        align-items: flex-start;
-        flex-direction: column;
-    }
 }
 
 @media (max-width: 575.98px) {
-    .details-page ::deep .availability-columns {
-        grid-template-columns: 1fr;
-    }
-
     .details-page ::deep .rental-summary > .btn {
         width: 100%;
     }

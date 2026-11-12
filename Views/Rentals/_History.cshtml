@@ -1,0 +1,128 @@
+@using System.Globalization
+@using RentRoad.ViewModels.Rentals
+@model RentalManagementViewModel
+@{
+    var errorFeedback = TempData["RentalManagementError"] as string;
+    var successFeedback = TempData["RentalManagementFeedback"] as string;
+}
+<div class="rental-history-page">
+    <header class="page-header">
+        <div>
+            <h1>@Model.Heading</h1>
+            <p>@Text[Model.IsIncoming ? "RentalManagementUi.IncomingIntroduction" : "RentalManagementUi.MineIntroduction"]</p>
+        </div>
+    </header>
+    <nav class="rental-history-navigation" aria-label="@Text["RentalManagementUi.NavigationLabel"]">
+        <a asp-controller="Rentals" asp-action="Mine" class="@(Model.IsIncoming ? null : "active")" aria-current="@(Model.IsIncoming ? null : "page")">@Text["RentalManagement.Mine"]</a>
+        <a asp-controller="Rentals" asp-action="Incoming" class="@(Model.IsIncoming ? "active" : null)" aria-current="@(Model.IsIncoming ? "page" : null)">@Text["RentalManagement.Incoming"]</a>
+    </nav>
+    @if (errorFeedback is string error)
+    {
+        <div class="alert alert-danger" role="alert" data-rental-management-error>@error</div>
+    }
+    else if (successFeedback is string success)
+    {
+        <div class="alert alert-success" role="status" data-rental-management-feedback>@success</div>
+    }
+    @if (!Model.HasLoadedHistory)
+    {
+        <section class="alert alert-danger" role="alert">
+            <h2 class="h5">@Text["Common.ActionFailed"]</h2>
+            @if (Model.Errors.Count == 0) { <p>@Text["RentalManagement.ReadUnavailable"]</p> }
+            @foreach (var message in Model.Errors) { <p>@message</p> }
+            <a asp-action="@(Model.IsIncoming ? "Incoming" : "Mine")">@Text["RentalManagementUi.RestartHistory"]</a>
+        </section>
+    }
+    else if (Model.Rentals.Count == 0)
+    {
+        <section class="empty-state" aria-labelledby="rental-history-empty">
+            <h2 id="rental-history-empty" class="h4">@(Model.TotalCount == 0 ? Model.EmptyMessage : Text["RentalManagementUi.EmptyPage"].Value)</h2>
+            @if (Model.PageNumber > 1)
+            {
+                <a class="btn btn-outline-primary" asp-action="@(Model.IsIncoming ? "Incoming" : "Mine")" asp-route-pageNumber="1" asp-route-pageSize="@Model.PageSize">@Text["RentalManagementUi.FirstPage"]</a>
+            }
+            else
+            {
+                <a class="btn btn-primary" asp-controller="@(Model.IsIncoming ? "MyListings" : "Listings")" asp-action="Index">@Text[Model.IsIncoming ? "Navigation.MyListings" : "Navigation.BrowseListings"]</a>
+            }
+        </section>
+    }
+    else
+    {
+        <p class="rental-history-help">@Text["RentalManagementUi.UtcHelp"]</p>
+        <p class="rental-history-help">@Text["RentalManagementUi.ActionHelp"]</p>
+        <div class="rental-history-records">
+            @foreach (var rental in Model.Rentals)
+            {
+                <article class="card rental-record" aria-labelledby="rental-title-@rental.RentalRequestId" data-rental-record="@rental.RentalRequestId">
+                    <div class="rental-record-image">
+                        <span class="rental-record-fallback" data-image-fallback aria-hidden="@(rental.PrimaryImage is not null ? "true" : null)">@Text[rental.PrimaryImage is null ? "Gallery.Empty" : "Gallery.Unavailable"]</span>
+                        @if (rental.PrimaryImage is { } photo)
+                        {
+                            <img data-listing-image src="@Url.Action("Get", "ListingImageContent", new { listingId = rental.ListingId, imageId = photo.ListingImageId })" alt="@(string.IsNullOrWhiteSpace(photo.AltText) ? rental.ListingTitle : photo.AltText)" loading="lazy" decoding="async" width="320" height="240" />
+                        }
+                    </div>
+                    <div class="rental-record-content">
+                        <div class="rental-record-heading">
+                            <h2 class="h5" id="rental-title-@rental.RentalRequestId">
+                                @if (rental.IsListingPublic)
+                                {
+                                    <a asp-controller="Listings" asp-action="Details" asp-route-id="@rental.ListingId">@rental.ListingTitle</a>
+                                }
+                                else if (Model.IsIncoming)
+                                {
+                                    <a asp-controller="MyListings" asp-action="Edit" asp-route-id="@rental.ListingId">@rental.ListingTitle</a>
+                                }
+                                else { @rental.ListingTitle }
+                            </h2>
+                            <span class="rental-status rental-status-@rental.Status.ToString().ToLowerInvariant()">@rental.StatusText</span>
+                        </div>
+                        <p class="rental-record-status">@Text[$"RentalManagementUi.{rental.Status}Description"]</p>
+                        <p class="rental-record-counterparty"><span>@Text[Model.IsIncoming ? "RentalManagement.Renter" : "ListingDetails.OwnerFallback"]:</span> @rental.CounterpartyDisplayName</p>
+                        <dl class="rental-record-facts">
+                            <div><dt>@Text["Availability.FirstDay"]</dt><dd><time datetime="@rental.FirstDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@Text["Availability.SingleDate", rental.FirstDay]</time></dd></div>
+                            <div><dt>@Text["Availability.LastDay"]</dt><dd><time datetime="@rental.LastDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@Text["Availability.SingleDate", rental.LastDay]</time></dd></div>
+                            <div><dt>@Text["RentalRequest.Duration"]</dt><dd>@rental.DurationText</dd></div>
+                            <div><dt>@Text["RentalManagement.DailyPrice"]</dt><dd>@rental.DailyPrice.FormattedAmount</dd></div>
+                            <div><dt>@Text["RentalManagement.TotalPrice"]</dt><dd class="rental-record-total">@rental.TotalPrice.FormattedAmount</dd></div>
+                            <div><dt>@Text["RentalManagement.RequestedAt"]</dt><dd><time datetime="@rental.CreatedAtUtc.ToString("O", CultureInfo.InvariantCulture)">@rental.CreatedAtUtc.ToString("MMM d, yyyy · HH:mm", CultureInfo.CurrentCulture)</time></dd></div>
+                            @if (rental.DecisionAtUtc is { } decision)
+                            {
+                                <div><dt>@Text["RentalManagement.DecidedAt"]</dt><dd><time datetime="@decision.ToString("O", CultureInfo.InvariantCulture)">@decision.ToString("MMM d, yyyy · HH:mm", CultureInfo.CurrentCulture)</time></dd></div>
+                            }
+                            @if (rental.CompletedAtUtc is { } completed)
+                            {
+                                <div><dt>@Text["RentalManagement.CompletedAt"]</dt><dd><time datetime="@completed.ToString("O", CultureInfo.InvariantCulture)">@completed.ToString("MMM d, yyyy · HH:mm", CultureInfo.CurrentCulture)</time></dd></div>
+                            }
+                        </dl>
+                        <div class="rental-record-actions">
+                            @if (rental.IsListingPublic)
+                            {
+                                <a class="rental-record-link" asp-controller="Listings" asp-action="Details" asp-route-id="@rental.ListingId">@Text["RentalManagementUi.ViewListing"]<span class="visually-hidden">@Text["Common.ItemReference", rental.ListingTitle]</span></a>
+                            }
+                            else if (Model.IsIncoming)
+                            {
+                                <a class="rental-record-link" asp-controller="MyListings" asp-action="Edit" asp-route-id="@rental.ListingId">@Text["RentalManagementUi.ViewOwnedListing"]<span class="visually-hidden">@Text["Common.ItemReference", rental.ListingTitle]</span></a>
+                            }
+                            else
+                            {
+                                <p class="form-text mb-0">@Text["RentalManagementUi.HistoricalListingUnavailable"]</p>
+                            }
+                            @foreach (var action in new[] { ("Cancel", rental.Actions.CanCancel), ("Approve", rental.Actions.CanApprove), ("Decline", rental.Actions.CanDecline), ("Activate", rental.Actions.CanActivate), ("Complete", rental.Actions.CanComplete) })
+                            {
+                                @if (action.Item2)
+                                {
+                                    <partial name="_ActionConfirmation" model="@(new RentalManagementActionViewModel(rental.RentalRequestId, action.Item1, Model.PageNumber, Model.PageSize))" />
+                                }
+                            }
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+    @if (Model.HasLoadedHistory)
+    {
+        <partial name="_HistoryPagination" model="Model" />
+    }
+</div>

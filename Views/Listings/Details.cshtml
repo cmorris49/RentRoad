@@ -5,6 +5,8 @@
 @{
     var title = string.IsNullOrWhiteSpace(Model.Title) ? Text["Listing.Untitled"].Value : Model.Title;
     var photos = Model.GalleryImages;
+    var requestFeedback = TempData["RentalRequestFeedback"] as string;
+    var feedbackListingId = TempData["RentalRequestFeedbackListingId"] as int?;
     ViewData["Title"] = title;
 }
 
@@ -14,6 +16,11 @@
         <span aria-hidden="true">/</span>
         <span aria-current="page">@title</span>
     </nav>
+
+    @if (requestFeedback is string feedback && feedbackListingId == Model.ListingId)
+    {
+        <div class="alert alert-success" role="status" data-rental-feedback>@feedback</div>
+    }
 
     <div class="details-layout">
         <section class="listing-gallery" aria-label="@Text["ListingImages.Photos"]">
@@ -32,16 +39,21 @@
             <section class="card rental-summary" aria-labelledby="request-heading">
                 <p class="rental-price"><span>@Model.DailyPrice.FormattedAmount</span> <span class="rental-price-unit">@Text["Listing.PerDay"]</span></p>
                 <p class="rental-currency">@Text["ListingDetails.CadPriceHelp"]</p>
-                <div class="request-heading"><h2 id="request-heading" class="h5">@Text["ListingDetails.RequestToRent"]</h2><span class="badge-soft">@Text["Common.ComingSoon"]</span></div>
-                @if (SignInManager.IsSignedIn(User))
+                <div class="request-heading"><h2 id="request-heading" class="h5">@Text["ListingDetails.RequestToRent"]</h2></div>
+                @if (Model.IsOwnedByViewer)
                 {
                     <button class="btn btn-primary" type="button" disabled aria-describedby="request-note">@Text["ListingDetails.RequestToRent"]</button>
-                    <p id="request-note" class="request-note">@Text["ListingDetails.RequestComingSoon"]</p>
+                    <p id="request-note" class="request-note">@Text["RentalRequestUi.OwnListing"]</p>
+                }
+                else if (SignInManager.IsSignedIn(User))
+                {
+                    <a class="btn btn-primary" asp-controller="RentalRequests" asp-action="Create" asp-route-listingId="@Model.ListingId" aria-describedby="request-note">@Text["ListingDetails.RequestToRent"]</a>
+                    <p id="request-note" class="request-note">@Text["RentalRequestUi.PendingHelp"]</p>
                 }
                 else
                 {
-                    <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "Listings", new { id = Model.ListingId })" aria-describedby="request-note">@Text["ListingDetails.LogInToRequest"]</a>
-                    <p id="request-note" class="request-note">@Text["ListingDetails.AnonymousRequestHelp"]</p>
+                    <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Create", "RentalRequests", new { listingId = Model.ListingId })" aria-describedby="request-note">@Text["ListingDetails.LogInToRequest"]</a>
+                    <p id="request-note" class="request-note">@Text["RentalRequestUi.LoginHelp"]</p>
                 }
             </section>
         </section>
@@ -53,51 +65,12 @@
         <p class="listing-description">@(string.IsNullOrWhiteSpace(Model.Description) ? Text["ListingDetails.NoDescription"].Value : Model.Description)</p>
     </section>
 
-    <section class="details-section" aria-labelledby="availability-heading">
-        <div class="availability-heading">
-            <div><p class="eyebrow">@Text["Availability.PlanAhead"]</p><h2 id="availability-heading">@Text["Availability.Heading"]</h2></div>
-            <p>@Text["Availability.PublicHelp"]</p>
-        </div>
-        <p class="date-convention">@Text["Availability.DisplayInclusiveHelp"]</p>
-        <div class="availability-columns">
-            <section class="card availability-panel" aria-labelledby="windows-heading">
-                <h3 id="windows-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>@Text["Availability.ListedWindows"]</h3>
-                @if (Model.AvailabilityWindows.Count == 0)
-                {
-                    <p class="availability-empty">@Text["Availability.NoListedWindows"]</p>
-                }
-                else
-                {
-                    <ul class="availability-periods">
-                        @foreach (var window in Model.AvailabilityWindows)
-                        {
-                            <li><span class="availability-range">@window.DisplayRange</span></li>
-                        }
-                    </ul>
-                }
-            </section>
-            <section class="card availability-panel blocked-periods" aria-labelledby="blocks-heading">
-                <h3 id="blocks-heading" class="h5"><span class="availability-marker" aria-hidden="true"></span>@Text["Availability.BlockedUnavailableDates"]</h3>
-                @if (Model.AvailabilityBlocks.Count == 0)
-                {
-                    <p class="availability-empty">@Text["Availability.NoListedBlocks"]</p>
-                }
-                else
-                {
-                    <ul class="availability-periods">
-                        @foreach (var block in Model.AvailabilityBlocks)
-                        {
-                            <li><span class="availability-range">@block.DisplayRange</span></li>
-                        }
-                    </ul>
-                }
-            </section>
-        </div>
-    </section>
+    <partial name="_PublicListingAvailability" model="@(new PublicListingAvailabilityViewModel(Model.AvailabilityWindows, Model.AvailabilityBlocks))" />
     <partial name="_ListingScroller" model='@(new ListingScrollerViewModel("similar-listings", Text["Listing.SimilarListings"].Value, Model.SimilarListings))' />
 </div>
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/public-listing-availability.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/listing-scroller.css" asp-append-version="true" />
 }
 @section Scripts {

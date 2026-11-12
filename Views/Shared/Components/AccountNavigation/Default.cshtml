@@ -8,6 +8,9 @@
             <span class="account-display-name">@Model.DisplayName</span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account-menu">
+            <li><a class="dropdown-item" asp-area="" asp-controller="Rentals" asp-action="Mine">@Text["RentalManagement.Mine"]</a></li>
+            <li><a class="dropdown-item" asp-area="" asp-controller="Rentals" asp-action="Incoming">@Text["RentalManagement.Incoming"]</a></li>
+            <li><hr class="dropdown-divider" /></li>
             <li>
                 <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">@Text["Navigation.ManageAccount"]</a>
             </li>

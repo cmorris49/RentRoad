@@ -26,6 +26,15 @@ public sealed partial class ListingService : IListingService
         this.timeProvider = timeProvider;
     }
 
+    /// <summary>Returns only whether the authenticated viewer owns this listing, using the database's Identity comparison semantics.</summary>
+    public Task<bool> IsOwnedByAsync(int listingId, ClaimsPrincipal? user, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var actorId = user?.Identities.FirstOrDefault(identity => identity.IsAuthenticated)?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return listingId <= 0 || string.IsNullOrWhiteSpace(actorId) ? Task.FromResult(false)
+            : context.Listings.AsNoTracking().AnyAsync(listing => listing.ListingId == listingId && listing.OwnerId == actorId, cancellationToken);
+    }
+
     /// <summary>
     /// Creates an empty draft associated with the authenticated, existing owner.
     /// </summary>

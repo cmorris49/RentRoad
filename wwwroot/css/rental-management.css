@@ -1,0 +1,50 @@
+.rental-history-page { max-width: 1200px; margin-inline: auto; overflow-wrap: anywhere; }
+.rental-history-page .page-header { margin-bottom: 1.5rem; }
+.rental-history-navigation { display: flex; flex-wrap: wrap; gap: .5rem; border-bottom: 1px solid var(--rr-border); margin-bottom: 1.5rem; padding-bottom: .75rem; }
+.rental-history-navigation a { display: inline-flex; align-items: center; min-height: 44px; padding: .5rem 1rem; border-radius: var(--rr-radius-sm); text-decoration: none; font-weight: 650; }
+.rental-history-navigation a.active { background: var(--rr-primary); color: var(--rr-on-primary); }
+.rental-history-navigation a:hover:not(.active) { background: var(--rr-surface-muted); }
+.rental-history-help { font-size: .875rem; color: var(--rr-muted); margin-bottom: .5rem; }
+.rental-history-records { display: grid; gap: 1rem; margin-top: 1.5rem; }
+.rental-record { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 1.25rem; padding: 1.25rem; }
+.rental-record-image { position: relative; aspect-ratio: 4 / 3; width: 100%; align-self: start; border-radius: var(--rr-radius-sm); background: var(--rr-surface-muted); overflow: hidden; }
+.rental-record-image img { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.rental-record-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: .5rem; text-align: center; font-size: .8rem; color: var(--rr-muted); }
+.rental-record-fallback[aria-hidden="true"] { visibility: hidden; }
+.rental-record-content { min-width: 0; }
+.rental-record-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .5rem 1rem; }
+.rental-record-heading h2 { margin-bottom: .35rem; }
+.rental-record-heading h2 a { color: var(--rr-text); text-decoration: none; }
+.rental-record-heading h2 a:hover { text-decoration: underline; }
+.rental-status { display: inline-block; border: 1px solid var(--rr-border); border-radius: 999px; padding: .2rem .65rem; font-size: .8rem; font-weight: 700; background: var(--rr-surface-muted); color: var(--rr-text); }
+.rental-status-pending { background: var(--rr-warning-bg); color: var(--rr-warning); }
+.rental-status-approved, .rental-status-completed { background: var(--rr-success-bg); color: var(--rr-success); }
+.rental-status-active { background: var(--rr-info-bg); color: var(--rr-info); }
+.rental-status-declined { background: var(--rr-danger-bg); color: var(--rr-danger); }
+.rental-record-status, .rental-record-counterparty { margin-bottom: .4rem; font-size: .875rem; color: var(--rr-muted); }
+.rental-record-counterparty { color: var(--rr-text); }
+.rental-record-counterparty span { color: var(--rr-muted); }
+.rental-record-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem 1.25rem; margin-block: 1rem; }
+.rental-record-facts dt { font-size: .75rem; font-weight: 500; color: var(--rr-muted); }
+.rental-record-facts dd { margin: .2rem 0 0; font-size: .875rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.rental-record-total { color: var(--rr-primary); }
+.rental-record-actions { display: flex; flex-wrap: wrap; align-items: start; gap: .5rem; border-top: 1px solid var(--rr-border); padding-top: .75rem; }
+.rental-record-link { display: inline-flex; align-items: center; min-height: 44px; margin-inline-end: .5rem; font-weight: 600; }
+.rental-action-confirmation { min-width: 0; max-width: 100%; }
+.rental-action-confirmation[open] { flex-basis: 100%; }
+.rental-action-confirmation summary { cursor: pointer; }
+.rental-action-review { max-width: 44rem; margin-top: .75rem; padding: 1rem; border-inline-start: 3px solid var(--rr-accent); background: var(--rr-surface-muted); border-radius: var(--rr-radius-sm); }
+.rental-action-review > p:first-child { font-size: .925rem; }
+.rental-action-review form { margin-bottom: .75rem; }
+.rental-history-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; margin-top: 1.5rem; }
+.rental-history-page-indicator { color: var(--rr-muted); font-size: .875rem; text-align: center; }
+@media (max-width: 767.98px) {
+    .rental-record { grid-template-columns: 96px minmax(0, 1fr); gap: 1rem; padding: 1rem; }
+    .rental-record-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 575.98px) {
+    .rental-record { grid-template-columns: minmax(0, 1fr); }
+    .rental-record-image { width: 112px; }
+    .rental-record-facts { gap: .75rem; }
+    .rental-history-page-indicator { order: -1; flex-basis: 100%; }
+}

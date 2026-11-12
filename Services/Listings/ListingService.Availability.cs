@@ -137,7 +137,11 @@ public sealed partial class ListingService
     private Task<ListingServiceResult<T>> ExecuteAvailabilityMutationAsync<T>(int listingId, ClaimsPrincipal? user,
         Func<ListingService, CancellationToken, Task<ListingServiceResult<T>>> operation, CancellationToken cancellationToken)
         => ListingOperationScope.ExecuteAsync(context, listingId, user,
-            (writeContext, token) => operation(new ListingService(writeContext, timeProvider), token), cancellationToken, includeImageChanges: false);
+            async (writeContext, token) =>
+            {
+                await ListingTransactionLock.AcquireAsync(writeContext, listingId, token);
+                return await operation(new ListingService(writeContext, timeProvider), token);
+            }, cancellationToken, includeImageChanges: false);
 
     /// <summary>
     /// Validates a proposed window set before applying a single atomic availability and timestamp save.
@@ -315,7 +319,7 @@ public sealed partial class ListingService
             .Select(request => new ListingAvailabilityPeriod(request.StartDate, request.EndDate)).ToListAsync(cancellationToken);
         foreach (var reservation in reservations)
         {
-            if (!CoversPeriod(windows, reservation)
+            if (!AvailabilityCoverage.CoversPeriod(windows, reservation)
                 || blocks.Any(block => block.StartDate < reservation.EndDate && reservation.StartDate < block.EndDate))
             {
                 return ListingServiceResult<bool>.Failure(ListingServiceStatus.Conflict,
@@ -328,30 +332,5 @@ public sealed partial class ListingService
                 new ListingValidationError(nameof(Listing.AvailabilityWindows), SharedResource.Get("AvailabilityFeedback.WindowRequired")));
         }
         return ListingServiceResult<bool>.Success(true);
-    }
-
-    /// <summary>
-    /// Checks complete half-open coverage by the union of adjacent or overlapping windows.
-    /// </summary>
-    private static bool CoversPeriod(IReadOnlyList<ListingAvailabilityPeriod> windows, ListingAvailabilityPeriod requested)
-    {
-        var coveredThrough = requested.StartDate;
-        foreach (var window in windows.OrderBy(window => window.StartDate).ThenBy(window => window.EndDate))
-        {
-            if (window.EndDate <= coveredThrough)
-            {
-                continue;
-            }
-            if (window.StartDate > coveredThrough)
-            {
-                return false;
-            }
-            coveredThrough = window.EndDate;
-            if (coveredThrough >= requested.EndDate)
-            {
-                return true;
-            }
-        }
-        return false;
     }
 }

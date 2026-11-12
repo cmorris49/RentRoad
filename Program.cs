@@ -5,6 +5,7 @@ using RentRoad.Models;
 using RentRoad.Localization;
 using RentRoad.Services.Listings;
 using RentRoad.Services.Storage;
+using RentRoad.Services.Rentals;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddControllersWithViews().AddRentRoadLocalization();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IListingService, ListingService>();
+builder.Services.AddScoped<IRentalRequestService, RentalRequestService>();
+builder.Services.AddScoped<IRentalManagementReadService, RentalManagementReadService>();
 builder.Services.AddScoped<IListingImageService, ListingImageService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ListingEditorSessions>();

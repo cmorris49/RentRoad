@@ -55,6 +55,7 @@ public sealed class ListingsController : Controller
     /// </summary>
     [AllowAnonymous]
     [HttpGet("{id:int}")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> DetailsAsync([FromRoute] int id, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
@@ -81,6 +82,7 @@ public sealed class ListingsController : Controller
         var similar = await listings.GetSimilarListingsAsync(id, cancellationToken);
         return View("Details", ListingDetailsViewModel.FromResult(result.Value!) with
         {
+            IsOwnedByViewer = await listings.IsOwnedByAsync(id, User, cancellationToken),
             SimilarListings = similar.Select(ListingSummaryViewModel.FromResult).ToArray()
         });
     }

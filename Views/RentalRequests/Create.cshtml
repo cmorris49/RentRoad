@@ -1,0 +1,97 @@
+@using System.Globalization
+@using RentRoad.ViewModels.Rentals
+@using RentRoad.ViewModels.Listings
+@model RentalRequestFormViewModel
+@{
+    ViewData["Title"] = Text["RentalRequest.CreateHeading"].Value;
+    ViewData["ClientResources"] = "rental";
+    var listing = Model.Listing;
+    var title = string.IsNullOrWhiteSpace(listing.Title) ? Text["MyListings.Untitled"].Value : listing.Title;
+    var minimum = Model.MinimumFirstDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    var lastMinimum = Model.FirstDay.HasValue && Model.FirstDay.Value >= Model.MinimumFirstDay
+        ? Model.FirstDay.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : minimum;
+}
+<div class="rental-request-page">
+    <nav class="rental-request-back" aria-label="@Text["Common.Breadcrumb"]">
+        <a asp-controller="Listings" asp-action="Details" asp-route-id="@listing.ListingId"><span aria-hidden="true">←</span> @Text["RentalRequestUi.BackToItem"]</a>
+    </nav>
+    <header class="rental-request-header">
+        <p class="eyebrow">@Text["RentalRequest.CreateHeading"]</p>
+        <h1>@title</h1>
+        <p>@Text["RentalRequestUi.Introduction"]</p>
+    </header>
+    <div class="rental-request-layout">
+        <section aria-labelledby="rental-dates-heading">
+            <h2 id="rental-dates-heading" class="h4">@Text["RentalRequestUi.DateHeading"]</h2>
+            <p id="rental-date-help" class="text-muted">@Text["RentalRequestUi.UtcHelp"]</p>
+            <form asp-controller="RentalRequests" asp-action="Create" asp-route-listingId="@listing.ListingId" method="post"
+                  data-rental-request data-daily-cents="@listing.DailyPrice.Cents.ToString(CultureInfo.InvariantCulture)" data-minimum-first-day="@minimum">
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert" tabindex="-1" data-request-errors></div>
+                <div class="rental-date-fields">
+                    <div>
+                        <label asp-for="FirstDay" class="form-label"></label>
+                        <input asp-for="FirstDay" asp-format="{0:yyyy-MM-dd}" class="form-control" type="date" required min="@minimum" max="9999-12-30"
+                               aria-describedby="rental-date-help first-day-error" aria-invalid="@(ViewData.ModelState["FirstDay"]?.Errors.Count > 0 ? "true" : null)" />
+                        <span asp-validation-for="FirstDay" id="first-day-error"></span>
+                    </div>
+                    <div>
+                        <label asp-for="LastDay" class="form-label"></label>
+                        <input asp-for="LastDay" asp-format="{0:yyyy-MM-dd}" class="form-control" type="date" required min="@lastMinimum" max="9999-12-30"
+                               aria-describedby="rental-date-help last-day-error" aria-invalid="@(ViewData.ModelState["LastDay"]?.Errors.Count > 0 ? "true" : null)" />
+                        <span asp-validation-for="LastDay" id="last-day-error"></span>
+                    </div>
+                </div>
+                <details class="rental-request-times">
+                    <summary>@Text["RentalRequestUi.OptionalTimes"]</summary>
+                    <p id="rental-time-help" class="form-text">@Text["RentalRequestUi.TimeHelp"]</p>
+                    <div class="rental-date-fields">
+                        <div><label asp-for="PickupTime" class="form-label"></label><input asp-for="PickupTime" type="time" class="form-control" aria-describedby="rental-time-help pickup-time-error" /><span asp-validation-for="PickupTime" id="pickup-time-error"></span></div>
+                        <div><label asp-for="ReturnTime" class="form-label"></label><input asp-for="ReturnTime" type="time" class="form-control" aria-describedby="rental-time-help return-time-error" /><span asp-validation-for="ReturnTime" id="return-time-error"></span></div>
+                    </div>
+                </details>
+                <p class="rental-pending-note">@Text["RentalRequestUi.PendingHelp"]</p>
+                <button type="submit" class="btn btn-primary" data-request-submit>@Text["RentalRequestUi.Submit"]</button>
+                <noscript><p class="form-text">@Text["RentalRequestUi.JavaScriptHelp"]</p></noscript>
+            </form>
+        </section>
+        <aside class="card rental-request-summary" aria-labelledby="rental-estimate-heading">
+            <div class="rental-request-photo">
+                @if (listing.PrimaryImage is { } photo)
+                {
+                    <img src="@Url.Action("Get", "ListingImageContent", new { listingId = listing.ListingId, imageId = photo.ListingImageId })" alt="@(photo.AltText ?? title)" data-listing-image />
+                    <span class="rental-photo-fallback" data-image-fallback aria-hidden="true">@Text["Gallery.Unavailable"]</span>
+                }
+                else
+                {
+                    <span class="rental-photo-fallback">@Text["Gallery.Empty"]</span>
+                }
+            </div>
+            <div class="rental-request-summary-content">
+                <h2 id="rental-estimate-heading" class="h5">@Text["RentalRequestUi.SummaryHeading"]</h2>
+                <p class="rental-request-item">@title</p>
+                <p class="text-muted">@(string.IsNullOrWhiteSpace(listing.PickupArea) ? Text["Listing.NoPickupArea"].Value : listing.PickupArea)</p>
+                <dl class="rental-estimate-values">
+                    <div><dt>@Text["Browse.DailyPrice"]</dt><dd>@listing.DailyPrice.FormattedAmount</dd></div>
+                    <div><dt>@Text["Availability.FirstDay"]</dt><dd data-estimate-first>@(Model.FirstDay?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "—")</dd></div>
+                    <div><dt>@Text["Availability.LastDay"]</dt><dd data-estimate-last>@(Model.LastDay?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "—")</dd></div>
+                    <div><dt>@Text["RentalRequest.Duration"]</dt><dd data-estimate-days>@(Model.DurationText ?? "—")</dd></div>
+                    <div class="rental-estimate-total"><dt>@Text["RentalRequest.EstimatedTotal"]</dt><dd data-estimate-total>@(Model.EstimatedTotal?.FormattedAmount ?? "—")</dd></div>
+                </dl>
+                <p class="rental-estimate-status" role="status" aria-live="polite" aria-atomic="true" data-estimate-status>@(Model.EstimateError ?? (Model.EstimatedTotal is null ? Text["RentalRequestUi.ChooseDates"].Value : Text["RentalRequestUi.EstimateAnnouncement", Model.DurationText!, Model.EstimatedTotal.FormattedAmount].Value))</p>
+                <p class="form-text">@Text["RentalRequestUi.EstimateHelp"]</p>
+            </div>
+        </aside>
+    </div>
+    <div class="rental-request-availability">
+        <partial name="_PublicListingAvailability" model="@(new PublicListingAvailabilityViewModel(listing.AvailabilityWindows, listing.AvailabilityBlocks))" />
+    </div>
+</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/public-listing-availability.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/rental-request.css" asp-append-version="true" />
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/listing-images.js" asp-append-version="true" defer></script>
+    <script src="~/js/rental-request.js" asp-append-version="true" defer></script>
+}

@@ -42,3 +42,7 @@ public sealed record ListingAvailabilityViewModel(DateOnly StartDate, DateOnly E
     /// </summary>
     public static ListingAvailabilityViewModel FromResult(ListingAvailabilityPeriod period) => new(period.StartDate, period.EndDate);
 }
+
+/// <summary>Shares public date periods between listing details and the request form, excluding private block reasons.</summary>
+public sealed record PublicListingAvailabilityViewModel(IReadOnlyList<ListingAvailabilityViewModel> Windows,
+    IReadOnlyList<ListingAvailabilityViewModel> Blocks);

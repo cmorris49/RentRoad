@@ -53,6 +53,18 @@ public sealed class SharedResource
     /// <summary>Provides standard resource-backed account validation metadata.</summary>
     public static string PasswordsDiffer => Get("Identity.PasswordsDiffer");
 
+    /// <summary>Provides resource-backed rental form display metadata.</summary>
+    public static string RentalPickupTimeLabel => Get("RentalRequest.PickupTime");
+
+    /// <summary>Provides resource-backed rental form display metadata.</summary>
+    public static string RentalReturnTimeLabel => Get("RentalRequest.ReturnTime");
+
+    /// <summary>Provides resource-backed rental form display metadata.</summary>
+    public static string RentalDurationLabel => Get("RentalRequest.Duration");
+
+    /// <summary>Provides resource-backed rental form display metadata.</summary>
+    public static string RentalEstimateLabel => Get("RentalRequest.EstimatedTotal");
+
     /// <summary>Resolves presentation text in the request UI culture, preserving a detectable key fallback.</summary>
     public static string Get(string key, params object[] arguments)
     {

@@ -1,10 +1,12 @@
 @{
     var client = ViewData["ClientResources"] as string;
-    var shared = client == "editor" ? new[] { "MyListings.Untitled", "MyListings.NoPickupArea", "MyListings.NoPrice", "ListingDetails.OwnerFallback", "Common.SaveChanges", "Common.Remove", "Currency.CadAmount" }
+    var shared = client == "rental" ? new[] { "Currency.CadAmount", "RentalRequest.DurationOne", "RentalRequest.DurationMany", "RentalRequest.InvalidPrice", "RentalRequest.PriceOverflow", "RentalRequest.FutureStartRequired", "Availability.LastDayBeforeFirst" }
+        : client == "editor" ? new[] { "MyListings.Untitled", "MyListings.NoPickupArea", "MyListings.NoPrice", "ListingDetails.OwnerFallback", "Common.SaveChanges", "Common.Remove", "Currency.CadAmount" }
         : client == "images" ? new[] { "ListingImages.LocalPreviewOnlyChooseUploadImageToSaveIt", "ListingImages.PreviewUnavailable",
             "ListingImages.Uploading", "ListingImages.UploadingYourImagePleaseWait", "ListingImages.UploadImage" } : Array.Empty<string>();
     var strings = Text.GetAllStrings(includeParentCultures: true)
         .Where(value => value.Name.StartsWith("Gallery.", StringComparison.Ordinal) || shared.Contains(value.Name)
+            || client == "rental" && value.Name.StartsWith("RentalRequestUi.", StringComparison.Ordinal)
             || client == "editor" && new[] { "ListingEditor.", "UploadQueue.", "ListingStatus." }
                 .Any(prefix => value.Name.StartsWith(prefix, StringComparison.Ordinal)))
         .ToDictionary(value => value.Name, value => value.Value);

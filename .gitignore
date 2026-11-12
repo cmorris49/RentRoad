@@ -6,8 +6,6 @@
 # dotenv files
 .env
 
-AGENTS.md
-.github/copilot-instructions.md
 Development/
 # Local tests
 Tests/
@@ -527,3 +525,15 @@ Localization/README.md
 
 Localization/ListingViews.md
 /Localization/FinalAudit.md
+/Services/Rentals/README.md
+/Services/Rentals/Decisions.md
+/Services/Rentals/Lifecycle.md
+/ViewModels/Rentals/README.md
+
+/Services/Rentals/Management.md
+
+/Views/RentalRequests/README.md
+
+/Views/Rentals/README.md
+
+/Services/Rentals/Stage7Verification.md

@@ -1,0 +1,28 @@
+@using RentRoad.ViewModels.Rentals
+@model RentalManagementViewModel
+@{
+    var action = Model.IsIncoming ? "Incoming" : "Mine";
+}
+<nav class="rental-history-pagination" aria-label="@Text["RentalManagement.PaginationLabel"]">
+    @if (Model.HasPreviousPage)
+    {
+        <a class="btn btn-outline-primary" rel="prev" asp-action="@action" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize">@Text["Browse.PreviousPage"]</a>
+    }
+    else
+    {
+        <span class="btn btn-outline-primary disabled" aria-disabled="true">@Text["Browse.PreviousPage"]</span>
+    }
+    <span class="rental-history-page-indicator">
+        @if (Model.TotalPages == 0) { @Text["RentalManagementUi.NoPages"] }
+        else if (Model.PageNumber > Model.TotalPages) { @Text["RentalManagementUi.OutsidePageIndicator", Model.PageNumber, Model.TotalPages] }
+        else { @Text["RentalManagementUi.PageIndicator", Model.PageNumber, Model.TotalPages] }
+    </span>
+    @if (Model.HasNextPage)
+    {
+        <a class="btn btn-outline-primary" rel="next" asp-action="@action" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize">@Text["Browse.NextPage"]</a>
+    }
+    else
+    {
+        <span class="btn btn-outline-primary disabled" aria-disabled="true">@Text["Browse.NextPage"]</span>
+    }
+</nav>

@@ -505,7 +505,7 @@
     <value>Availability</value>
   </data>
   <data name="Availability.PublicHelp" xml:space="preserve">
-    <value>Listed windows apply except for blocked dates below. Final availability will be confirmed when rental requests are available.</value>
+    <value>Listed windows apply except for blocked dates below. Availability is checked again when you submit and when the owner approves.</value>
   </data>
   <data name="Availability.DisplayInclusiveHelp" xml:space="preserve">
     <value>Both the first and last day shown are included.</value>
@@ -1319,4 +1319,125 @@
   <data name="Validation.NonPropertyUnknownInvalid" xml:space="preserve"><value>The supplied value is invalid.</value></data>
   <data name="Validation.NonPropertyNumber" xml:space="preserve"><value>The field must be a number.</value></data>
   <data name="Validation.Summary" xml:space="preserve"><value>One or more validation errors occurred.</value></data>
+  <data name="RentalRequest.SignInRequired" xml:space="preserve"><value>Sign in to request a rental.</value></data>
+  <data name="RentalRequest.DetailsRequired" xml:space="preserve"><value>Rental request details are required.</value></data>
+  <data name="RentalRequest.InvalidListingId" xml:space="preserve"><value>Choose a valid listing to rent.</value></data>
+  <data name="RentalRequest.StartRequired" xml:space="preserve"><value>Choose the first rental day.</value></data>
+  <data name="RentalRequest.EndRequired" xml:space="preserve"><value>Provide the exclusive rental end date.</value></data>
+  <data name="RentalRequest.FutureStartRequired" xml:space="preserve"><value>The first rental day must be after today.</value></data>
+  <data name="RentalRequest.PositiveDurationRequired" xml:space="preserve"><value>The rental end date must be after the start date, with at least one rental day.</value></data>
+  <data name="RentalRequest.TransactionInProgress" xml:space="preserve"><value>Complete the current transaction before submitting a rental request.</value></data>
+  <data name="RentalRequest.AccountNotFound" xml:space="preserve"><value>Your renter account could not be found.</value></data>
+  <data name="RentalRequest.ListingNotFound" xml:space="preserve"><value>The requested listing could not be found.</value></data>
+  <data name="RentalRequest.ListingNotPublished" xml:space="preserve"><value>This listing is not currently accepting rental requests.</value></data>
+  <data name="RentalRequest.SelfRentalForbidden" xml:space="preserve"><value>You cannot rent your own listing.</value></data>
+  <data name="RentalRequest.InvalidPrice" xml:space="preserve"><value>This listing does not have a valid daily rental price.</value></data>
+  <data name="RentalRequest.PriceOverflow" xml:space="preserve"><value>The total rental price is too large. Choose a shorter rental period.</value></data>
+  <data name="RentalRequest.OutsideAvailability" xml:space="preserve"><value>The entire rental period must be covered by the listing’s availability windows.</value></data>
+  <data name="RentalRequest.BlockedDates" xml:space="preserve"><value>The rental period includes dates when this listing is unavailable.</value></data>
+  <data name="RentalRequest.ReservedDates" xml:space="preserve"><value>The rental period overlaps an approved or active rental.</value></data>
+  <data name="RentalRequest.PersistenceUnconfirmed" xml:space="preserve"><value>The rental request could not be confirmed. Retry with the same listing, dates and times to check the submission.</value></data>
+  <data name="RentalRequest.SignInToManage" xml:space="preserve"><value>Sign in to manage rental requests.</value></data>
+  <data name="RentalRequest.InvalidRequestId" xml:space="preserve"><value>Choose a valid rental request.</value></data>
+  <data name="RentalRequest.RequestUnavailable" xml:space="preserve"><value>The rental request could not be found or is not available to this account.</value></data>
+  <data name="RentalRequest.InvalidTransition" xml:space="preserve"><value>This rental request cannot be changed to the requested status.</value></data>
+  <data name="RentalRequest.CancellationTooLate" xml:space="preserve"><value>An approved rental can only be cancelled before its first rental day begins.</value></data>
+  <data name="RentalRequest.ApprovalTooLate" xml:space="preserve"><value>This rental request cannot be approved because its first rental day has passed.</value></data>
+  <data name="RentalRequest.ConcurrentChange" xml:space="preserve"><value>The rental request changed during this operation. Refresh it before trying again.</value></data>
+  <data name="RentalRequest.DecisionUnconfirmed" xml:space="preserve"><value>The rental status change could not be confirmed. Refresh the request to check its saved status before trying again.</value></data>
+  <data name="RentalRequest.ActivationTooEarly" xml:space="preserve"><value>A rental can only be activated once its first rental day has arrived.</value></data>
+  <data name="RentalRequest.CompletionTooEarly" xml:space="preserve"><value>A rental can only be completed once its scheduled rental period has ended.</value></data>
+  <data name="RentalRequest.CreateHeading" xml:space="preserve"><value>Request a rental</value></data>
+  <data name="RentalRequest.PickupTime" xml:space="preserve"><value>Pickup time (optional)</value></data>
+  <data name="RentalRequest.ReturnTime" xml:space="preserve"><value>Return time (optional)</value></data>
+  <data name="RentalRequest.Duration" xml:space="preserve"><value>Rental duration</value></data>
+  <data name="RentalRequest.EstimatedTotal" xml:space="preserve"><value>Estimated total (CAD)</value></data>
+  <data name="RentalRequest.DurationOne" xml:space="preserve"><value>{0} rental day</value></data>
+  <data name="RentalRequest.DurationMany" xml:space="preserve"><value>{0} rental days</value></data>
+  <data name="RentalRequest.Submitted" xml:space="preserve"><value>Your rental request is pending owner approval. Dates are not reserved until approval.</value></data>
+  <data name="RentalRequest.AlreadyPending" xml:space="preserve"><value>You already have a pending request for these dates and times. Dates are not reserved until approval.</value></data>
+  <data name="RentalRequest.FormUnavailable" xml:space="preserve"><value>The rental request form could not be loaded. Try again later.</value></data>
+  <data name="RentalManagement.Mine" xml:space="preserve"><value>My Rentals</value></data>
+  <data name="RentalManagement.Incoming" xml:space="preserve"><value>Incoming Requests</value></data>
+  <data name="RentalManagement.MineEmpty" xml:space="preserve"><value>You have not submitted any rental requests yet.</value></data>
+  <data name="RentalManagement.IncomingEmpty" xml:space="preserve"><value>There are no rental requests for your listings yet.</value></data>
+  <data name="RentalManagement.InvalidPagination" xml:space="preserve"><value>Choose a page number of at least 1 and a page size between 1 and 100 within the supported history range.</value></data>
+  <data name="RentalManagement.ReadUnavailable" xml:space="preserve"><value>Rental history could not be loaded. Try again later.</value></data>
+  <data name="RentalManagement.PaginationLabel" xml:space="preserve"><value>Rental history pages</value></data>
+  <data name="RentalManagement.TotalPrice" xml:space="preserve"><value>Agreed total (CAD)</value></data>
+  <data name="RentalManagement.DailyPrice" xml:space="preserve"><value>Agreed daily price (CAD)</value></data>
+  <data name="RentalManagement.RequestedAt" xml:space="preserve"><value>Requested on</value></data>
+  <data name="RentalManagement.DecidedAt" xml:space="preserve"><value>Owner decision on</value></data>
+  <data name="RentalManagement.CompletedAt" xml:space="preserve"><value>Completed on</value></data>
+  <data name="RentalManagement.Renter" xml:space="preserve"><value>Renter</value></data>
+  <data name="RentalManagement.Approve" xml:space="preserve"><value>Approve request</value></data>
+  <data name="RentalManagement.Decline" xml:space="preserve"><value>Decline request</value></data>
+  <data name="RentalManagement.Cancel" xml:space="preserve"><value>Cancel request</value></data>
+  <data name="RentalManagement.Activate" xml:space="preserve"><value>Activate rental</value></data>
+  <data name="RentalManagement.Complete" xml:space="preserve"><value>Complete rental</value></data>
+  <data name="RentalManagement.ActionLabel" xml:space="preserve"><value>{0} for rental request {1}</value></data>
+  <data name="RentalManagement.ApproveSucceeded" xml:space="preserve"><value>The rental request was approved. Its dates are now reserved.</value></data>
+  <data name="RentalManagement.ApproveRepeated" xml:space="preserve"><value>This rental request is already approved. No further change was made.</value></data>
+  <data name="RentalManagement.DeclineSucceeded" xml:space="preserve"><value>The rental request was declined. Other requests remain unchanged.</value></data>
+  <data name="RentalManagement.DeclineRepeated" xml:space="preserve"><value>This rental request is already declined. No further change was made.</value></data>
+  <data name="RentalManagement.CancelSucceeded" xml:space="preserve"><value>The rental request was cancelled. It no longer reserves dates.</value></data>
+  <data name="RentalManagement.CancelRepeated" xml:space="preserve"><value>This rental request is already cancelled. No further change was made.</value></data>
+  <data name="RentalManagement.ActivateSucceeded" xml:space="preserve"><value>The rental is now active. Its agreed dates and prices are unchanged.</value></data>
+  <data name="RentalManagement.ActivateRepeated" xml:space="preserve"><value>This rental is already active. No further change was made.</value></data>
+  <data name="RentalManagement.CompleteSucceeded" xml:space="preserve"><value>The rental was completed. Its agreed terms are preserved.</value></data>
+  <data name="RentalManagement.CompleteRepeated" xml:space="preserve"><value>This rental is already completed. No further change was made.</value></data>
+  <data name="RentalStatus.Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="RentalStatus.Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="RentalStatus.Declined" xml:space="preserve"><value>Declined</value></data>
+  <data name="RentalStatus.Active" xml:space="preserve"><value>Active</value></data>
+  <data name="RentalStatus.Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="RentalStatus.Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="RentalRequestUi.Introduction" xml:space="preserve"><value>Choose the days you need this item. The owner will review your request before any dates are reserved.</value></data>
+  <data name="RentalRequestUi.DateHeading" xml:space="preserve"><value>Choose your rental dates</value></data>
+  <data name="RentalRequestUi.UtcHelp" xml:space="preserve"><value>First Day must be after today in UTC. Last Day is included; choose the same day for a one-day rental.</value></data>
+  <data name="RentalRequestUi.PendingHelp" xml:space="preserve"><value>A request starts as Pending. It does not reserve dates or confirm a booking until the owner approves.</value></data>
+  <data name="RentalRequestUi.LoginHelp" xml:space="preserve"><value>Sign in to choose your rental dates and send a request to the owner.</value></data>
+  <data name="RentalRequestUi.OwnListing" xml:space="preserve"><value>This is your listing. You cannot request to rent your own item.</value></data>
+  <data name="RentalRequestUi.Submit" xml:space="preserve"><value>Send rental request</value></data>
+  <data name="RentalRequestUi.Submitting" xml:space="preserve"><value>Sending request…</value></data>
+  <data name="RentalRequestUi.SummaryHeading" xml:space="preserve"><value>Your rental estimate</value></data>
+  <data name="RentalRequestUi.EstimateHelp" xml:space="preserve"><value>This is an estimate using the current daily price. The server saves the agreed price when your request is submitted.</value></data>
+  <data name="RentalRequestUi.ChooseDates" xml:space="preserve"><value>Choose dates to see your estimate.</value></data>
+  <data name="RentalRequestUi.BackToItem" xml:space="preserve"><value>Back to item</value></data>
+  <data name="RentalRequestUi.OptionalTimes" xml:space="preserve"><value>Optional pickup and return times</value></data>
+  <data name="RentalRequestUi.TimeHelp" xml:space="preserve"><value>Times are informational and do not change the daily price or rental duration.</value></data>
+  <data name="RentalRequestUi.DateInvalid" xml:space="preserve"><value>Choose valid First Day and Last Day dates.</value></data>
+  <data name="RentalRequestUi.JavaScriptHelp" xml:space="preserve"><value>Without JavaScript, you can still submit your dates. The server validates availability and calculates the rental price.</value></data>
+  <data name="RentalRequestUi.EstimateAnnouncement" xml:space="preserve"><value>{0}. Estimated total: {1}.</value></data>
+  <data name="RentalManagementUi.MineIntroduction" xml:space="preserve"><value>Follow your requests, view agreed rental terms, and cancel eligible requests before your rental begins.</value></data>
+  <data name="RentalManagementUi.IncomingIntroduction" xml:space="preserve"><value>Review requests for your items and confirm each step of an approved rental.</value></data>
+  <data name="RentalManagementUi.NavigationLabel" xml:space="preserve"><value>Rental management</value></data>
+  <data name="RentalManagementUi.PendingDescription" xml:space="preserve"><value>Awaiting owner approval. These dates are not reserved.</value></data>
+  <data name="RentalManagementUi.ApprovedDescription" xml:space="preserve"><value>The owner approved this rental and reserved its dates.</value></data>
+  <data name="RentalManagementUi.ActiveDescription" xml:space="preserve"><value>This rental is in progress.</value></data>
+  <data name="RentalManagementUi.CompletedDescription" xml:space="preserve"><value>This rental has finished.</value></data>
+  <data name="RentalManagementUi.DeclinedDescription" xml:space="preserve"><value>The owner declined this request.</value></data>
+  <data name="RentalManagementUi.CancelledDescription" xml:space="preserve"><value>This request was cancelled and no longer reserves dates.</value></data>
+  <data name="RentalManagementUi.UtcHelp" xml:space="preserve"><value>Request, decision, and completion times are shown in UTC. First Day and Last Day are both included.</value></data>
+  <data name="RentalManagementUi.ActionHelp" xml:space="preserve"><value>Open an action to review it before confirming. The server checks eligibility and availability again.</value></data>
+  <data name="RentalManagementUi.ApproveConfirmation" xml:space="preserve"><value>Approve this request? This reserves the requested dates. Other pending requests are not automatically declined.</value></data>
+  <data name="RentalManagementUi.DeclineConfirmation" xml:space="preserve"><value>Decline this request? The request and its agreed terms will remain in rental history.</value></data>
+  <data name="RentalManagementUi.CancelConfirmation" xml:space="preserve"><value>Cancel this request? It will no longer reserve any dates. This action cannot be undone.</value></data>
+  <data name="RentalManagementUi.ActivateConfirmation" xml:space="preserve"><value>Activate this rental to confirm it has started? Its agreed dates and prices stay unchanged.</value></data>
+  <data name="RentalManagementUi.CompleteConfirmation" xml:space="preserve"><value>Complete this rental to confirm its rental period has ended? Its history and agreed terms will be preserved.</value></data>
+  <data name="RentalManagementUi.ConfirmApprove" xml:space="preserve"><value>Confirm approval</value></data>
+  <data name="RentalManagementUi.ConfirmDecline" xml:space="preserve"><value>Confirm decline</value></data>
+  <data name="RentalManagementUi.ConfirmCancel" xml:space="preserve"><value>Confirm cancellation</value></data>
+  <data name="RentalManagementUi.ConfirmActivate" xml:space="preserve"><value>Confirm activation</value></data>
+  <data name="RentalManagementUi.ConfirmComplete" xml:space="preserve"><value>Confirm completion</value></data>
+  <data name="RentalManagementUi.CloseConfirmation" xml:space="preserve"><value>Close this action above to keep the request unchanged.</value></data>
+  <data name="RentalManagementUi.ViewListing" xml:space="preserve"><value>View listing</value></data>
+  <data name="RentalManagementUi.EmptyPage" xml:space="preserve"><value>There are no requests on this page. Return to the first page to see your current history.</value></data>
+  <data name="RentalManagementUi.FirstPage" xml:space="preserve"><value>First page</value></data>
+  <data name="RentalManagementUi.NoPages" xml:space="preserve"><value>No rental history pages yet.</value></data>
+  <data name="RentalManagementUi.PageIndicator" xml:space="preserve"><value>Page {0} of {1}</value></data>
+  <data name="RentalManagementUi.OutsidePageIndicator" xml:space="preserve"><value>Page {0} is beyond your {1} history pages.</value></data>
+  <data name="RentalManagementUi.RestartHistory" xml:space="preserve"><value>Reload rental history</value></data>
+  <data name="RentalManagementUi.ViewOwnedListing" xml:space="preserve"><value>View your listing</value></data>
+  <data name="RentalManagementUi.HistoricalListingUnavailable" xml:space="preserve"><value>This listing is no longer publicly available. Your rental history is preserved.</value></data>
 </root>

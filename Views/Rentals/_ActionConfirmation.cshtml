@@ -1,0 +1,12 @@
+@using RentRoad.ViewModels.Rentals
+@model RentalManagementActionViewModel
+<details class="rental-action-confirmation">
+    <summary class="btn btn-outline-primary" aria-label="@Text["RentalManagement.ActionLabel", Text[$"RentalManagement.{Model.Action}"].Value, Model.RentalRequestId]">@Text[$"RentalManagement.{Model.Action}"]</summary>
+    <div class="rental-action-review">
+        <p>@Text[$"RentalManagementUi.{Model.Action}Confirmation"]</p>
+        <form asp-controller="Rentals" asp-action="@Model.Action" asp-route-id="@Model.RentalRequestId" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" method="post">
+            <button type="submit" class="btn btn-primary" aria-label="@Text["RentalManagement.ActionLabel", Text[$"RentalManagementUi.Confirm{Model.Action}"].Value, Model.RentalRequestId]">@Text[$"RentalManagementUi.Confirm{Model.Action}"]</button>
+        </form>
+        <p class="form-text mb-0">@Text["RentalManagementUi.CloseConfirmation"]</p>
+    </div>
+</details>

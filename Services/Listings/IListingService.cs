@@ -16,6 +16,9 @@ namespace RentRoad.Services.Listings;
 /// </remarks>
 public interface IListingService
 {
+    /// <summary>Checks ownership for presentation using the authenticated principal without exposing Identity IDs or loading an entity graph.</summary>
+    Task<bool> IsOwnedByAsync(int listingId, ClaimsPrincipal? user, CancellationToken cancellationToken = default);
+
     /// <summary>Checks proposed scalar fields against existing publication rules without saving or publishing them.</summary>
     Task<ListingServiceResult<bool>> ValidateProposedForPublicationAsync(int listingId, ClaimsPrincipal? user,
         ListingUpdate details, CancellationToken cancellationToken = default);
