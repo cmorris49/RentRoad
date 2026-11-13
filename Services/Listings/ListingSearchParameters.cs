@@ -18,23 +18,59 @@ public sealed record ListingSearchParameters
     public const int MAX_SEARCH_TERMS = 10;
     public const int MAX_PICKUP_AREA_LENGTH = 150;
 
-    public string? SearchText { get; init; }
+    public string? SearchText
+    {
+        get;
+        init;
+    }
 
-    public ListingCategory? Category { get; init; }
+    public ListingCategory? Category
+    {
+        get;
+        init;
+    }
 
-    public long? MinimumDailyPriceCents { get; init; }
+    public long? MinimumDailyPriceCents
+    {
+        get;
+        init;
+    }
 
-    public long? MaximumDailyPriceCents { get; init; }
+    public long? MaximumDailyPriceCents
+    {
+        get;
+        init;
+    }
 
-    public ItemCondition? Condition { get; init; }
+    public ItemCondition? Condition
+    {
+        get;
+        init;
+    }
 
-    public string? PickupArea { get; init; }
+    public string? PickupArea
+    {
+        get;
+        init;
+    }
 
-    public ListingSortOrder SortOrder { get; init; } = ListingSortOrder.NewestFirst;
+    public ListingSortOrder SortOrder
+    {
+        get;
+        init;
+    } = ListingSortOrder.NewestFirst;
 
-    public int PageNumber { get; init; } = 1;
+    public int PageNumber
+    {
+        get;
+        init;
+    } = 1;
 
-    public int PageSize { get; init; } = DEFAULT_PAGE_SIZE;
+    public int PageSize
+    {
+        get;
+        init;
+    } = DEFAULT_PAGE_SIZE;
 }
 
 /// <summary>

@@ -12,26 +12,64 @@ namespace RentRoad.Services.Listings;
 /// </remarks>
 public sealed record ListingUpdate
 {
-    public string? Title { get; init; }
+    public string? Title
+    {
+        get;
+        init;
+    }
 
-    public string? Description { get; init; }
+    public string? Description
+    {
+        get;
+        init;
+    }
 
-    public ListingCategory? Category { get; init; }
+    public ListingCategory? Category
+    {
+        get;
+        init;
+    }
 
-    public ItemCondition? Condition { get; init; }
+    public ItemCondition? Condition
+    {
+        get;
+        init;
+    }
 
-    public long? DailyPriceCents { get; init; }
+    public long? DailyPriceCents
+    {
+        get;
+        init;
+    }
 
-    public string? PickupArea { get; init; }
+    public string? PickupArea
+    {
+        get;
+        init;
+    }
 
-    public double? Latitude { get; init; }
+    public double? Latitude
+    {
+        get;
+        init;
+    }
 
-    public double? Longitude { get; init; }
+    public double? Longitude
+    {
+        get;
+        init;
+    }
 
-    public IReadOnlyList<ListingAvailabilityPeriod>? AvailabilityWindows { get; init; }
+    public IReadOnlyList<ListingAvailabilityPeriod>? AvailabilityWindows
+    {
+        get;
+        init;
+    }
 }
 
 /// <summary>
 /// Represents an availability window with an inclusive start and an exclusive end.
 /// </summary>
+/// <param name="StartDate">The inclusive start date of the rental or availability period.</param>
+/// <param name="EndDate">The exclusive end date of the rental or availability period.</param>
 public sealed record ListingAvailabilityPeriod(DateOnly StartDate, DateOnly EndDate);

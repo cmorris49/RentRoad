@@ -1,9 +1,18 @@
-/** Adds local upload previews and duplicate-submit feedback without changing server image validation. */
+/**
+ * Adds local upload previews and duplicate-submit feedback without changing server image validation.
+ *
+ * @returns {void} Does not return a value.
+ */
 (function initializeImageManagement() {
     "use strict";
     const text = window.RentRoadText;
 
-    /** Connects one multipart form; no file is sent until its normal authenticated submission. */
+    /**
+     * Connects one multipart form; no file is sent until its normal authenticated submission.
+     *
+     * @param {HTMLFormElement} form - Rendered form used by this component.
+     * @returns {void} Does not return a value.
+     */
     function connectUpload(form) {
         const input = form.querySelector("[data-image-file]");
         const preview = form.querySelector("[data-upload-preview]");
@@ -14,7 +23,11 @@
         let previewUrl = null;
         let submitting = false;
 
-        /** Releases only the temporary object URL created by this form. */
+        /**
+         * Releases only the temporary object URL created by this form.
+         *
+         * @returns {void} Does not return a value.
+         */
         function releasePreview() {
             if (previewUrl !== null) {
                 URL.revokeObjectURL(previewUrl);
@@ -22,7 +35,11 @@
             }
         }
 
-        /** Displays the selected local file without uploading it or claiming that it passed validation. */
+        /**
+         * Displays the selected local file without uploading it or claiming that it passed validation.
+         *
+         * @returns {void} Does not return a value.
+         */
         function previewSelection() {
             releasePreview();
             preview.hidden = true;
@@ -41,24 +58,39 @@
             status.textContent = text("ListingImages.LocalPreviewOnlyChooseUploadImageToSaveIt");
         }
 
-        /** Keeps an undecodable preview from hiding the authoritative upload feedback. */
+        /**
+         * Keeps an undecodable preview from hiding the authoritative upload feedback.
+         *
+         * @returns {void} Does not return a value.
+         */
         function previewUnavailable() {
             preview.hidden = true;
             releasePreview();
             status.textContent = text("ListingImages.PreviewUnavailable");
         }
 
-        /** Waits for client validation handlers before disabling the button for an actual submission. */
+        /**
+         * Waits for client validation handlers before disabling the button for an actual submission.
+         *
+         * @param {SubmitEvent} event - Native event supplied to this handler.
+         * @returns {void} Does not return a value.
+         */
         function beginUpload(event) {
             if (submitting) {
                 event.preventDefault();
+
                 return;
             }
 
             queueMicrotask(() => confirmSubmission(event));
         }
 
-        /** Disables submission only after all client validation listeners have accepted the event. */
+        /**
+         * Disables submission only after all client validation listeners have accepted the event.
+         *
+         * @param {SubmitEvent} event - Native event supplied to this handler.
+         * @returns {void} Does not return a value.
+         */
         function confirmSubmission(event) {
             if (event.defaultPrevented || !form.checkValidity()) {
                 return;
@@ -71,7 +103,11 @@
             status.textContent = text("ListingImages.UploadingYourImagePleaseWait");
         }
 
-        /** Restores the form if browser history returns a previously submitted document. */
+        /**
+         * Restores the form if browser history returns a previously submitted document.
+         *
+         * @returns {void} Does not return a value.
+         */
         function restoreUpload() {
             submitting = false;
             submit.disabled = false;

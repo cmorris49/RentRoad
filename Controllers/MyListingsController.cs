@@ -18,6 +18,7 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Initializes owner management using the existing listing service and Identity principal supplied by MVC.
     /// </summary>
+    /// <param name="listings">The service used to retrieve and manage listing information.</param>
     public MyListingsController(IListingService listings)
     {
         this.listings = listings;
@@ -26,10 +27,13 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Displays all current-user listings, including drafts, unavailable items, and archived history.
     /// </summary>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task containing the MVC response for the operation.</returns>
     [HttpGet("")]
     public async Task<IActionResult> IndexAsync(CancellationToken cancellationToken = default)
     {
         var result = await listings.GetOwnerListingsAsync(User, cancellationToken);
+
         return result.IsSuccess
             ? View("Index", new OwnerListingManagementViewModel(result.Value!))
             : ReadFailure(result.Status);
@@ -38,32 +42,44 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Displays an incomplete create form without creating any database records.
     /// </summary>
+    /// <returns>A task containing the MVC response for the operation.</returns>
     [HttpGet("create")]
-    public Task<IActionResult> CreateAsync() => Task.FromResult<IActionResult>(View("Create", new ListingCreateViewModel()));
+    public Task<IActionResult> CreateAsync() =>
+        Task.FromResult<IActionResult>(View("Create", new ListingCreateViewModel()));
 
     /// <summary>
     /// Creates a validated draft in one save and redirects to editing after success.
     /// </summary>
+    /// <param name="input">The submitted editable listing fields.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task containing the MVC response for the operation.</returns>
     [HttpPost("create")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateAsync([FromForm(Name = "")] ListingCreateViewModel input,
+    public async Task<IActionResult> CreateAsync(
+        [FromForm(Name = "")] ListingCreateViewModel input,
         CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
             return FormView("Create", input, StatusCodes.Status400BadRequest);
         }
+
         var result = await listings.CreateDraftAsync(User, input.ToServiceUpdate(), cancellationToken);
+
         if (result.IsSuccess)
         {
-            TempData["ListingSuccess"] = SharedResource.Get("ListingFeedback.YourDraftHasBeenSavedYouCanKeepEditing");
+            TempData["ListingSuccess"] =
+                SharedResource.Get("ListingFeedback.YourDraftHasBeenSavedYouCanKeepEditing");
             return RedirectToAction("Edit", new { id = result.Value!.ListingId });
         }
+
         var terminal = TerminalFailure(result.Status);
+
         if (terminal is not null)
         {
             return terminal;
         }
+
         AddErrors(result.Errors);
         return FormView("Create", input, FailureStatusCode(result.Status));
     }
@@ -71,10 +87,16 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Displays one owned listing without validating publication or loading all of the owner's listings.
     /// </summary>
+    /// <param name="id">The identifier of the listing selected by the route.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task containing the MVC response for the operation.</returns>
     [HttpGet("{id:int}/edit")]
-    public async Task<IActionResult> EditAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> EditAsync(
+        [FromRoute] int id,
+        CancellationToken cancellationToken = default)
     {
         var result = await listings.GetOwnerListingAsync(id, User, cancellationToken);
+
         return result.IsSuccess
             ? View("Edit", new ListingEditViewModel(result.Value!))
             : ReadFailure(result.Status);
@@ -83,26 +105,37 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Saves only editable scalar fields for the route-selected listing and preserves submitted values on failure.
     /// </summary>
+    /// <param name="id">The identifier of the listing selected by the route.</param>
+    /// <param name="input">The submitted editable listing fields.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task containing the MVC response for the operation.</returns>
     [HttpPost("{id:int}/edit")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditAsync([FromRoute] int id, [FromForm(Name = "")] ListingFormViewModel input,
+    public async Task<IActionResult> EditAsync(
+        [FromRoute] int id,
+        [FromForm(Name = "")] ListingFormViewModel input,
         CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
             return await EditFailureAsync(id, input, StatusCodes.Status400BadRequest, null, cancellationToken);
         }
+
         var result = await listings.UpdateAsync(id, User, input.ToServiceUpdate(), cancellationToken);
+
         if (result.IsSuccess)
         {
             TempData["ListingSuccess"] = SharedResource.Get("ListingFeedback.YourListingChangesHaveBeenSaved");
             return RedirectToAction("Edit", new { id = result.Value!.ListingId });
         }
+
         var terminal = TerminalFailure(result.Status);
+
         if (terminal is not null)
         {
             return terminal;
         }
+
         AddErrors(result.Errors);
         return await EditFailureAsync(id, input, FailureStatusCode(result.Status), null, cancellationToken);
     }
@@ -110,40 +143,60 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Opens an owner-only review step; this endpoint never publishes without final confirmation.
     /// </summary>
+    /// <param name="id">The identifier of the listing selected by the route.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task containing the MVC response for the operation.</returns>
     [HttpPost("{id:int}/publish")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> PublishAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> PublishAsync(
+        [FromRoute] int id,
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
             return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
+
         var result = await listings.GetOwnerListingAsync(id, User, cancellationToken);
-        return result.IsSuccess ? RedirectToAction("SavedReview", "ListingEditor", new { id }) : ReadFailure(result.Status);
+
+        return result.IsSuccess
+            ? RedirectToAction("SavedReview", "ListingEditor", new { id })
+            : ReadFailure(result.Status);
     }
 
     /// <summary>
     /// Archives the owned listing through the service and redirects to management without deleting historical records.
     /// </summary>
+    /// <param name="id">The identifier of the listing selected by the route.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task containing the MVC response for the operation.</returns>
     [HttpPost("{id:int}/archive")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ArchiveAsync([FromRoute] int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ArchiveAsync(
+        [FromRoute] int id,
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
             return ValidationProblem(modelStateDictionary: ModelState, title: SharedResource.Get("Validation.Summary"));
         }
+
         var result = await listings.ArchiveAsync(id, User, cancellationToken);
+
         if (result.IsSuccess)
         {
-            TempData["ListingSuccess"] = SharedResource.Get("ListingFeedback.YourListingHasBeenArchivedItsHistoryIsPreserved");
+            TempData["ListingSuccess"] =
+                SharedResource.Get("ListingFeedback.YourListingHasBeenArchivedItsHistoryIsPreserved");
             return RedirectToAction("Index");
         }
+
         var terminal = TerminalFailure(result.Status);
+
         if (terminal is not null)
         {
             return terminal;
         }
+
         AddErrors(result.Errors);
         return await EditFailureAsync(id, null, FailureStatusCode(result.Status), null, cancellationToken);
     }
@@ -151,10 +204,21 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Reloads trusted status after failure while retaining submitted fields and existing ModelState attempted values.
     /// </summary>
-    private async Task<IActionResult> EditFailureAsync(int id, ListingFormViewModel? input, int statusCode,
-        IReadOnlyList<ListingValidationError>? publicationErrors, CancellationToken cancellationToken)
+    /// <param name="id">The identifier of the listing selected by the route.</param>
+    /// <param name="input">The submitted editable listing fields.</param>
+    /// <param name="statusCode">The HTTP status to apply to the response, when supplied.</param>
+    /// <param name="publicationErrors">The optional publication validation errors to display.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task containing the MVC response for the operation.</returns>
+    private async Task<IActionResult> EditFailureAsync(
+        int id,
+        ListingFormViewModel? input,
+        int statusCode,
+        IReadOnlyList<ListingValidationError>? publicationErrors,
+        CancellationToken cancellationToken)
     {
         var current = await listings.GetOwnerListingAsync(id, User, cancellationToken);
+
         return current.IsSuccess
             ? FormView("Edit", new ListingEditViewModel(current.Value!, input, publicationErrors), statusCode)
             : ReadFailure(current.Status);
@@ -163,24 +227,37 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Maps known resource/authentication failures without including private service diagnostics in server errors.
     /// </summary>
-    private IActionResult? TerminalFailure(ListingServiceStatus status) => status switch
-    {
-        ListingServiceStatus.Unauthenticated => Challenge(),
-        ListingServiceStatus.Forbidden => Forbid(),
-        ListingServiceStatus.NotFound => NotFound(),
-        ListingServiceStatus.ValidationFailed or ListingServiceStatus.Conflict or ListingServiceStatus.InvalidState => null,
-        _ => Problem(statusCode: StatusCodes.Status500InternalServerError, title: SharedResource.Get("ListingFeedback.TheListingOperationCouldNotBeCompleted"))
-    };
+    /// <param name="status">The service outcome to translate into an MVC response.</param>
+    /// <returns>The terminal MVC failure response, or null when the caller should handle the outcome.</returns>
+    private IActionResult? TerminalFailure(ListingServiceStatus status) =>
+        status switch
+        {
+            ListingServiceStatus.Unauthenticated => Challenge(),
+            ListingServiceStatus.Forbidden => Forbid(),
+            ListingServiceStatus.NotFound => NotFound(),
+            ListingServiceStatus.ValidationFailed or ListingServiceStatus.Conflict or ListingServiceStatus.InvalidState =>
+                null,
+            _ =>
+                Problem(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: SharedResource.Get("ListingFeedback.TheListingOperationCouldNotBeCompleted"))
+        };
 
     /// <summary>
     /// Handles read failures for which there is no authorized form model to redisplay.
     /// </summary>
-    private IActionResult ReadFailure(ListingServiceStatus status) => TerminalFailure(status)
-        ?? Problem(statusCode: FailureStatusCode(status), title: SharedResource.Get("ListingFeedback.TheListingCouldNotBeLoaded"));
+    /// <param name="status">The service outcome to translate into an MVC response.</param>
+    /// <returns>The MVC response for the operation's outcome.</returns>
+    private IActionResult ReadFailure(ListingServiceStatus status) =>
+        TerminalFailure(status)
+            ?? Problem(
+                statusCode: FailureStatusCode(status),
+                title: SharedResource.Get("ListingFeedback.TheListingCouldNotBeLoaded"));
 
     /// <summary>
     /// Adds service field errors to the same flat field names used by the form ViewModels.
     /// </summary>
+    /// <param name="errors">The validation or operation errors returned by the service.</param>
     private void AddErrors(IReadOnlyList<ListingValidationError> errors)
     {
         foreach (var error in errors)
@@ -192,15 +269,25 @@ public sealed class MyListingsController : Controller
     /// <summary>
     /// Distinguishes invalid input from conflicting or disallowed lifecycle operations.
     /// </summary>
-    private static int FailureStatusCode(ListingServiceStatus status) => status == ListingServiceStatus.ValidationFailed
-        ? StatusCodes.Status400BadRequest : StatusCodes.Status409Conflict;
+    /// <param name="status">The service outcome to translate into an MVC response.</param>
+    /// <returns>The HTTP status code for the service outcome.</returns>
+    private static int FailureStatusCode(ListingServiceStatus status) =>
+        status == ListingServiceStatus.ValidationFailed
+            ? StatusCodes.Status400BadRequest
+            : StatusCodes.Status409Conflict;
 
     /// <summary>
-    /// Returns a typed form response with the intended failure status, without redirecting or clearing submitted values.
+    /// Returns a typed form response with the intended failure status, without redirecting or clearing
+    /// submitted values.
     /// </summary>
+    /// <param name="name">The name of the form view to render.</param>
+    /// <param name="model">The presentation model to render in the view.</param>
+    /// <param name="statusCode">The HTTP status to apply to the response, when supplied.</param>
+    /// <returns>The view response with its model and HTTP status.</returns>
     private ViewResult FormView(string name, object model, int statusCode)
     {
         var result = View(name, model);
+
         result.StatusCode = statusCode;
         return result;
     }

@@ -25,10 +25,20 @@ public sealed class ListingImageService : IListingImageService
     private readonly string containerName;
 
     /// <summary>
-    /// Initializes image orchestration using the existing context, storage service, UTC clock, and safe operational logging.
+    /// Initializes image orchestration using the existing context, storage service, UTC clock, and safe operational
+    /// logging.
     /// </summary>
-    public ListingImageService(ApplicationDbContext context, IBlobImageStorageService storage, TimeProvider clock,
-        IOptions<BlobImageStorageOptions> options, ILogger<ListingImageService> logger)
+    /// <param name="context">The existing scoped database context.</param>
+    /// <param name="storage">The private blob image storage service.</param>
+    /// <param name="clock">The clock used to obtain UTC timestamps and review expiry times.</param>
+    /// <param name="options">The image storage configuration and validation limits.</param>
+    /// <param name="logger">The logger used to record operational failures.</param>
+    public ListingImageService(
+        ApplicationDbContext context,
+        IBlobImageStorageService storage,
+        TimeProvider clock,
+        IOptions<BlobImageStorageOptions> options,
+        ILogger<ListingImageService> logger)
     {
         this.context = context;
         this.storage = storage;
@@ -40,23 +50,44 @@ public sealed class ListingImageService : IListingImageService
     /// <summary>
     /// Authorizes before uploading, then rechecks ownership and listing state before saving server-generated metadata.
     /// </summary>
-    public async Task<ListingServiceResult<ListingImage>> UploadAsync(int listingId, ClaimsPrincipal? user, Stream? content,
-        string? contentType, string? originalFileName = null, string? altText = null, CancellationToken cancellationToken = default)
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <param name="content">The caller-owned stream containing the image bytes.</param>
+    /// <param name="contentType">The image MIME content type.</param>
+    /// <param name="originalFileName">The optional original filename retained as image metadata.</param>
+    /// <param name="altText">The optional alternative text for the listing image.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    public async Task<ListingServiceResult<ListingImage>> UploadAsync(
+        int listingId,
+        ClaimsPrincipal? user,
+        Stream? content,
+        string? contentType,
+        string? originalFileName = null,
+        string? altText = null,
+        CancellationToken cancellationToken = default)
     {
         var ready = ListingOperationScope.CheckCallerState(context, listingId, user);
+
         if (!ready.IsSuccess)
         {
             return ListingServiceResult<ListingImage>.Failure(ready.Status, ready.Errors.ToArray());
         }
+
         var owned = await ReadOwnedListingAsync(listingId, user, cancellationToken);
+
         if (!owned.IsSuccess)
         {
             return ListingServiceResult<ListingImage>.Failure(owned.Status, owned.Errors.ToArray());
         }
+
         if (owned.Value!.Status == ListingStatus.Archived)
         {
-            return Failure<ListingImage>(ListingServiceStatus.InvalidState, SharedResource.Get("ImageFeedback.ArchivedListingsCannotBeEdited"));
+            return Failure<ListingImage>(
+                ListingServiceStatus.InvalidState,
+                SharedResource.Get("ImageFeedback.ArchivedListingsCannotBeEdited"));
         }
+
         var candidate = new ListingImage
         {
             ListingId = listingId,
@@ -64,117 +95,186 @@ public sealed class ListingImageService : IListingImageService
             AltText = string.IsNullOrWhiteSpace(altText) ? null : altText.Trim()
         };
         var errors = ValidateText(candidate);
+
         if (content is null || string.IsNullOrWhiteSpace(contentType))
         {
-            errors.Add(new(nameof(Listing.Images), SharedResource.Get("ImageFeedback.AnImageStreamAndContentTypeAreRequired")));
+            errors.Add(new(
+                    nameof(Listing.Images),
+                    SharedResource.Get("ImageFeedback.AnImageStreamAndContentTypeAreRequired")));
         }
+
         if (errors.Count > 0)
         {
-            return ListingServiceResult<ListingImage>.Failure(ListingServiceStatus.ValidationFailed, errors.ToArray());
+            return ListingServiceResult<ListingImage>.Failure(
+                ListingServiceStatus.ValidationFailed,
+                errors.ToArray());
         }
 
         StoredBlobImage stored;
+
         try
         {
             stored = await storage.UploadAsync(content!, contentType!, cancellationToken);
         }
         catch (ArgumentException)
         {
-            return Failure<ListingImage>(ListingServiceStatus.ValidationFailed, SharedResource.Get("ImageFeedback.ChooseANonemptyJPEGPNGOrWebPImageWithin"));
+            return Failure<ListingImage>(
+                ListingServiceStatus.ValidationFailed,
+                SharedResource.Get("ImageFeedback.ChooseANonemptyJPEGPNGOrWebPImageWithin"));
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             LogFailure("UploadStorage", listingId, null, exception);
-            return Failure<ListingImage>(ListingServiceStatus.StorageFailed, SharedResource.Get("ImageFeedback.TheImageCouldNotBeUploadedCheckStorageConfiguration"));
+            return Failure<ListingImage>(
+                ListingServiceStatus.StorageFailed,
+                SharedResource.Get("ImageFeedback.TheImageCouldNotBeUploadedCheckStorageConfiguration"));
         }
+
         candidate.ContainerName = stored.ContainerName;
         candidate.BlobName = stored.BlobName;
         candidate.ContentType = stored.ContentType;
         candidate.SizeBytes = stored.SizeBytes;
         var attempt = new UploadAttempt();
         var validation = new List<ValidationResult>();
-        Validator.TryValidateObject(candidate, new ValidationContext(candidate), validation, validateAllProperties: true);
-        if (validation.Count > 0 || stored.SizeBytes <= 0 || stored.ContentType is not ("image/jpeg" or "image/png" or "image/webp")
+
+        Validator.TryValidateObject(
+            candidate,
+            new ValidationContext(candidate),
+            validation,
+            validateAllProperties: true);
+
+        if (validation.Count > 0 || stored.SizeBytes <= 0
+            || stored.ContentType is not ("image/jpeg" or "image/png" or "image/webp")
             || !string.Equals(stored.ContainerName, containerName, StringComparison.Ordinal))
         {
-            return await RecoverUploadAsync(candidate, attempt, Failure<ListingImage>(ListingServiceStatus.StorageFailed,
-                SharedResource.Get("ImageFeedback.StorageReturnedInvalidImageMetadata")));
+            return await RecoverUploadAsync(
+                candidate,
+                attempt,
+                Failure<ListingImage>(
+                    ListingServiceStatus.StorageFailed,
+                    SharedResource.Get("ImageFeedback.StorageReturnedInvalidImageMetadata")));
         }
 
         try
         {
-            var result = await MutateAsync(listingId, user, async (database, listing, images, token) =>
-            {
-                var existing = await database.ListingImages.AsNoTracking().SingleOrDefaultAsync(image =>
-                    image.ContainerName == stored.ContainerName && image.BlobName == stored.BlobName, token);
-                if (existing is not null)
+            var result = await MutateAsync(
+                listingId,
+                user,
+                async (database, listing, images, token) =>
                 {
-                    return attempt.SaveAttempted && existing.ListingId == listingId
-                        ? ListingServiceResult<ListingImage>.Success(existing)
-                        : Failure<ListingImage>(ListingServiceStatus.Conflict, SharedResource.Get("ImageFeedback.ThisStorageImageIsAlreadyAssociatedWithAListing"));
-                }
-                NormalizeOrder(images);
-                var image = new ListingImage
-                {
-                    ListingId = listingId, ContainerName = stored.ContainerName, BlobName = stored.BlobName,
-                    ContentType = stored.ContentType, SizeBytes = stored.SizeBytes,
-                    OriginalFileName = candidate.OriginalFileName, AltText = candidate.AltText,
-                    CreatedAtUtc = clock.GetUtcNow().UtcDateTime, DisplayOrder = images.Count,
-                    IsPrimary = !images.Any(existingImage => existingImage.IsPrimary)
-                };
-                database.ListingImages.Add(image);
-                listing.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
-                attempt.SaveAttempted = true;
-                await database.SaveChangesAsync(token);
-                return ListingServiceResult<ListingImage>.Success(image);
-            }, cancellationToken);
+                    var existing = await database.ListingImages.AsNoTracking().SingleOrDefaultAsync(image =>
+                        image.ContainerName == stored.ContainerName && image.BlobName == stored.BlobName, token);
+
+                    if (existing is not null)
+                    {
+                        return attempt.SaveAttempted && existing.ListingId == listingId
+                            ? ListingServiceResult<ListingImage>.Success(existing)
+                            : Failure<ListingImage>(
+                                ListingServiceStatus.Conflict,
+                                SharedResource.Get("ImageFeedback.ThisStorageImageIsAlreadyAssociatedWithAListing"));
+                    }
+
+                    NormalizeOrder(images);
+                    var image = new ListingImage
+                    {
+                        ListingId = listingId,
+                        ContainerName = stored.ContainerName,
+                        BlobName = stored.BlobName,
+                        ContentType = stored.ContentType,
+                        SizeBytes = stored.SizeBytes,
+                        OriginalFileName = candidate.OriginalFileName,
+                        AltText = candidate.AltText,
+                        CreatedAtUtc = clock.GetUtcNow().UtcDateTime,
+                        DisplayOrder = images.Count,
+                        IsPrimary = !images.Any(existingImage => existingImage.IsPrimary)
+                    };
+
+                    database.ListingImages.Add(image);
+                    listing.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
+                    attempt.SaveAttempted = true;
+                    await database.SaveChangesAsync(token);
+                    return ListingServiceResult<ListingImage>.Success(image);
+                },
+                cancellationToken);
+
             return result.IsSuccess ? result : await RecoverUploadAsync(candidate, attempt, result);
         }
         catch (OperationCanceledException)
         {
-            await RecoverUploadAsync(candidate, attempt, Failure<ListingImage>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.ImageMetadataSavingWasCancelled")));
+            await RecoverUploadAsync(
+                candidate,
+                attempt,
+                Failure<ListingImage>(
+                    ListingServiceStatus.PersistenceFailed,
+                    SharedResource.Get("ImageFeedback.ImageMetadataSavingWasCancelled")));
             throw;
         }
     }
 
     /// <summary>
-    /// Commits safe metadata removal before attempting blob deletion, retaining publication requirements and primary order.
+    /// Commits safe metadata removal before attempting blob deletion, retaining publication requirements and
+    /// primary order.
     /// </summary>
-    public async Task<ListingServiceResult<ListingImageDeletion>> DeleteAsync(int listingId, int imageId, ClaimsPrincipal? user,
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="imageId">The identifier of the selected listing image, when supplied.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    public async Task<ListingServiceResult<ListingImageDeletion>> DeleteAsync(
+        int listingId,
+        int imageId,
+        ClaimsPrincipal? user,
         CancellationToken cancellationToken = default)
     {
         ListingImage? planned = null;
         ListingServiceResult<ListingImage> result;
+
         try
         {
-            result = await MutateAsync(listingId, user, async (database, listing, images, token) =>
-            {
-                var selected = images.SingleOrDefault(image => image.ListingImageId == imageId);
-                if (selected is null)
+            result = await MutateAsync(
+                listingId,
+                user,
+                async (database, listing, images, token) =>
                 {
-                    return MissingImage<ListingImage>(imageId);
-                }
-                if (!string.Equals(selected.ContainerName, containerName, StringComparison.Ordinal))
-                {
-                    return Failure<ListingImage>(ListingServiceStatus.InvalidState, SharedResource.Get("ImageFeedback.TheImageBelongsToADifferentConfiguredStorageContainer"));
-                }
-                var remaining = images.Where(image => image.ListingImageId != imageId).ToList();
-                if (listing.Status is ListingStatus.Published or ListingStatus.Unavailable && !remaining.Any(ListingService.HasStoredImageMetadata))
-                {
-                    return Failure<ListingImage>(ListingServiceStatus.ValidationFailed, SharedResource.Get("ImageFeedback.ImageRequired"));
-                }
-                planned = selected;
-                database.ListingImages.Remove(selected);
-                await database.SaveChangesAsync(token);
-                NormalizeOrder(remaining);
-                if (remaining.Count > 0 && !remaining.Any(image => image.IsPrimary))
-                {
-                    remaining[0].IsPrimary = true;
-                }
-                listing.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
-                await database.SaveChangesAsync(token);
-                return ListingServiceResult<ListingImage>.Success(selected);
-            }, cancellationToken);
+                    var selected = images.SingleOrDefault(image => image.ListingImageId == imageId);
+
+                    if (selected is null)
+                    {
+                        return MissingImage<ListingImage>(imageId);
+                    }
+
+                    if (!string.Equals(selected.ContainerName, containerName, StringComparison.Ordinal))
+                    {
+                        return Failure<ListingImage>(
+                            ListingServiceStatus.InvalidState,
+                            SharedResource.Get("ImageFeedback.TheImageBelongsToADifferentConfiguredStorageContainer"));
+                    }
+
+                    var remaining = images.Where(image => image.ListingImageId != imageId).ToList();
+
+                    if (listing.Status is ListingStatus.Published or ListingStatus.Unavailable
+                        && !remaining.Any(ListingService.HasStoredImageMetadata))
+                    {
+                        return Failure<ListingImage>(
+                            ListingServiceStatus.ValidationFailed,
+                            SharedResource.Get("ImageFeedback.ImageRequired"));
+                    }
+
+                    planned = selected;
+                    database.ListingImages.Remove(selected);
+                    await database.SaveChangesAsync(token);
+                    NormalizeOrder(remaining);
+
+                    if (remaining.Count > 0 && !remaining.Any(image => image.IsPrimary))
+                    {
+                        remaining[0].IsPrimary = true;
+                    }
+
+                    listing.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
+                    await database.SaveChangesAsync(token);
+                    return ListingServiceResult<ListingImage>.Success(selected);
+                },
+                cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -182,136 +282,225 @@ public sealed class ListingImageService : IListingImageService
             {
                 await CompleteDeletionAsync(planned, metadataCommitted: false);
             }
+
             throw;
         }
+
         if (planned is null)
         {
             return ListingServiceResult<ListingImageDeletion>.Failure(result.Status, result.Errors.ToArray());
         }
+
         if (!result.IsSuccess)
         {
             var inspection = await InspectReferenceAsync(planned);
+
             if (!inspection.Verified)
             {
-                return Failure<ListingImageDeletion>(ListingServiceStatus.ReconciliationRequired,
+                return Failure<ListingImageDeletion>(
+                    ListingServiceStatus.ReconciliationRequired,
                     SharedResource.Get("ImageFeedback.ImageRemovalCouldNotBeVerifiedRefreshTheListing"));
             }
+
             if (inspection.Image is not null)
             {
                 return ListingServiceResult<ListingImageDeletion>.Failure(result.Status, result.Errors.ToArray());
             }
+
             ListingOperationScope.InvalidateTrackedEntries(context, listingId);
         }
+
         return await CompleteDeletionAsync(planned, metadataCommitted: true);
     }
 
     /// <summary>
     /// Clears the prior primary flag before assigning its replacement inside the same SQL transaction.
     /// </summary>
-    public Task<ListingServiceResult<ListingImage>> SetPrimaryAsync(int listingId, int imageId, ClaimsPrincipal? user,
-        CancellationToken cancellationToken = default) => MutateAsync(listingId, user, async (database, listing, images, token) =>
-    {
-        var selected = images.SingleOrDefault(image => image.ListingImageId == imageId);
-        if (selected is null)
-        {
-            return MissingImage<ListingImage>(imageId);
-        }
-        if (!selected.IsPrimary)
-        {
-            foreach (var image in images)
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="imageId">The identifier of the selected listing image, when supplied.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    public Task<ListingServiceResult<ListingImage>> SetPrimaryAsync(
+        int listingId,
+        int imageId,
+        ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default) =>
+        MutateAsync(
+            listingId,
+            user,
+            async (database, listing, images, token) =>
             {
-                image.IsPrimary = false;
-            }
-            await database.SaveChangesAsync(token);
-            selected.IsPrimary = true;
-            listing.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
-            await database.SaveChangesAsync(token);
-        }
-        return ListingServiceResult<ListingImage>.Success(selected);
-    }, cancellationToken);
+                var selected = images.SingleOrDefault(image => image.ListingImageId == imageId);
+
+                if (selected is null)
+                {
+                    return MissingImage<ListingImage>(imageId);
+                }
+
+                if (!selected.IsPrimary)
+                {
+                    foreach (var image in images)
+                    {
+                        image.IsPrimary = false;
+                    }
+
+                    await database.SaveChangesAsync(token);
+                    selected.IsPrimary = true;
+                    listing.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
+                    await database.SaveChangesAsync(token);
+                }
+
+                return ListingServiceResult<ListingImage>.Success(selected);
+            },
+            cancellationToken);
 
     /// <summary>
     /// Validates a complete image ID permutation and persists deterministic contiguous display positions.
     /// </summary>
-    public Task<ListingServiceResult<IReadOnlyList<ListingImage>>> SetDisplayOrderAsync(int listingId, IReadOnlyList<int>? imageIds,
-        ClaimsPrincipal? user, CancellationToken cancellationToken = default)
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="imageIds">The complete requested sequence of listing image identifiers.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    public Task<ListingServiceResult<IReadOnlyList<ListingImage>>> SetDisplayOrderAsync(
+        int listingId,
+        IReadOnlyList<int>? imageIds,
+        ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default)
     {
         var snapshot = imageIds?.ToArray();
-        return MutateAsync<IReadOnlyList<ListingImage>>(listingId, user, async (database, listing, images, token) =>
-        {
-            if (snapshot is null || snapshot.Length != images.Count || snapshot.Distinct().Count() != snapshot.Length
-                || snapshot.Any(id => id <= 0) || !snapshot.ToHashSet().SetEquals(images.Select(image => image.ListingImageId)))
+
+        return MutateAsync<IReadOnlyList<ListingImage>>(
+            listingId,
+            user,
+            async (database, listing, images, token) =>
             {
-                return Failure<IReadOnlyList<ListingImage>>(ListingServiceStatus.ValidationFailed,
-                    SharedResource.Get("ImageFeedback.SupplyEveryCurrentImageIDForThisListingExactly"));
-            }
-            var byId = images.ToDictionary(image => image.ListingImageId);
-            var ordered = snapshot.Select(id => byId[id]).ToList();
-            NormalizeOrder(ordered);
-            listing.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
-            await database.SaveChangesAsync(token);
-            return ListingServiceResult<IReadOnlyList<ListingImage>>.Success(ordered);
-        }, cancellationToken);
+                if (snapshot is null || snapshot.Length != images.Count || snapshot.Distinct()
+                    .Count() != snapshot.Length
+                    || snapshot.Any(id => id <= 0)
+                    || !snapshot.ToHashSet()
+                        .SetEquals(images.Select(image => image.ListingImageId)))
+                {
+                    return Failure<IReadOnlyList<ListingImage>>(
+                        ListingServiceStatus.ValidationFailed,
+                        SharedResource.Get("ImageFeedback.SupplyEveryCurrentImageIDForThisListingExactly"));
+                }
+
+                var byId = images.ToDictionary(image => image.ListingImageId);
+                var ordered = snapshot.Select(id => byId[id]).ToList();
+
+                NormalizeOrder(ordered);
+                listing.UpdatedAtUtc = clock.GetUtcNow().UtcDateTime;
+                await database.SaveChangesAsync(token);
+                return ListingServiceResult<IReadOnlyList<ListingImage>>.Success(ordered);
+            },
+            cancellationToken);
     }
 
     /// <summary>
     /// Retrieves detached metadata in display order after authenticating the owner, including archived listings.
     /// </summary>
-    public async Task<ListingServiceResult<IReadOnlyList<ListingImage>>> GetImagesAsync(int listingId, ClaimsPrincipal? user,
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    public async Task<ListingServiceResult<IReadOnlyList<ListingImage>>> GetImagesAsync(
+        int listingId,
+        ClaimsPrincipal? user,
         CancellationToken cancellationToken = default)
     {
         try
         {
             await using var database = ListingOperationScope.CreateContext(context);
-            var owned = await ListingOperationScope.GetOwnedListingAsync(database, listingId, user, cancellationToken);
+            var owned = await ListingOperationScope.GetOwnedListingAsync(
+                database,
+                listingId,
+                user,
+                cancellationToken);
+
             if (!owned.IsSuccess)
             {
-                return ListingServiceResult<IReadOnlyList<ListingImage>>.Failure(owned.Status, owned.Errors.ToArray());
+                return ListingServiceResult<IReadOnlyList<ListingImage>>.Failure(
+                    owned.Status,
+                    owned.Errors.ToArray());
             }
+
             var images = await database.ListingImages.AsNoTracking().Where(image => image.ListingId == listingId)
-                .OrderBy(image => image.DisplayOrder).ThenBy(image => image.ListingImageId).ToListAsync(cancellationToken);
+                .OrderBy(image => image.DisplayOrder)
+                .ThenBy(image => image.ListingImageId)
+                .ToListAsync(cancellationToken);
+
             return ListingServiceResult<IReadOnlyList<ListingImage>>.Success(images);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             LogFailure("ReadImages", listingId, null, exception);
-            return Failure<IReadOnlyList<ListingImage>>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.ListingImagesCouldNotBeLoadedTryAgainLater"));
+            return Failure<IReadOnlyList<ListingImage>>(
+                ListingServiceStatus.PersistenceFailed,
+                SharedResource.Get("ImageFeedback.ListingImagesCouldNotBeLoadedTryAgainLater"));
         }
     }
 
     /// <summary>
-    /// Opens an authorized stored image and rechecks visibility and association after storage access, disposing rejected streams.
+    /// Opens an authorized stored image and rechecks visibility and association after storage access, disposing
+    /// rejected streams.
     /// </summary>
-    public async Task<ListingServiceResult<BlobImageDownload>> DownloadAsync(int listingId, int imageId, ClaimsPrincipal? user,
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="imageId">The identifier of the selected listing image, when supplied.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    public async Task<ListingServiceResult<BlobImageDownload>> DownloadAsync(
+        int listingId,
+        int imageId,
+        ClaimsPrincipal? user,
         CancellationToken cancellationToken = default)
     {
         if (listingId <= 0 || imageId <= 0)
         {
-            return Failure<BlobImageDownload>(ListingServiceStatus.ValidationFailed, SharedResource.Get("ImageFeedback.ListingAndImageIDsMustBePositive"));
+            return Failure<BlobImageDownload>(
+                ListingServiceStatus.ValidationFailed,
+                SharedResource.Get("ImageFeedback.ListingAndImageIDsMustBePositive"));
         }
+
         BlobImageDownload? opened = null;
+
         try
         {
             await using var database = ListingOperationScope.CreateContext(context);
             var reference = await ReadImageReferenceAsync(database, listingId, imageId, cancellationToken);
             var denied = ImageAccessFailure(reference, user);
+
             if (denied is not null)
             {
                 return denied;
             }
-            if (!string.Equals(reference!.ContainerName, containerName, StringComparison.Ordinal) || string.IsNullOrWhiteSpace(reference.BlobName))
+
+            if (!string.Equals(reference!.ContainerName, containerName, StringComparison.Ordinal)
+                || string.IsNullOrWhiteSpace(reference.BlobName))
             {
-                return Failure<BlobImageDownload>(ListingServiceStatus.StorageFailed, SharedResource.Get("ImageFeedback.TheImageSStorageConfigurationIsUnavailable"));
+                return Failure<BlobImageDownload>(
+                    ListingServiceStatus.StorageFailed,
+                    SharedResource.Get("ImageFeedback.TheImageSStorageConfigurationIsUnavailable"));
             }
+
             opened = await storage.DownloadAsync(reference.BlobName, cancellationToken);
             var current = await ReadImageReferenceAsync(database, listingId, imageId, cancellationToken);
+
             denied = ImageAccessFailure(current, user);
-            if (denied is not null || current!.ContainerName != reference.ContainerName || current.BlobName != reference.BlobName)
+
+            if (denied is not null || current!.ContainerName != reference.ContainerName
+                || current.BlobName != reference.BlobName)
             {
                 await opened.DisposeAsync();
                 opened = null;
-                return denied ?? Failure<BlobImageDownload>(ListingServiceStatus.NotFound, SharedResource.Get("ImageFeedback.TheImageCouldNotBeFound"));
+                return denied
+                    ?? Failure<BlobImageDownload>(
+                        ListingServiceStatus.NotFound,
+                        SharedResource.Get("ImageFeedback.TheImageCouldNotBeFound"));
             }
+
             return ListingServiceResult<BlobImageDownload>.Success(opened);
         }
         catch (OperationCanceledException)
@@ -320,6 +509,7 @@ public sealed class ListingImageService : IListingImageService
             {
                 await opened.DisposeAsync();
             }
+
             throw;
         }
         catch (BlobImageStorageException exception)
@@ -328,13 +518,16 @@ public sealed class ListingImageService : IListingImageService
             {
                 await opened.DisposeAsync();
             }
+
             LogFailure("DownloadStorage", listingId, imageId, exception);
-            return Failure<BlobImageDownload>(exception.Failure switch
-            {
-                BlobImageStorageFailure.NotFound => ListingServiceStatus.NotFound,
-                BlobImageStorageFailure.Conflict => ListingServiceStatus.Conflict,
-                _ => ListingServiceStatus.StorageFailed
-            }, SharedResource.Get("ImageFeedback.TheImageCouldNotBeRetrievedFromStorage"));
+            return Failure<BlobImageDownload>(
+                exception.Failure switch
+                {
+                    BlobImageStorageFailure.NotFound => ListingServiceStatus.NotFound,
+                    BlobImageStorageFailure.Conflict => ListingServiceStatus.Conflict,
+                    _ => ListingServiceStatus.StorageFailed
+                },
+                SharedResource.Get("ImageFeedback.TheImageCouldNotBeRetrievedFromStorage"));
         }
         catch (Exception exception)
         {
@@ -342,108 +535,188 @@ public sealed class ListingImageService : IListingImageService
             {
                 await opened.DisposeAsync();
             }
+
             LogFailure("DownloadImage", listingId, imageId, exception);
-            return Failure<BlobImageDownload>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.TheImageCouldNotBeLoadedTryAgainLater"));
+            return Failure<BlobImageDownload>(
+                ListingServiceStatus.PersistenceFailed,
+                SharedResource.Get("ImageFeedback.TheImageCouldNotBeLoadedTryAgainLater"));
         }
     }
 
     /// <summary>
     /// Projects only the server-resolved storage reference and fields needed to authorize this selected image.
     /// </summary>
-    private static Task<ImageReference?> ReadImageReferenceAsync(ApplicationDbContext database, int listingId, int imageId,
-        CancellationToken cancellationToken) => database.ListingImages.AsNoTracking()
-        .Where(image => image.ListingId == listingId && image.ListingImageId == imageId)
-        .Select(image => new ImageReference(image.ContainerName, image.BlobName, image.Listing.OwnerId, image.Listing.Status))
-        .SingleOrDefaultAsync(cancellationToken);
+    /// <param name="database">The database context used for this operation.</param>
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="imageId">The identifier of the selected listing image, when supplied.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the selected image's storage and visibility reference, or null when it does not exist.</returns>
+    private static Task<ImageReference?> ReadImageReferenceAsync(
+        ApplicationDbContext database,
+        int listingId,
+        int imageId,
+        CancellationToken cancellationToken) =>
+        database.ListingImages.AsNoTracking()
+            .Where(image => image.ListingId == listingId && image.ListingImageId == imageId)
+            .Select(image => new ImageReference(
+                image.ContainerName,
+                image.BlobName,
+                image.Listing.OwnerId,
+                image.Listing.Status))
+            .SingleOrDefaultAsync(cancellationToken);
 
     /// <summary>
     /// Allows anonymous published access and reserves every other listing status for its authenticated owner.
     /// </summary>
-    private static ListingServiceResult<BlobImageDownload>? ImageAccessFailure(ImageReference? reference, ClaimsPrincipal? user)
+    /// <param name="reference">The server-resolved storage reference and visibility data, when found.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <returns>The access failure result, or null when image access is permitted.</returns>
+    private static ListingServiceResult<BlobImageDownload>? ImageAccessFailure(
+        ImageReference? reference,
+        ClaimsPrincipal? user)
     {
         if (reference is null)
         {
-            return Failure<BlobImageDownload>(ListingServiceStatus.NotFound, SharedResource.Get("ImageFeedback.TheImageCouldNotBeFoundForThisListing"));
+            return Failure<BlobImageDownload>(
+                ListingServiceStatus.NotFound,
+                SharedResource.Get("ImageFeedback.TheImageCouldNotBeFoundForThisListing"));
         }
+
         if (reference.Status == ListingStatus.Published)
         {
             return null;
         }
+
         var ownerId = ListingOperationScope.GetOwnerId(user);
+
         if (ownerId is null)
         {
-            return Failure<BlobImageDownload>(ListingServiceStatus.Unauthenticated, SharedResource.Get("ImageFeedback.SignInToViewThisImage"));
+            return Failure<BlobImageDownload>(
+                ListingServiceStatus.Unauthenticated,
+                SharedResource.Get("ImageFeedback.SignInToViewThisImage"));
         }
-        return string.Equals(reference.OwnerId, ownerId, StringComparison.Ordinal) ? null
-            : Failure<BlobImageDownload>(ListingServiceStatus.Forbidden, SharedResource.Get("ImageFeedback.OnlyTheListingOwnerCanViewThisImage"));
+
+        return string.Equals(reference.OwnerId, ownerId, StringComparison.Ordinal)
+            ? null
+            : Failure<BlobImageDownload>(
+                ListingServiceStatus.Forbidden,
+                SharedResource.Get("ImageFeedback.OnlyTheListingOwnerCanViewThisImage"));
     }
 
     /// <summary>
     /// Contains server-only lookup data that is never returned to MVC as image metadata.
     /// </summary>
+    /// <param name="ContainerName">The name of the image storage container.</param>
+    /// <param name="BlobName">The blob name within the configured storage container.</param>
+    /// <param name="OwnerId">The listing owner's identifier.</param>
+    /// <param name="Status">The operation or lifecycle status associated with the value.</param>
     private sealed record ImageReference(string ContainerName, string BlobName, string OwnerId, ListingStatus Status);
 
     /// <summary>
-    /// Shares owner and archived-state checks across serializable metadata mutations without invoking blob storage in retries.
+    /// Shares owner and archived-state checks across serializable metadata mutations without invoking blob storage
+    /// in retries.
     /// </summary>
-    private async Task<ListingServiceResult<T>> MutateAsync<T>(int listingId, ClaimsPrincipal? user,
+    /// <typeparam name="T">The operation's result value type.</typeparam>
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <param name="operation">The asynchronous operation to execute within the surrounding service workflow.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    private async Task<ListingServiceResult<T>> MutateAsync<T>(
+        int listingId,
+        ClaimsPrincipal? user,
         Func<ApplicationDbContext, Listing, List<ListingImage>, CancellationToken, Task<ListingServiceResult<T>>> operation,
         CancellationToken cancellationToken)
     {
         try
         {
-            return await ListingOperationScope.ExecuteAsync(context, listingId, user, async (database, token) =>
-            {
-                var owned = await ListingOperationScope.GetOwnedListingAsync(database, listingId, user, token);
-                if (!owned.IsSuccess)
+            return await ListingOperationScope.ExecuteAsync(
+                context,
+                listingId,
+                user,
+                async (database, token) =>
                 {
-                    return ListingServiceResult<T>.Failure(owned.Status, owned.Errors.ToArray());
-                }
-                if (owned.Value!.Status == ListingStatus.Archived)
-                {
-                    return Failure<T>(ListingServiceStatus.InvalidState, SharedResource.Get("ImageFeedback.ArchivedListingsCannotBeEdited"));
-                }
-                var images = await database.ListingImages.Where(image => image.ListingId == listingId)
-                    .OrderBy(image => image.DisplayOrder).ThenBy(image => image.ListingImageId).ToListAsync(token);
-                return await operation(database, owned.Value, images, token);
-            }, cancellationToken);
+                    var owned = await ListingOperationScope.GetOwnedListingAsync(database, listingId, user, token);
+
+                    if (!owned.IsSuccess)
+                    {
+                        return ListingServiceResult<T>.Failure(owned.Status, owned.Errors.ToArray());
+                    }
+
+                    if (owned.Value!.Status == ListingStatus.Archived)
+                    {
+                        return Failure<T>(
+                            ListingServiceStatus.InvalidState,
+                            SharedResource.Get("ImageFeedback.ArchivedListingsCannotBeEdited"));
+                    }
+
+                    var images = await database.ListingImages.Where(image => image.ListingId == listingId)
+                        .OrderBy(image => image.DisplayOrder)
+                        .ThenBy(image => image.ListingImageId)
+                        .ToListAsync(token);
+
+                    return await operation(database, owned.Value, images, token);
+                },
+                cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             LogFailure("SaveMetadata", listingId, null, exception);
-            return Failure<T>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.ImageMetadataCouldNotBeSavedRefreshTheListing"));
+            return Failure<T>(
+                ListingServiceStatus.PersistenceFailed,
+                SharedResource.Get("ImageFeedback.ImageMetadataCouldNotBeSavedRefreshTheListing"));
         }
     }
 
     /// <summary>
     /// Reads current ownership before spending resources on an upload, without relying on cached entities.
     /// </summary>
-    private async Task<ListingServiceResult<Listing>> ReadOwnedListingAsync(int listingId, ClaimsPrincipal? user, CancellationToken cancellationToken)
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="user">The Identity principal supplied by the application boundary.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    private async Task<ListingServiceResult<Listing>> ReadOwnedListingAsync(
+        int listingId,
+        ClaimsPrincipal? user,
+        CancellationToken cancellationToken)
     {
         try
         {
             await using var database = ListingOperationScope.CreateContext(context);
+
             return await ListingOperationScope.GetOwnedListingAsync(database, listingId, user, cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             LogFailure("ReadListing", listingId, null, exception);
-            return Failure<Listing>(ListingServiceStatus.PersistenceFailed, SharedResource.Get("ImageFeedback.TheListingCouldNotBeLoadedTryAgainLater"));
+            return Failure<Listing>(
+                ListingServiceStatus.PersistenceFailed,
+                SharedResource.Get("ImageFeedback.TheListingCouldNotBeLoadedTryAgainLater"));
         }
     }
 
     /// <summary>
-    /// Verifies ambiguous commits before compensation and never deletes a referenced blob or a different container's blob.
+    /// Verifies ambiguous commits before compensation and never deletes a referenced blob or a different
+    /// container's blob.
     /// </summary>
-    private async Task<ListingServiceResult<ListingImage>> RecoverUploadAsync(ListingImage candidate, UploadAttempt attempt,
+    /// <param name="candidate">The uploaded image metadata being verified before compensation.</param>
+    /// <param name="attempt">The upload attempt state used when verifying a possibly committed metadata save.</param>
+    /// <param name="failure">The original image operation failure to preserve during recovery.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    private async Task<ListingServiceResult<ListingImage>> RecoverUploadAsync(
+        ListingImage candidate,
+        UploadAttempt attempt,
         ListingServiceResult<ListingImage> failure)
     {
         var inspection = await InspectReferenceAsync(candidate);
+
         if (!inspection.Verified)
         {
-            return Failure<ListingImage>(ListingServiceStatus.ReconciliationRequired,
+            return Failure<ListingImage>(
+                ListingServiceStatus.ReconciliationRequired,
                 SharedResource.Get("ImageFeedback.TheUploadSDatabaseOutcomeCouldNotBeVerified"));
         }
+
         if (inspection.Image is not null)
         {
             if (attempt.SaveAttempted && inspection.Image.ListingId == candidate.ListingId)
@@ -451,55 +724,82 @@ public sealed class ListingImageService : IListingImageService
                 ListingOperationScope.InvalidateTrackedEntries(context, candidate.ListingId);
                 return ListingServiceResult<ListingImage>.Success(inspection.Image);
             }
+
             return failure;
         }
+
         if (await TryDeleteBlobAsync(candidate))
         {
             return failure;
         }
-        return Failure<ListingImage>(ListingServiceStatus.CleanupPending,
+
+        return Failure<ListingImage>(
+            ListingServiceStatus.CleanupPending,
             SharedResource.Get("ImageFeedback.ImageMetadataWasNotSavedButBlobCleanupIs"));
     }
 
     /// <summary>
     /// Reports whether committed metadata removal also completed physical cleanup, without hiding partial success.
     /// </summary>
-    private async Task<ListingServiceResult<ListingImageDeletion>> CompleteDeletionAsync(ListingImage image, bool metadataCommitted)
+    /// <param name="image">The listing image or metadata being processed.</param>
+    /// <param name="metadataCommitted">Whether image metadata removal is already known to have committed.</param>
+    /// <returns>A task returning the operation result containing the returned value or structured errors.</returns>
+    private async Task<ListingServiceResult<ListingImageDeletion>> CompleteDeletionAsync(
+        ListingImage image,
+        bool metadataCommitted)
     {
         var inspection = await InspectReferenceAsync(image);
+
         if (!metadataCommitted && (!inspection.Verified || inspection.Image is not null))
         {
-            return Failure<ListingImageDeletion>(ListingServiceStatus.ReconciliationRequired, SharedResource.Get("ImageFeedback.ImageDeletionWasInterruptedStorageWasLeftUntouched"));
+            return Failure<ListingImageDeletion>(
+                ListingServiceStatus.ReconciliationRequired,
+                SharedResource.Get("ImageFeedback.ImageDeletionWasInterruptedStorageWasLeftUntouched"));
         }
+
         var removed = inspection.Verified && inspection.Image is null && await TryDeleteBlobAsync(image);
         var value = new ListingImageDeletion(image.ListingImageId, true, removed);
+
         if (removed)
         {
             ListingOperationScope.InvalidateTrackedEntries(context, image.ListingId);
             return ListingServiceResult<ListingImageDeletion>.Success(value);
         }
+
         LogReconciliation(image, "DeleteCleanupPending");
-        return new ListingServiceResult<ListingImageDeletion>(ListingServiceStatus.CleanupPending, value,
-            new[] { new ListingValidationError(nameof(Listing.Images), SharedResource.Get("ImageFeedback.ImageMetadataWasRemovedButBlobCleanupIsPending")) });
+        return new ListingServiceResult<ListingImageDeletion>(
+            ListingServiceStatus.CleanupPending,
+            value,
+            new[] { new ListingValidationError(
+                    nameof(Listing.Images),
+                    SharedResource.Get("ImageFeedback.ImageMetadataWasRemovedButBlobCleanupIsPending")) });
     }
 
     /// <summary>
     /// Uses an independent bounded token and serializable read to avoid deleting blobs after an uncertain SQL commit.
     /// </summary>
+    /// <param name="image">The listing image or metadata being processed.</param>
+    /// <returns>A task returning whether the reference check succeeded and the matching committed image metadata, when found.</returns>
     private async Task<(bool Verified, ListingImage? Image)> InspectReferenceAsync(ListingImage image)
     {
         using var timeout = new CancellationTokenSource(recoveryTimeout);
+
         try
         {
-            return await context.Database.CreateExecutionStrategy().ExecuteAsync(async token =>
-            {
-                await using var database = ListingOperationScope.CreateContext(context);
-                await using var transaction = await database.Database.BeginTransactionAsync(IsolationLevel.Serializable, token);
-                var reference = await database.ListingImages.AsNoTracking().SingleOrDefaultAsync(stored =>
-                    stored.ContainerName == image.ContainerName && stored.BlobName == image.BlobName, token);
-                await transaction.CommitAsync(token);
-                return (true, reference);
-            }, timeout.Token);
+            return await context.Database.CreateExecutionStrategy().ExecuteAsync(
+                async token =>
+                {
+                    await using var database = ListingOperationScope.CreateContext(context);
+                    await using var transaction = await database.Database.BeginTransactionAsync(
+                        IsolationLevel.Serializable,
+                        token);
+                    var reference = await database.ListingImages.AsNoTracking().SingleOrDefaultAsync(stored =>
+                        stored.ContainerName == image.ContainerName && stored.BlobName == image.BlobName, token);
+
+                    await transaction.CommitAsync(token);
+                    return (true, reference);
+                },
+                timeout.Token);
         }
         catch (Exception exception)
         {
@@ -512,14 +812,19 @@ public sealed class ListingImageService : IListingImageService
     /// <summary>
     /// Retries idempotent cleanup with its own timeout, using only a verified server-resolved container and blob name.
     /// </summary>
+    /// <param name="image">The listing image or metadata being processed.</param>
+    /// <returns>A task returning whether blob cleanup completed within the bounded attempts.</returns>
     private async Task<bool> TryDeleteBlobAsync(ListingImage image)
     {
-        if (!string.Equals(image.ContainerName, containerName, StringComparison.Ordinal) || string.IsNullOrWhiteSpace(image.BlobName))
+        if (!string.Equals(image.ContainerName, containerName, StringComparison.Ordinal)
+            || string.IsNullOrWhiteSpace(image.BlobName))
         {
             LogReconciliation(image, "ContainerMismatch");
             return false;
         }
+
         using var timeout = new CancellationTokenSource(recoveryTimeout);
+
         for (var attempt = 0; attempt < CLEANUP_ATTEMPTS && !timeout.IsCancellationRequested; attempt++)
         {
             try
@@ -532,6 +837,7 @@ public sealed class ListingImageService : IListingImageService
                 LogFailure("DeleteBlob", image.ListingId, image.ListingImageId, exception);
             }
         }
+
         LogReconciliation(image, "BlobCleanupFailed");
         return false;
     }
@@ -539,32 +845,52 @@ public sealed class ListingImageService : IListingImageService
     /// <summary>
     /// Removes path components from optional original filenames without using them as blob identifiers.
     /// </summary>
+    /// <param name="fileName">The optional original image filename to normalize.</param>
+    /// <returns>The filename without path components, or null when no usable filename remains.</returns>
     private static string? NormalizeFileName(string? fileName)
     {
-        var name = string.IsNullOrWhiteSpace(fileName) ? null : Path.GetFileName(fileName.Replace('\\', '/')).Trim();
+        var name = string.IsNullOrWhiteSpace(fileName) ? null : Path.GetFileName(fileName.Replace('\\', '/'))
+                .Trim();
+
         return string.IsNullOrWhiteSpace(name) ? null : name;
     }
 
     /// <summary>
     /// Applies the existing model's filename and alt-text length constraints before uploading any bytes.
     /// </summary>
+    /// <param name="image">The listing image or metadata being processed.</param>
+    /// <returns>The validation errors found by these checks.</returns>
     private static List<ListingValidationError> ValidateText(ListingImage image)
     {
         var results = new List<ValidationResult>();
-        Validator.TryValidateProperty(image.OriginalFileName,
-            new ValidationContext(image) { MemberName = nameof(ListingImage.OriginalFileName) }, results);
-        Validator.TryValidateProperty(image.AltText, new ValidationContext(image) { MemberName = nameof(ListingImage.AltText) }, results);
-        var errors = results.SelectMany(result => result.MemberNames.Select(field => new ListingValidationError(field, ResourceValidation.Message(image, field)))).ToList();
+
+        Validator.TryValidateProperty(
+            image.OriginalFileName,
+            new ValidationContext(image) { MemberName = nameof(ListingImage.OriginalFileName) },
+            results);
+        Validator.TryValidateProperty(
+            image.AltText,
+            new ValidationContext(image) { MemberName = nameof(ListingImage.AltText) },
+            results);
+        var errors = results.SelectMany(result => result.MemberNames.Select(field => new ListingValidationError(
+                    field,
+                    ResourceValidation.Message(image, field))))
+            .ToList();
+
         if (image.OriginalFileName?.Any(char.IsControl) == true || image.AltText?.Any(char.IsControl) == true)
         {
-            errors.Add(new(nameof(Listing.Images), SharedResource.Get("ImageFeedback.ImageFilenamesAndAlternativeTextMustNotContainControl")));
+            errors.Add(new(
+                    nameof(Listing.Images),
+                    SharedResource.Get("ImageFeedback.ImageFilenamesAndAlternativeTextMustNotContainControl")));
         }
+
         return errors;
     }
 
     /// <summary>
     /// Assigns stable, contiguous display positions while preserving the requested order and primary flags.
     /// </summary>
+    /// <param name="images">The image metadata collection in the order being processed.</param>
     private static void NormalizeOrder(IReadOnlyList<ListingImage> images)
     {
         for (var index = 0; index < images.Count; index++)
@@ -576,35 +902,66 @@ public sealed class ListingImageService : IListingImageService
     /// <summary>
     /// Produces a safe image-specific failure without exposing storage or SQL diagnostics.
     /// </summary>
+    /// <typeparam name="T">The operation's result value type.</typeparam>
+    /// <param name="status">The operation or lifecycle status associated with the value.</param>
+    /// <param name="message">The message text associated with the operation.</param>
+    /// <returns>The operation result containing the returned value or structured errors.</returns>
     private static ListingServiceResult<T> Failure<T>(ListingServiceStatus status, string message) =>
         ListingServiceResult<T>.Failure(status, new ListingValidationError(nameof(Listing.Images), message));
 
     /// <summary>
     /// Distinguishes invalid selected IDs from records absent from the owned listing.
     /// </summary>
-    private static ListingServiceResult<T> MissingImage<T>(int imageId) => imageId <= 0
-        ? Failure<T>(ListingServiceStatus.ValidationFailed, SharedResource.Get("ImageFeedback.ImageIDMustBePositive"))
-        : Failure<T>(ListingServiceStatus.NotFound, SharedResource.Get("ImageFeedback.TheImageCouldNotBeFoundForThisListing"));
+    /// <typeparam name="T">The operation's result value type.</typeparam>
+    /// <param name="imageId">The identifier of the selected listing image, when supplied.</param>
+    /// <returns>The operation result containing the returned value or structured errors.</returns>
+    private static ListingServiceResult<T> MissingImage<T>(int imageId) =>
+        imageId <= 0
+            ? Failure<T>(
+                ListingServiceStatus.ValidationFailed,
+                SharedResource.Get("ImageFeedback.ImageIDMustBePositive"))
+            : Failure<T>(
+                ListingServiceStatus.NotFound,
+                SharedResource.Get("ImageFeedback.TheImageCouldNotBeFoundForThisListing"));
 
     /// <summary>
     /// Logs failure classification without retaining potentially sensitive SDK or SQL exception messages.
     /// </summary>
+    /// <param name="operation">The diagnostic name of the operation.</param>
+    /// <param name="listingId">The identifier of the listing being processed.</param>
+    /// <param name="imageId">The identifier of the selected listing image, when supplied.</param>
+    /// <param name="exception">The exception being classified or logged.</param>
     private void LogFailure(string operation, int listingId, int? imageId, Exception exception) =>
-        logger.LogError("Listing image operation {Operation} failed for listing {ListingId}, image {ImageId}, failure type {FailureType}.",
-            operation, listingId, imageId, exception.GetType().Name);
+        logger.LogError(
+            "Listing image operation {Operation} failed for listing {ListingId}, image {ImageId}, failure type {FailureType}.",
+            operation,
+            listingId,
+            imageId,
+            exception.GetType().Name);
 
     /// <summary>
     /// Records server-resolved blob identifiers for operational reconciliation, without credentials or signed URLs.
     /// </summary>
+    /// <param name="image">The listing image or metadata being processed.</param>
+    /// <param name="reason">The reason associated with the unavailable period or reconciliation event.</param>
     private void LogReconciliation(ListingImage image, string reason) =>
-        logger.LogError("Image reconciliation required: {Reason}, listing {ListingId}, image {ImageId}, container {ContainerName}, blob {BlobName}.",
-            reason, image.ListingId, image.ListingImageId, image.ContainerName, image.BlobName);
+        logger.LogError(
+            "Image reconciliation required: {Reason}, listing {ListingId}, image {ImageId}, container {ContainerName}, blob {BlobName}.",
+            reason,
+            image.ListingId,
+            image.ListingImageId,
+            image.ContainerName,
+            image.BlobName);
 
     /// <summary>
     /// Remembers whether this logical upload attempted a SQL save across provider retries.
     /// </summary>
     private sealed class UploadAttempt
     {
-        public bool SaveAttempted { get; set; }
+        public bool SaveAttempted
+        {
+            get;
+            set;
+        }
     }
 }

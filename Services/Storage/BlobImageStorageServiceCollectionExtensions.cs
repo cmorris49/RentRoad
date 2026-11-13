@@ -9,12 +9,19 @@ namespace RentRoad.Services.Storage;
 public static class BlobImageStorageServiceCollectionExtensions
 {
     /// <summary>
-    /// Binds storage options and registers reusable SDK clients, validating configuration when storage is first resolved.
+    /// Binds storage options and registers reusable SDK clients, validating configuration when storage is first
+    /// resolved.
     /// </summary>
-    public static IServiceCollection AddBlobImageStorage(this IServiceCollection services, IConfiguration configuration)
+    /// <param name="services">The application service collection to configure.</param>
+    /// <param name="configuration">The application configuration containing image storage settings.</param>
+    /// <returns>The service collection with the registrations added.</returns>
+    public static IServiceCollection AddBlobImageStorage(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddOptions<BlobImageStorageOptions>()
-            .Bind(configuration.GetSection(BlobImageStorageOptions.SECTION_NAME)).ValidateDataAnnotations();
+            .Bind(configuration.GetSection(BlobImageStorageOptions.SECTION_NAME))
+            .ValidateDataAnnotations();
         services.AddSingleton(provider => CreateContainerClient(provider.GetRequiredService<IOptions<BlobImageStorageOptions>>().Value));
         services.AddSingleton<IBlobImageStorageService, AzureBlobImageStorageService>();
         return services;
@@ -23,6 +30,8 @@ public static class BlobImageStorageServiceCollectionExtensions
     /// <summary>
     /// Constructs an authenticated client without including malformed connection strings in error messages.
     /// </summary>
+    /// <param name="options">The image storage configuration and validation limits.</param>
+    /// <returns>The client for the configured image storage container.</returns>
     private static BlobContainerClient CreateContainerClient(BlobImageStorageOptions options)
     {
         try

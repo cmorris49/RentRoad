@@ -11,7 +11,8 @@ Development/
 Tests/
 Services/Storage/README.md
 Services/Listings/ListingImages.md
-
+JAVASCRIPT_CLEANUP_GUIDELINES.md
+CODE_CLEANUP_GUIDELINES.md
 # Local documentation
 Services/Listings/ListingImages.md
 ViewModels/Listings/README.md

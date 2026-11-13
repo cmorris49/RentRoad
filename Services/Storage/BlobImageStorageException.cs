@@ -18,11 +18,16 @@ public enum BlobImageStorageFailure
 /// </summary>
 public sealed class BlobImageStorageException : Exception
 {
-    public BlobImageStorageFailure Failure { get; }
+    public BlobImageStorageFailure Failure
+    {
+        get;
+    }
 
     /// <summary>
     /// Describes the failure using a message that contains no storage credentials or request details.
     /// </summary>
+    /// <param name="failure">The classified blob storage failure.</param>
+    /// <param name="message">The message text associated with the operation.</param>
     public BlobImageStorageException(BlobImageStorageFailure failure, string message) : base(message)
     {
         Failure = failure;
