@@ -1549,4 +1549,9 @@
   <data name="Brand.Rent" xml:space="preserve"><value>Rent</value></data>
   <data name="Brand.Road" xml:space="preserve"><value>Road</value></data>
   <data name="Brand.Tagline" xml:space="preserve"><value>Big plans. Less to own.</value></data>
+  <data name="Home.Showcase.Description" xml:space="preserve"><value>Discover rentals from the marketplace</value></data>
+  <data name="Home.Showcase.Pause" xml:space="preserve"><value>Pause listing showcase</value></data>
+  <data name="Home.Showcase.Play" xml:space="preserve"><value>Play listing showcase</value></data>
+  <data name="Home.Showcase.Previous" xml:space="preserve"><value>Previous listing</value></data>
+  <data name="Home.Showcase.Next" xml:space="preserve"><value>Next listing</value></data>
 </root>
