@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UseRazorSourceGenerator>false</UseRazorSourceGenerator>
     <UserSecretsId>aspnet-RentRoad-efd62e20-067e-4691-b868-e8de435b00bf</UserSecretsId>
   </PropertyGroup>
 

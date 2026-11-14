@@ -7,7 +7,6 @@ namespace RentRoad.Controllers;
 /// <summary>
 /// Accepts authenticated review submissions and exposes a simple listing review summary endpoint.
 /// </summary>
-[Authorize]
 [Route("reviews")]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public sealed class ReviewsController : Controller
@@ -32,12 +31,15 @@ public sealed class ReviewsController : Controller
     /// Submits a review for a completed rental request using the authenticated identity.
     /// </summary>
     /// <param name="submission">The submitted review data.</param>
+    /// <param name="returnUrl">The optional local history URL to return to after a browser form submission.</param>
     /// <param name="cancellationToken">The token used to cancel the operation.</param>
     /// <returns>A JSON result for successful review creation or a validation problem otherwise.</returns>
+    [Authorize]
     [HttpPost("create")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateAsync(
         [FromForm] ReviewSubmission submission,
+        [FromForm] string? returnUrl = null,
         CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
@@ -49,6 +51,12 @@ public sealed class ReviewsController : Controller
 
         if (result.IsSuccess && result.Value is not null)
         {
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                TempData["RentalManagementFeedback"] = SharedResource.Get("Review.SubmissionSucceeded");
+                return LocalRedirect(returnUrl);
+            }
+
             return Json(new { review = result.Value });
         }
 
@@ -69,6 +77,7 @@ public sealed class ReviewsController : Controller
     /// <param name="listingId">The listing identifier to summarize.</param>
     /// <param name="cancellationToken">The token used to cancel the operation.</param>
     /// <returns>The listing summary as JSON.</returns>
+    [AllowAnonymous]
     [HttpGet("summary")]
     public async Task<IActionResult> SummaryAsync(
         [FromQuery] int listingId,

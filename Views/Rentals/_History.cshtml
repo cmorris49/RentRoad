@@ -127,6 +127,36 @@
                                     @await Html.PartialAsync("_ActionConfirmation", new RentalManagementActionViewModel(rental.RentalRequestId, action.Item1, Model.PageNumber, Model.PageSize))
                                 }
                             }
+                            @if (rental.CanReview)
+                            {
+                                <form asp-controller="Reviews" asp-action="Create" method="post" class="rental-review-form">
+                                    <input type="hidden" name="RentalRequestId" value="@rental.RentalRequestId" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action(Model.IsIncoming ? "Incoming" : "Mine", "Rentals", new { pageNumber = Model.PageNumber, pageSize = Model.PageSize })" />
+                                    <div class="mb-2">
+                                        <label class="form-label" for="review-rating-@rental.RentalRequestId">@Text["Review.RatingLabel"]</label>
+                                        <select class="form-select" id="review-rating-@rental.RentalRequestId" name="Rating" required>
+                                            <option value="">@Text["Review.RatingPlaceholder"]</option>
+                                            @for (var rating = 5; rating >= 1; rating--)
+                                            {
+                                                <option value="@rating">@Text["Review.RatingOption", rating]</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label" for="review-comment-@rental.RentalRequestId">@Text["Review.CommentLabel"]</label>
+                                        <textarea class="form-control" id="review-comment-@rental.RentalRequestId" name="Comment" rows="3" maxlength="2000"></textarea>
+                                    </div>
+                                    <button class="btn btn-primary" type="submit">@Text["Review.Submit"]</button>
+                                </form>
+                            }
+                            else if (!Model.IsIncoming && rental.ReviewRating is int reviewRating)
+                            {
+                                <p class="form-text mb-0">@Text["Review.Submitted", reviewRating]</p>
+                                @if (!string.IsNullOrWhiteSpace(rental.ReviewComment))
+                                {
+                                    <p class="form-text mb-0">@rental.ReviewComment</p>
+                                }
+                            }
                         </div>
                     </div>
                 </article>

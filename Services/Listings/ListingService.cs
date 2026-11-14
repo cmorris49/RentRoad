@@ -695,14 +695,14 @@ public sealed partial class ListingService : IListingService
                     .ToList(),
                 listing.RentalRequests
                     .Where(request => request.Status == RentalStatus.Completed && request.Review != null)
+                    .OrderByDescending(request => request.Review!.CreatedAtUtc)
+                    .ThenByDescending(request => request.Review!.ReviewId)
                     .Select(request => new ListingReview(
                         request.Review!.ReviewId,
                         request.Renter.DisplayName,
                         request.Review.Rating,
                         request.Review.Comment,
                         request.Review.CreatedAtUtc))
-                    .OrderByDescending(review => review.CreatedAtUtc)
-                    .ThenByDescending(review => review.ReviewId)
                     .ToList()));
 
     /// <summary>

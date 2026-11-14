@@ -53,6 +53,8 @@ public sealed record RentalAvailableActions(
 /// <param name="CreatedAtUtc">The creation timestamp in UTC.</param>
 /// <param name="DecisionAtUtc">The request decision timestamp in UTC, when recorded.</param>
 /// <param name="CompletedAtUtc">The completion timestamp in UTC, when recorded.</param>
+/// <param name="ReviewRating">The submitted review rating, when one exists.</param>
+/// <param name="ReviewComment">The submitted review comment, when one exists.</param>
 /// <param name="Actions">The advisory rental actions available to the viewer.</param>
 public sealed record RentalHistoryItem(
     int RentalRequestId,
@@ -70,6 +72,8 @@ public sealed record RentalHistoryItem(
     DateTime CreatedAtUtc,
     DateTime? DecisionAtUtc,
     DateTime? CompletedAtUtc,
+    int? ReviewRating,
+    string? ReviewComment,
     RentalAvailableActions Actions)
 {
     /// <summary>
@@ -85,6 +89,15 @@ public sealed record RentalHistoryItem(
     /// References only the conversation matching this already authorized listing/renter pair.
     /// </summary>
     public int? ConversationId
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    /// Identifies a completed renter rental that is eligible for one review submission.
+    /// </summary>
+    public bool CanReview
     {
         get;
         init;

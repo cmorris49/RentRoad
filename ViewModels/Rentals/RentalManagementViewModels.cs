@@ -27,6 +27,9 @@ public sealed class RentalManagementItemViewModel
     public DateTime CreatedAtUtc { get; }
     public DateTime? DecisionAtUtc { get; }
     public DateTime? CompletedAtUtc { get; }
+    public int? ReviewRating { get; }
+    public string? ReviewComment { get; }
+    public bool CanReview { get; }
     public RentalAvailableActions Actions { get; }
     public string DurationText => SharedResource.Get(RentalDays == 1 ? "RentalRequest.DurationOne" : "RentalRequest.DurationMany", RentalDays);
 
@@ -51,6 +54,9 @@ public sealed class RentalManagementItemViewModel
         CreatedAtUtc = item.CreatedAtUtc;
         DecisionAtUtc = item.DecisionAtUtc;
         CompletedAtUtc = item.CompletedAtUtc;
+        ReviewRating = item.ReviewRating;
+        ReviewComment = item.ReviewComment;
+        CanReview = item.CanReview;
         Actions = item.Actions;
     }
 }

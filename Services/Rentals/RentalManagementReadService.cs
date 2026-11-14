@@ -126,7 +126,9 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
                     request.Status,
                     request.CreatedAtUtc,
                     request.DecisionAtUtc,
-                    request.CompletedAtUtc
+                    request.CompletedAtUtc,
+                    ReviewRating = request.Review == null ? (int?)null : request.Review.Rating,
+                    ReviewComment = request.Review == null ? null : request.Review.Comment
                 })
                 .ToListAsync(cancellationToken);
             var today = DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime);
@@ -148,6 +150,8 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
                     row.CreatedAtUtc,
                     row.DecisionAtUtc,
                     row.CompletedAtUtc,
+                    row.ReviewRating,
+                    row.ReviewComment,
                     new RentalAvailableActions(
                         !incoming
                             && (row.Status == RentalStatus.Pending || row.Status == RentalStatus.Approved && today < row.StartDate),
@@ -158,7 +162,10 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
                         incoming && row.Status == RentalStatus.Active && today >= row.EndDate))
                 {
                     IsListingPublic = row.ListingStatus == ListingStatus.Published,
-                    ConversationId = row.ConversationId
+                    ConversationId = row.ConversationId,
+                    CanReview = !incoming
+                        && row.Status == RentalStatus.Completed
+                        && row.ReviewRating is null
                 })
                 .ToArray();
 

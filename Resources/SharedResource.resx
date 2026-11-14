@@ -357,6 +357,27 @@
   <data name="ListingDetails.Rating" xml:space="preserve">
     <value>{0} out of 5</value>
   </data>
+  <data name="Review.RatingLabel" xml:space="preserve">
+    <value>Rating</value>
+  </data>
+  <data name="Review.RatingPlaceholder" xml:space="preserve">
+    <value>Select a rating</value>
+  </data>
+  <data name="Review.RatingOption" xml:space="preserve">
+    <value>{0} out of 5</value>
+  </data>
+  <data name="Review.CommentLabel" xml:space="preserve">
+    <value>Comment (optional)</value>
+  </data>
+  <data name="Review.Submit" xml:space="preserve">
+    <value>Submit review</value>
+  </data>
+  <data name="Review.Submitted" xml:space="preserve">
+    <value>You submitted a {0}-star review.</value>
+  </data>
+  <data name="Review.SubmissionSucceeded" xml:space="preserve">
+    <value>Your review was submitted successfully.</value>
+  </data>
   <data name="Listing.Untitled" xml:space="preserve">
     <value>Rental listing</value>
   </data>
