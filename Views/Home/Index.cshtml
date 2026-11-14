@@ -11,8 +11,8 @@
 <div class="home-page">
 <section class="home-hero page-section" aria-labelledby="home-heading">
     <div class="hero-copy">
-        <p class="eyebrow">@Text["Home.Eyebrow"]</p>
-        <h1 id="home-heading">@Text["Home.BigPlans"]<br /><span>@Text["Home.LessToOwn"]</span></h1>
+        <p class="eyebrow">@Text["Brand.Tagline"]</p>
+        <h1 id="home-heading"><partial name="_BrandWordmark" /></h1>
         <p class="hero-introduction">@Text["Home.Introduction"]</p>
         <form class="hero-search" method="get" asp-controller="Listings" asp-action="Index" role="search" aria-label="@Text["Home.SearchLabel"]">
             <label asp-for="SearchText" class="form-label">@Text["Home.SearchPrompt"]</label>
@@ -22,13 +22,12 @@
             </div>
         </form>
         <div class="hero-actions">
-            <a class="hero-browse-link" asp-controller="Listings" asp-action="Index">@Text["Home.BrowseRentals"] <span aria-hidden="true">→</span></a>
+            <a class="hero-browse-link" asp-controller="Listings" asp-action="Index"><span>@Text["Home.BrowseRentals"]</span><span aria-hidden="true">→</span></a>
             @if (SignInManager.IsSignedIn(User))
             {
                 <a class="btn btn-outline-primary" asp-controller="MyListings" asp-action="Create">@Text["Navigation.CreateListing"]</a>
             }
         </div>
-        <p class="hero-location">@Text["Home.Location"]</p>
     </div>
     <div class="hero-art" aria-hidden="true">
         <span class="hero-art-label">@Text["Home.ArtLabel"]</span>

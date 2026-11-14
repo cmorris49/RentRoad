@@ -1,0 +1,49 @@
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    var page = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+    var section = ViewData["SettingsSection"] as string ?? (page switch
+    {
+        "/Account/Manage/Index" => "account",
+        "/Account/Manage/Email" => "email",
+        "/Account/Manage/ChangePassword" or "/Account/Manage/SetPassword" => "password",
+        "/Account/Manage/ExternalLogins" => "external-logins",
+        "/Account/Manage/PersonalData" or "/Account/Manage/DeletePersonalData" => "personal-data",
+        _ => "security"
+    });
+    var overview = ViewData["SettingsOverview"] is true;
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+}
+<div class="settings-shell @(overview ? "settings-overview" : "settings-selected")">
+    <header class="settings-header">
+        <h1 id="settings-heading">@Text["Navigation.Settings"]</h1>
+    </header>
+    <div class="settings-grid">
+        <aside class="settings-sidebar">
+            <partial name="/Views/Shared/_SettingsNavigation.cshtml" model="@(overview ? string.Empty : section)" />
+        </aside>
+        <section class="settings-content" aria-labelledby="@(overview ? "settings-heading" : "settings-section-heading")">
+            @if (!overview)
+            {
+                <a class="settings-back" asp-area="" asp-controller="Settings" asp-action="Index">← @Text["Settings.Back"]</a>
+                <h2 id="settings-section-heading" class="settings-desktop-title">@ViewData["Title"]</h2>
+                <h1 class="settings-mobile-title">@ViewData["Title"]</h1>
+            }
+            @if (page.StartsWith("/Account/Manage", StringComparison.Ordinal))
+            {
+                <div class="settings-identity-content">
+                    @RenderBody()
+                </div>
+            }
+            else
+            {
+                @RenderBody()
+            }
+        </section>
+    </div>
+</div>
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

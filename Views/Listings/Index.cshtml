@@ -16,8 +16,10 @@
 <div class="browse-page">
 <header class="page-header browse-heading">
     <p class="eyebrow">@Text["Browse.Eyebrow"]</p>
-    <h1>@Text["Browse.Heading"]</h1>
-    <p>@Text["Browse.Introduction"]</p>
+    <h1>
+        <span class="browse-desktop-heading">@Text["Browse.Heading"]</span>
+        <span class="browse-mobile-heading">@Text["Browse.MobileHeading"]</span>
+    </h1>
 </header>
 
 @if (!Model.HasValidSearch)
@@ -30,6 +32,14 @@
 }
 
 <div class="browse-layout">
+    <div class="browse-search" role="search" aria-label="@Text["Browse.SearchLabel"]">
+        <label asp-for="SearchText" class="form-label">@Text["Browse.SearchPrompt"]</label>
+        <div class="browse-search-controls">
+            <input asp-for="SearchText" type="search" form="listing-filters" class="form-control" placeholder="@Text["Browse.SearchPlaceholder"]" maxlength="@ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH" aria-describedby="keyword-error" />
+            <button class="btn btn-primary" type="submit" form="listing-filters">@Text["Common.Search"]</button>
+        </div>
+        <span asp-validation-for="SearchText" id="keyword-error"></span>
+    </div>
     <aside class="browse-sidebar" aria-labelledby="filters-heading">
         <button class="btn btn-outline-primary filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filter-panel" aria-controls="filter-panel" aria-expanded="@(!Model.HasValidSearch ? "true" : "false")">@Text["Browse.Refine"] <span aria-hidden="true">⌄</span></button>
         <div class="collapse d-lg-block @(!Model.HasValidSearch ? "show" : null)" id="filter-panel">
@@ -60,7 +70,7 @@
                     </select>
                     <span asp-validation-for="Condition" id="condition-error"></span>
                 </div>
-                <fieldset>
+                <fieldset class="price-filter-row">
                     <legend class="form-label">@Text["Browse.DailyPrice"]</legend>
                     <div class="price-filter-grid">
                         <div>
@@ -104,14 +114,6 @@
     </aside>
 
     <section class="browse-results" aria-labelledby="results-heading">
-        <div class="browse-search" role="search" aria-label="@Text["Browse.SearchLabel"]">
-            <label asp-for="SearchText" class="form-label">@Text["Browse.SearchPrompt"]</label>
-            <div class="browse-search-controls">
-                <input asp-for="SearchText" type="search" form="listing-filters" class="form-control" placeholder="@Text["Browse.SearchPlaceholder"]" maxlength="@ListingSearchParameters.MAX_SEARCH_TEXT_LENGTH" aria-describedby="keyword-error" />
-                <button class="btn btn-primary" type="submit" form="listing-filters">@Text["Common.Search"]</button>
-            </div>
-            <span asp-validation-for="SearchText" id="keyword-error"></span>
-        </div>
         <div class="results-toolbar">
             <div>
                 <h2 id="results-heading" class="h4">@(string.IsNullOrWhiteSpace(Model.SearchText) ? Text["Browse.Explore"].Value : Text["Browse.ResultsFor", Model.SearchText!].Value)</h2>

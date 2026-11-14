@@ -49,6 +49,18 @@ public class HomeController : Controller
     }
 
     /// <summary>
+    /// Renders a privacy-safe missing-page response without changing its HTTP status.
+    /// </summary>
+    /// <returns>The branded missing-page view with status code 404.</returns>
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult PageNotFound()
+    {
+        Response.StatusCode = StatusCodes.Status404NotFound;
+
+        return View();
+    }
+
+    /// <summary>
     /// Displays a safe error page with a diagnostic request identifier.
     /// </summary>
     /// <returns>The MVC response for the operation's outcome.</returns>

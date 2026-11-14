@@ -30,6 +30,7 @@
         let focusAfterAction = null;
         let savedSignature = signature();
         const storageKey = "rentroad-new-editor";
+        const pendingCreationKey = "rentroad-new-editor-write";
 
         /**
          * Reads editable scalar values without including tokens, IDs, or relationships.
@@ -74,7 +75,7 @@
         }
 
         /**
-         * Sends explicit requests once; ambiguous writes are never retried automatically.
+         * Records unresolved first writes and sends each request once without automatically retrying mutations.
          *
          * @param {string} url - Endpoint or address to use.
          * @param {FormData|undefined} data - Authenticated form data to submit, or undefined for a GET
@@ -82,6 +83,12 @@
          * @returns {Promise<object>} The parsed, validated response envelope from the existing endpoint.
          */
         async function request(url, data) {
+            if (data && state && !state.listingId) {
+                try {
+                    sessionStorage.setItem(pendingCreationKey, state.token);
+                } catch { }
+            }
+
             const response = await fetch(
                 url,
                 {
@@ -98,6 +105,7 @@
                     : text("ListingEditor.TheOperationCouldNotBeConfirmedReviewTheSaved"));
 
                 failure.feedback = json;
+                failure.status = response.status;
                 throw failure;
             }
 
@@ -248,6 +256,7 @@
 
                 try {
                     sessionStorage.removeItem(storageKey);
+                    sessionStorage.removeItem(pendingCreationKey);
                 } catch { }
             }
 
@@ -978,10 +987,14 @@
 
         try {
             let existingToken = new URL(location.href).searchParams.get("editor");
+            let cachedToken = false;
+            let unresolvedCreation = false;
 
             if (!existingToken && !Number(root.dataset.listingId)) {
                 try {
                     existingToken = sessionStorage.getItem(storageKey);
+                    cachedToken = Boolean(existingToken);
+                    unresolvedCreation = sessionStorage.getItem(pendingCreationKey) === existingToken;
                 } catch { }
             }
 
@@ -995,7 +1008,21 @@
                 query.set("listingId", root.dataset.listingId);
             }
 
-            const opened = await request("/my/listings/editor/session?" + query);
+            let opened;
+
+            try {
+                opened = await request("/my/listings/editor/session?" + query);
+            } catch (error) {
+                if (!cachedToken || unresolvedCreation || error.status !== 409 || error.feedback?.status !== "Conflict") {
+                    throw error;
+                }
+
+                try {
+                    sessionStorage.removeItem(storageKey);
+                } catch { }
+
+                opened = await request("/my/listings/editor/session");
+            }
 
             if (!Number(root.dataset.listingId) && opened.state.listingId
                 && Object.values(currentFields()).every(value => value === "")) {

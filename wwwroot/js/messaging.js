@@ -52,6 +52,7 @@
             this.observationRanges = new Map();
             this.pending = null;
             this.sending = false;
+            this.composing = false;
             this.syncCursor = null;
             this.olderCursor = config.history?.nextCursor;
             this.hasOlder = config.history?.hasMore || false;
@@ -63,6 +64,7 @@
             this.disposed = false;
             this.blocked = false;
             this.listeners = [];
+            this.reads = new window.AbortController();
             this.managed = false;
             this.history = root.querySelector("[data-history]");
             this.list = root.querySelector("[data-message-list]");
@@ -116,7 +118,13 @@
             this.syncCursor = Math.max(0, ...this.messages.keys()) || null;
             this.input.disabled = false;
             this.sendButton.disabled = false;
-            this.listen(this.input, "input", () => this.updateCount());
+            this.listen(this.input, "keydown", event => this.composeKey(event));
+            this.listen(this.input, "compositionstart", () => {
+                this.composing = true;
+            });
+            this.listen(this.input, "compositionend", () => {
+                this.composing = false;
+            });
             this.listen(this.form, "submit", event => {
                 event.preventDefault();
                 this.send();
@@ -138,8 +146,29 @@
                 }
             }
 
-            this.updateCount();
             this.scrollLatest();
+        }
+
+        /**
+         * Sends on an unmodified Enter while preserving multiline input and IME composition.
+         *
+         * @param {KeyboardEvent} event - Composer keyboard event.
+         * @returns {void} Does not return a value.
+         */
+        composeKey(event) {
+            if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey
+                || this.composing || event.isComposing || event.keyCode === 229) {
+                return;
+            }
+
+            event.preventDefault();
+
+            if (event.repeat || this.sending || this.disposed || this.blocked || this.input.disabled
+                || this.input.readOnly || !this.input.value.trim()) {
+                return;
+            }
+
+            this.send();
         }
 
         /**
@@ -150,6 +179,7 @@
          * @returns {Promise<object>} The parsed, validated response envelope from the existing endpoint.
          */
         async request(url, body) {
+            this.ensureActive();
             const options = {
                 credentials: "same-origin",
                 cache: "no-store",
@@ -163,15 +193,23 @@
                 options.headers[this.config.antiforgeryHeaderName || "RequestVerificationToken"] =
                     this.form.querySelector('input[name="__RequestVerificationToken"]').value;
                 options.body = JSON.stringify(body);
+            } else {
+                options.signal = this.reads.signal;
             }
 
             let response;
 
             try {
                 response = await window.fetch(url, options);
-            } catch {
+            } catch (error) {
+                if (this.disposed || options.signal?.aborted) {
+                    throw error;
+                }
+
                 throw new MessagingFailure(text("Messages.ReadUnavailable"));
             }
+
+            this.ensureActive();
 
             if ([401, 403].includes(response.status)) {
                 this.blocked = true;
@@ -190,9 +228,15 @@
 
             try {
                 envelope = await response.json();
-            } catch {
+            } catch (error) {
+                if (this.disposed || options.signal?.aborted) {
+                    throw error;
+                }
+
                 throw new MessagingFailure(text("Messages.ReadUnavailable"), response.status);
             }
+
+            this.ensureActive();
 
             if (!response.ok || !envelope.isSuccess) {
                 const feedback = envelope.errors?.map(error => error.message).filter(value => typeof value === "string")
@@ -202,6 +246,21 @@
             }
 
             return envelope;
+        }
+
+        /**
+         * Rejects late work from a released conversation without affecting the shared transport.
+         *
+         * @throws {Error} An AbortError when this page consumer has been deactivated.
+         * @returns {void} Does not return a value.
+         */
+        ensureActive() {
+            if (this.disposed) {
+                const error = new Error();
+
+                error.name = "AbortError";
+                throw error;
+            }
         }
 
         /**
@@ -291,6 +350,8 @@
             try {
                 if (this.conversationId) {
                     const joined = await this.connection.invoke(this.config.realtime.joinMethod, this.conversationId);
+
+                    if (this.disposed) return;
 
                     if (!joined?.isSuccess) {
                         const unauthorized = joined?.errors?.some(error => ["Conversations.NotAvailable", "Messages.SignInRequired"].includes(error.resourceKey))
@@ -449,7 +510,7 @@
          * @returns {Promise<void>} Resolves when this operation completes.
          */
         async loadOlder() {
-            if (this.loadingOlder || !this.hasOlder || this.blocked) return;
+            if (this.disposed || this.loadingOlder || !this.hasOlder || this.blocked) return;
 
             this.loadingOlder = true;
             const button = this.root.querySelector("[data-load-older]");
@@ -483,6 +544,8 @@
          * @returns {void} Does not return a value.
          */
         merge(messages, older = false) {
+            if (this.disposed) return;
+
             const height = this.history.scrollHeight;
             const top = this.history.scrollTop;
             const nearBottom = height - top - this.history.clientHeight < 80;
@@ -617,7 +680,7 @@
          * @returns {Promise<void>} Resolves when this operation completes.
          */
         async send() {
-            if (this.sending || this.disposed || this.blocked) return;
+            if (this.sending || this.disposed || this.blocked || this.composing) return;
 
             if (!this.pending) {
                 const content = this.input.value;
@@ -672,8 +735,7 @@
                 this.root.querySelector("[data-new-submission]").hidden = true;
                 this.sendFeedback(text(response.notificationStatus === "Unavailable"
                     ? "Messages.SavedWithoutLive"
-                    : "Messages.Sent"));
-                this.updateCount();
+                    : "Messages.Sent"), false, response.notificationStatus === "Unavailable");
                 this.input.focus();
                 await this.recover();
             } catch (error) {
@@ -794,7 +856,7 @@
          * @returns {Promise<void>} Resolves when this operation completes.
          */
         async acknowledge() {
-            if (this.reading || this.blocked || document.visibilityState !== "visible" || !document.hasFocus()) {
+            if (this.disposed || this.reading || this.blocked || document.visibilityState !== "visible" || !document.hasFocus()) {
                 return;
             }
 
@@ -818,6 +880,9 @@
 
             try {
                 await this.request(this.config.endpoints.readUrl, { throughMessageId: boundary });
+
+                if (this.disposed) return;
+
                 this.acknowledged = boundary;
                 window.dispatchEvent(new Event("rentroad:messages-read"));
 
@@ -849,11 +914,14 @@
          * @returns {Promise<void>} Resolves when this operation completes.
          */
         async refreshUnread() {
-            if (!this.root.querySelector("[data-unread-count]")) return;
+            if (this.disposed || !this.root.querySelector("[data-unread-count]")) return;
 
             try {
                 const url = this.config.endpoints?.unreadCountUrl || this.config.unreadCountUrl;
                 const result = await this.request(url);
+
+                if (this.disposed) return;
+
                 const badge = this.root.querySelector("[data-unread-count]");
 
                 badge.hidden = result.data.unreadCount === 0;
@@ -893,7 +961,8 @@
                     const response = await window.fetch(inboxUrl, {
                         credentials: "same-origin",
                         cache: "no-store",
-                        redirect: "error"
+                        redirect: "error",
+                        signal: this.reads.signal
                     });
 
                     if (!response.ok) {
@@ -904,6 +973,8 @@
                             response.status);
                     }
 
+                    const html = await response.text();
+
                     if (this.disposed) return;
 
                     if (inboxUrl !== this.config.inboxUrl) {
@@ -911,7 +982,7 @@
                         continue;
                     }
 
-                    const parsed = new DOMParser().parseFromString(await response.text(), "text/html");
+                    const parsed = new DOMParser().parseFromString(html, "text/html");
                     const replacement = parsed.querySelector("[data-inbox-content]");
 
                     if (!replacement) {
@@ -933,6 +1004,8 @@
                     await this.refreshUnread();
                 } while (this.inboxAgain && !this.disposed && !this.blocked);
             } catch (error) {
+                if (this.disposed) return;
+
                 const message = this.safeError(error, "Messages.ReadUnavailable");
 
                 this.feedback("[data-page-error]", message);
@@ -1003,17 +1076,6 @@
         }
 
         /**
-         * Provides localized composer length guidance using the same UTF-16 count as server validation.
-         *
-         * @returns {void} Does not return a value.
-         */
-        updateCount() {
-            this.feedback(
-                "[data-character-count]",
-                text("Messages.CharacterCount", this.input.value.length, this.config.maximumLength));
-        }
-
-        /**
          * Announces live transport state separately from persistence and preserves an explicit reconnect
          *   action.
          *
@@ -1022,6 +1084,8 @@
          * @returns {void} Does not return a value.
          */
         connectionStatus(key, retry = false) {
+            if (this.disposed) return;
+
             this.feedback("[data-connection-status]", text(key));
             const problem = !["Messages.Connecting", "Messages.Connected", "Messages.Reconnected"].includes(key);
             const status = this.root.querySelector("[data-connection-status]");
@@ -1042,13 +1106,17 @@
          *
          * @param {string} value - Text to display safely.
          * @param {boolean} error - Whether to display error feedback.
+         * @param {boolean} visible - Whether non-error feedback needs visible attention.
          * @returns {void} Does not return a value.
          */
-        sendFeedback(value, error = false) {
+        sendFeedback(value, error = false, visible = false) {
+            if (this.disposed) return;
+
             const node = this.root.querySelector("[data-send-status]");
 
             node.textContent = value;
             node.dataset.error = String(error);
+            node.classList[error || visible ? "remove" : "add"]("visually-hidden");
             this.input.setAttribute("aria-invalid", String(error));
         }
 
@@ -1060,6 +1128,8 @@
          * @returns {void} Does not return a value.
          */
         feedback(selector, value) {
+            if (this.disposed) return;
+
             const node = this.root.querySelector(selector);
 
             if (node) {
@@ -1113,6 +1183,7 @@
          */
         async deactivate() {
             this.disposed = true;
+            this.reads.abort();
 
             if (this.input) {
                 this.input.disabled = true;
@@ -1132,7 +1203,8 @@
 
             this.listeners = [];
 
-            if (this.conversationId && this.connection?.state === window.signalR?.HubConnectionState.Connected) {
+            if (this.conversationId && this.connection
+                && this.connection.state === window.signalR?.HubConnectionState.Connected) {
                 try {
                     await this.connection.invoke(this.config.realtime.leaveMethod, this.conversationId);
                 } catch {

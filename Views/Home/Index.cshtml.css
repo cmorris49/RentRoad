@@ -7,14 +7,10 @@
 }
 
 .home-page ::deep .hero-copy h1 {
-    font-size: clamp(2.75rem, 5.5vw, 4.75rem);
+    font-size: clamp(2.75rem, 6.5vw, 5.5rem);
     line-height: 1.06;
     letter-spacing: -.055em;
     margin-bottom: 1.5rem;
-}
-
-.home-page ::deep .hero-copy h1 span {
-    color: var(--rr-primary);
 }
 
 .home-page ::deep .hero-introduction {
@@ -60,19 +56,19 @@
 .home-page ::deep .hero-browse-link {
     display: inline-flex;
     align-items: center;
-    gap: .75rem;
+    gap: .35rem;
     min-height: 44px;
     font-weight: 650;
+    text-decoration: none;
 }
 
-.home-page ::deep .hero-location {
-    font-size: .8rem;
-    color: var(--rr-muted);
-    margin: 1rem 0 0;
+.home-page ::deep .hero-browse-link > span:first-child {
+    text-decoration: underline;
+    text-underline-offset: .2em;
 }
 
-.home-page ::deep .hero-location span {
-    padding-inline: .35rem;
+.home-page ::deep .hero-browse-link:hover > span:first-child {
+    text-decoration-thickness: .12em;
 }
 
 .home-page ::deep .hero-art {

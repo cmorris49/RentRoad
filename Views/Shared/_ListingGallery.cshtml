@@ -14,7 +14,6 @@
                     <span class="listing-image-fallback" data-image-fallback aria-hidden="true">@Text["Gallery.Unavailable"]</span>
                     <img data-listing-image src="@photo.Url" alt="@(string.IsNullOrWhiteSpace(photo.AltText) ? Text["Gallery.PhotoAlt", Model.Title, index + 1].Value : photo.AltText)" width="1000" height="750" loading="lazy" decoding="async" />
                 </a>
-                @if (photo.IsPrimary && !Model.Compact) { <span class="rr-gallery-primary badge-soft">@Text["Gallery.Primary"]</span> }
             </figure>
         }
     </div>

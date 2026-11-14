@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RentRoad.Data;
 using RentRoad.Models;
+using RentRoad.Middleware;
 using RentRoad.Localization;
 using RentRoad.Services.Listings;
 using RentRoad.Services.Storage;
@@ -51,6 +52,7 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseRentRoadNotFoundPages();
 app.UseRouting();
 app.UseRequestLocalization();
 

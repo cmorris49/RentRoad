@@ -1519,4 +1519,34 @@
   <data name="Conversations.CurrentSelection" xml:space="preserve"><value>Selected: {0} · {1}</value></data>
   <data name="Messages.Switching" xml:space="preserve"><value>Opening conversation…</value></data>
   <data name="Messages.WaitForSend" xml:space="preserve"><value>Please wait for this submission to finish before switching conversations.</value></data>
+  <data name="Settings.Navigation" xml:space="preserve"><value>Settings sections</value></data>
+  <data name="Settings.AccountManagement" xml:space="preserve"><value>Account Management</value></data>
+  <data name="Settings.Profile" xml:space="preserve"><value>Profile</value></data>
+  <data name="Settings.ExternalLogins" xml:space="preserve"><value>External logins</value></data>
+  <data name="Settings.TwoFactor" xml:space="preserve"><value>Two-factor authentication</value></data>
+  <data name="Settings.PersonalData" xml:space="preserve"><value>Personal data</value></data>
+  <data name="Settings.Accessibility" xml:space="preserve"><value>Accessibility</value></data>
+  <data name="Settings.Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings.Appearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="Settings.Theme" xml:space="preserve"><value>Theme</value></data>
+  <data name="Settings.Back" xml:space="preserve"><value>Back to Settings</value></data>
+  <data name="Settings.LanguageIntroduction" xml:space="preserve"><value>The language used for RentRoad’s interface.</value></data>
+  <data name="Settings.CurrentLanguage" xml:space="preserve"><value>Current language</value></data>
+  <data name="Settings.English" xml:space="preserve"><value>English</value></data>
+  <data name="Settings.MoreLanguages" xml:space="preserve"><value>RentRoad currently supports English only. Additional languages are not yet available.</value></data>
+  <data name="Settings.ThemeIntroduction" xml:space="preserve"><value>Choose a comfortable appearance, or follow your device’s theme.</value></data>
+  <data name="Settings.System" xml:space="preserve"><value>System</value></data>
+  <data name="Settings.Light" xml:space="preserve"><value>Light</value></data>
+  <data name="Settings.Dark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Settings.ThemeStorage" xml:space="preserve"><value>Your theme preference is saved in this browser when storage is available.</value></data>
+  <data name="Settings.ThemeSelected" xml:space="preserve"><value>Theme applied: {0}.</value></data>
+  <data name="Settings.ThemeJavaScript" xml:space="preserve"><value>Enable JavaScript to change the appearance preference.</value></data>
+  <data name="Messages.KeyboardHelp" xml:space="preserve"><value>Enter to send · Shift + Enter for a new line.</value></data>
+  <data name="NotFound.Title" xml:space="preserve"><value>Page Not Found</value></data>
+  <data name="NotFound.Description" xml:space="preserve"><value>This page may have moved or may no longer exist. Let’s get you back on the road.</value></data>
+  <data name="NotFound.GoHome" xml:space="preserve"><value>Go Home</value></data>
+  <data name="Browse.MobileHeading" xml:space="preserve"><value>Search Rentals</value></data>
+  <data name="Brand.Rent" xml:space="preserve"><value>Rent</value></data>
+  <data name="Brand.Road" xml:space="preserve"><value>Road</value></data>
+  <data name="Brand.Tagline" xml:space="preserve"><value>Big plans. Less to own.</value></data>
 </root>

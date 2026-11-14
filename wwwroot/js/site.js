@@ -1,7 +1,5 @@
 /**
- * Initializes the saved or system theme before styles load, then connects the navigation toggle.
- *
- * @returns {void} Does not return a value.
+ * Applies the saved or system theme before styles load and connects appearance preferences.
  */
 (function initializeTheme() {
     "use strict";
@@ -11,9 +9,9 @@
     let selectedTheme = readTheme();
 
     /**
-     * Reads a valid saved preference, tolerating unavailable browser storage.
+     * Reads a saved preference while tolerating unavailable browser storage.
      *
-     * @returns {"light"|"dark"|null} The explicit saved theme, or null when unavailable or invalid.
+     * @returns {"light"|"dark"|null} The explicit preference, or null for the system theme.
      */
     function readTheme() {
         try {
@@ -26,57 +24,61 @@
     }
 
     /**
-     * Applies the preference and synchronizes the accessible dark-mode toggle.
-     *
-     * @returns {void} Does not return a value.
+     * Applies the current preference and synchronizes any settings controls.
      */
     function applyTheme() {
         const theme = selectedTheme ?? (systemTheme.matches ? "dark" : "light");
 
         document.documentElement.setAttribute("data-bs-theme", theme);
-        const toggle = document.querySelector("[data-theme-toggle]");
 
-        if (toggle) {
-            toggle.setAttribute("aria-pressed", String(theme === "dark"));
-            toggle.hidden = false;
+        for (const choice of document.querySelectorAll("[data-theme-choice]")) {
+            choice.checked = choice.value === (selectedTheme ?? "system");
         }
     }
 
     /**
-     * Saves an explicit choice, keeping it active for this page if storage is blocked.
+     * Applies an explicit choice immediately and saves it when storage is available.
      *
-     * @returns {void} Does not return a value.
+     * @param {Event} event - Change event from a theme radio input.
      */
-    function toggleTheme() {
-        selectedTheme = document.documentElement.getAttribute("data-bs-theme") === "dark" ? "light" : "dark";
+    function selectTheme(event) {
+        const choice = event.currentTarget;
+
+        if (!choice.checked || !["system", "light", "dark"].includes(choice.value)) return;
+
+        selectedTheme = choice.value === "system" ? null : choice.value;
         applyTheme();
 
         try {
-            window.localStorage.setItem(THEME_KEY, selectedTheme);
+            if (selectedTheme === null) {
+                window.localStorage.removeItem(THEME_KEY);
+            } else {
+                window.localStorage.setItem(THEME_KEY, selectedTheme);
+            }
         } catch {
-            return;
+            selectedTheme = choice.value === "system" ? null : choice.value;
+        }
+
+        const status = document.querySelector("[data-theme-status]");
+
+        if (status) {
+            status.textContent = choice.dataset.themeConfirmation;
         }
     }
 
     /**
-     * Connects the theme control after the navigation is available.
-     *
-     * @returns {void} Does not return a value.
+     * Connects appearance controls after the document is ready without requiring a navbar button.
      */
-    function connectToggle() {
-        const toggle = document.querySelector("[data-theme-toggle]");
-
-        if (toggle) {
-            toggle.addEventListener("click", toggleTheme);
+    function connectPreferences() {
+        for (const choice of document.querySelectorAll("[data-theme-choice]")) {
+            choice.addEventListener("change", selectTheme);
         }
 
         applyTheme();
     }
 
     /**
-     * Follows operating-system changes until the user makes an explicit selection.
-     *
-     * @returns {void} Does not return a value.
+     * Follows operating-system changes until an explicit light or dark preference is selected.
      */
     function followSystemTheme() {
         if (selectedTheme === null) {
@@ -85,10 +87,9 @@
     }
 
     /**
-     * Synchronizes changes or removal of the saved preference in another tab.
+     * Synchronizes preference changes made in another tab.
      *
-     * @param {StorageEvent} event - Native event supplied to this handler.
-     * @returns {void} Does not return a value.
+     * @param {StorageEvent} event - Browser storage notification.
      */
     function syncStoredTheme(event) {
         if (event.key === THEME_KEY || event.key === null) {
@@ -100,5 +101,5 @@
     applyTheme();
     systemTheme.addEventListener("change", followSystemTheme);
     window.addEventListener("storage", syncStoredTheme);
-    document.addEventListener("DOMContentLoaded", connectToggle, { once: true });
+    document.addEventListener("DOMContentLoaded", connectPreferences, { once: true });
 })();

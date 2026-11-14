@@ -64,8 +64,6 @@
 .messages-compose-field { min-width: 0; }
 .messages-compose-row > button { min-width: 4rem; max-width: 6rem; min-height: 44px; }
 .messages-composer textarea { min-height: 3rem; max-height: 6rem; resize: vertical; font-size: 1rem; }
-.messages-composer-help { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: .15rem .5rem; }
-.messages-composer-help .form-text { font-size: .65rem; margin: .25rem 0 0; }
 .messages-composer-feedback { max-height: min(18dvh, 7rem); overflow-y: auto; font-size: .8rem; }
 .messages-composer-feedback p { margin: .25rem 0 0; }
 .messages-composer-feedback p:empty { display: none; }

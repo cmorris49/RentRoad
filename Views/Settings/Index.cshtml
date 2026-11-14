@@ -1,8 +1,33 @@
-@{ ViewData["Title"] = Text["Navigation.Settings"]; }
-<section class="settings-page" aria-labelledby="settings-heading">
-    <p class="eyebrow">@Text["Settings.YourAccount"]</p>
-    <h1 id="settings-heading">@Text["Navigation.Settings"]</h1>
-    <p class="h4">@Text["Common.ComingSoon"]</p>
-    <p class="text-muted">@Text["Settings.Introduction"]</p>
-    <a asp-controller="MyListings" asp-action="Index">@Text["Navigation.BackToMyListings"]</a>
-</section>
+@{
+    Layout = "/Views/Shared/_SettingsLayout.cshtml";
+    var language = ViewData["SettingsSection"] as string == "language";
+    var overview = ViewData["SettingsOverview"] is true;
+    ViewData["Title"] = Text[overview ? "Navigation.Settings" : language ? "Settings.Language" : "Settings.Theme"];
+}
+@if (!overview && language)
+{
+    <p class="text-muted">@Text["Settings.LanguageIntroduction"]</p>
+    <dl class="settings-language">
+        <dt>@Text["Settings.CurrentLanguage"]</dt>
+        <dd>@Text["Settings.English"]</dd>
+    </dl>
+    <p class="form-text">@Text["Settings.MoreLanguages"]</p>
+}
+else if (!overview)
+{
+    <p id="theme-help" class="text-muted">@Text["Settings.ThemeIntroduction"]</p>
+    <fieldset class="theme-choices" aria-describedby="theme-help">
+        <legend class="visually-hidden">@Text["Settings.Theme"]</legend>
+        @foreach (var choice in new[] { "system", "light", "dark" })
+        {
+            var key = choice switch { "light" => "Settings.Light", "dark" => "Settings.Dark", _ => "Settings.System" };
+            <label class="theme-choice" for="theme-@choice">
+                <input class="form-check-input" type="radio" name="theme" id="theme-@choice" value="@choice" data-theme-choice
+                       data-theme-confirmation="@Text["Settings.ThemeSelected", Text[key]]" />
+                <span>@Text[key]</span>
+            </label>
+        }
+    </fieldset>
+    <p role="status" aria-live="polite" class="settings-theme-status" data-theme-status></p>
+    <noscript><p class="alert alert-info">@Text["Settings.ThemeJavaScript"]</p></noscript>
+}

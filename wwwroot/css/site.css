@@ -178,7 +178,7 @@ a:hover {
     margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
 }
 
-.page-header p, .form-text, .text-muted {
+.page-header p:not(.eyebrow), .form-text, .text-muted {
     color: var(--rr-muted) !important;
 }
 
@@ -255,6 +255,22 @@ a:hover {
     fill: var(--rr-primary);
 }
 
+.brand-wordmark {
+    white-space: nowrap;
+}
+
+.brand-wordmark > [aria-hidden="true"] {
+    display: inline-flex;
+}
+
+.brand-rent {
+    color: var(--rr-text);
+}
+
+.brand-road {
+    color: var(--rr-primary);
+}
+
 .brand-dot {
     color: var(--rr-accent);
 }
@@ -283,43 +299,6 @@ a:hover {
     margin-left: auto;
     align-items: center;
     gap: .5rem;
-}
-
-.theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: .5rem;
-    min-width: 44px;
-    min-height: 44px;
-    padding: .5rem;
-    border: 1px solid var(--rr-border);
-    color: var(--rr-text);
-    background: var(--rr-surface);
-}
-
-.theme-toggle:hover, .theme-toggle[aria-pressed="true"] {
-    background: var(--rr-surface-muted);
-    color: var(--rr-primary);
-    border-color: var(--rr-control-border);
-}
-
-.theme-toggle-label {
-    font-size: .85rem;
-    font-weight: 600;
-}
-
-.theme-icon {
-    width: 20px;
-    height: 20px;
-}
-
-.theme-icon-sun, [data-bs-theme="dark"] .theme-icon-moon {
-    display: none;
-}
-
-[data-bs-theme="dark"] .theme-icon-sun {
-    display: block;
 }
 
 .navbar-toggler {
@@ -757,14 +736,6 @@ a:hover {
         margin-right: 1.25rem;
     }
 
-    .theme-toggle {
-        order: 3;
-        margin-left: .5rem;
-    }
-
-    .theme-toggle-label {
-        display: none;
-    }
 
 }
 
@@ -805,9 +776,6 @@ a:hover {
         height: 34px;
     }
 
-    .theme-toggle-label {
-        display: none;
-    }
 
     .footer-content {
         flex-direction: column;
@@ -934,26 +902,119 @@ a:hover {
 .messages-navigation-link .messages-navigation-unread { position: absolute; inset-block-start: -.25rem; inset-inline-end: -.35rem; min-width: 1.25rem; text-align: center; padding: .1rem .35rem; font-size: .65rem; }
 @media (max-width: 1199.98px) { .account-navigation { flex-direction: row; align-items: center; gap: .75rem; } }
 
-/* Authenticated mailbox and account controls remain visible beside the mobile menu. */
-.account-profile-icon { display: none; }
-.site-nav-container > .account-navigation { flex-direction: row; align-items: center; order: 2; padding: 0; margin-block: 0; border: 0; }
+/* One account area shares the collapsed panel on mobile and aligns right on desktop. */
+.account-profile-icon,
+.account-mobile,
+.messages-navigation-text {
+    display: none;
+}
+
+.site-nav-container .navbar-collapse {
+    min-width: 0;
+}
+
+.not-found-page {
+    max-width: 42rem;
+    margin: clamp(2rem, 8vh, 6rem) auto;
+    text-align: center;
+}
+
+.not-found-code {
+    margin: 0;
+    color: var(--rr-primary);
+    font-size: clamp(5rem, 20vw, 9rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.06em;
+}
+
+.not-found-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .75rem;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 1200px) {
+    .site-nav-container .account-navigation {
+        flex-direction: row;
+        margin-left: auto;
+    }
+}
+
 @media (max-width: 1199.98px) {
-    .site-nav-container > .theme-toggle { order: 1; }
-    .site-nav-container > .navbar-toggler { order: 2; }
-    .site-nav-container > .account-navigation { order: 3; margin-left: 0; gap: .25rem; }
-    .site-nav-container > .navbar-collapse { order: 4; flex-basis: 100%; }
-    .site-nav-container > .account-navigation .messages-navigation-link { display: inline-flex; width: 44px; }
-}
-@media (max-width: 575.98px) {
-    .site-nav-container { gap: .3rem; }
-    .site-nav-container > .account-navigation .account-toggle { display: inline-flex; justify-content: center; align-items: center; width: 44px; height: 44px; padding: .55rem; }
-    .site-nav-container > .account-navigation .account-display-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-    .site-nav-container > .account-navigation .account-toggle::after { display: none; }
-    .account-profile-icon { display: block; width: 22px; height: 22px; }
-    .site-nav-container > .theme-toggle { min-width: 40px; padding: .4rem; }
-    .site-nav-container > .navbar-toggler { padding-inline: .4rem; }
-}
-@media (max-width: 359.98px) {
-    .site-nav-container > .brand .brand-mark { display: none; }
-    .site-nav-container > .brand { font-size: 1.2rem; }
+    .site-nav-container > .navbar-toggler {
+        margin-left: auto;
+    }
+
+    .site-nav-container > .navbar-collapse {
+        flex-basis: 100%;
+        max-height: calc(100dvh - 6rem);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .site-nav-container .account-navigation {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        margin-left: 0;
+    }
+
+    .site-nav-container .navbar-nav .nav-link {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    .account-desktop {
+        display: none;
+    }
+
+    .account-mobile,
+    .messages-navigation-text {
+        display: block;
+    }
+
+    .account-mobile-divider {
+        margin-top: .5rem;
+        padding-top: .5rem;
+        border-top: 1px solid var(--rr-border);
+    }
+
+    .account-mobile button.nav-link {
+        width: 100%;
+        min-height: 44px;
+        border: 0;
+        background: transparent;
+        text-align: left;
+    }
+
+    .site-nav-container .messages-navigation-item {
+        align-self: stretch;
+    }
+
+    .site-nav-container .messages-navigation-link.btn {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: .625rem .875rem;
+        font-size: .925rem;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .messages-navigation-link svg {
+        display: none;
+    }
+
+    .messages-navigation-link .messages-navigation-unread {
+        position: static;
+        margin-left: auto;
+    }
+
+    .site-nav-container .brand .brand-mark {
+        display: block;
+    }
 }

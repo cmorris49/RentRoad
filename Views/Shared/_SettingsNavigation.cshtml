@@ -1,0 +1,29 @@
+@model string
+@inject Microsoft.AspNetCore.Identity.SignInManager<RentRoad.Models.ApplicationUser> SignInManager
+@{
+    var external = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+}
+<nav aria-label="@Text["Settings.Navigation"]" class="settings-navigation">
+    <div class="settings-group">
+        <h2>@Text["Settings.AccountManagement"]</h2>
+        <ul>
+            <li><a asp-area="Identity" asp-page="/Account/Manage/Index" aria-current="@(Model == "account" ? "page" : null)">@Text["Settings.Profile"]</a></li>
+            <li><a asp-area="Identity" asp-page="/Account/Manage/Email" aria-current="@(Model == "email" ? "page" : null)">@Text["Identity.Email"]</a></li>
+            <li><a asp-area="Identity" asp-page="/Account/Manage/ChangePassword" aria-current="@(Model == "password" ? "page" : null)">@Text["Identity.Password"]</a></li>
+            @if (external || ViewData["ManageNav.HasExternalLogins"] is true)
+            {
+                <li><a asp-area="Identity" asp-page="/Account/Manage/ExternalLogins" aria-current="@(Model == "external-logins" ? "page" : null)">@Text["Settings.ExternalLogins"]</a></li>
+            }
+            <li><a asp-area="Identity" asp-page="/Account/Manage/TwoFactorAuthentication" aria-current="@(Model == "security" ? "page" : null)">@Text["Settings.TwoFactor"]</a></li>
+            <li><a asp-area="Identity" asp-page="/Account/Manage/PersonalData" aria-current="@(Model == "personal-data" ? "page" : null)">@Text["Settings.PersonalData"]</a></li>
+        </ul>
+    </div>
+    <div class="settings-group">
+        <h2>@Text["Settings.Accessibility"]</h2>
+        <ul><li><a asp-area="" asp-controller="Settings" asp-action="Index" asp-route-section="language" aria-current="@(Model == "language" ? "page" : null)">@Text["Settings.Language"]</a></li></ul>
+    </div>
+    <div class="settings-group">
+        <h2>@Text["Settings.Appearance"]</h2>
+        <ul><li><a asp-area="" asp-controller="Settings" asp-action="Index" asp-route-section="theme" aria-current="@(Model == "theme" ? "page" : null)">@Text["Settings.Theme"]</a></li></ul>
+    </div>
+</nav>

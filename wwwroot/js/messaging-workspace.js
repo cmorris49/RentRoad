@@ -250,7 +250,7 @@
 
                 return true;
             } catch (error) {
-                if (navigation !== this.navigation || error.name === "AbortError") {
+                if (navigation !== this.navigation || this.disposed || error.name === "AbortError") {
                     return false;
                 }
 
@@ -325,7 +325,6 @@
                     current.input.readOnly = !!draft.pending;
                     current.sendButton.textContent = text(draft.pending ? "Messages.RetrySend" : "Messages.Send");
                     panel.querySelector("[data-pending-help]").hidden = !draft.pending;
-                    current.updateCount();
                 }
 
                 starting.catch(() => {
@@ -470,7 +469,7 @@
             window.clearInterval(this.poll);
             this.unsubscribe?.();
             this.current?.deactivate();
-            this.sidebar.disposed = true;
+            this.sidebar.deactivate();
         }
     }
 

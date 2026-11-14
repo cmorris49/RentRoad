@@ -5,8 +5,27 @@
 .browse-page ::deep .browse-layout {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
-    gap: 2rem;
+    grid-template-rows: auto 1fr;
+    column-gap: 2rem;
     align-items: start;
+}
+
+.browse-page ::deep .browse-sidebar {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+}
+
+.browse-page ::deep .browse-search,
+.browse-page ::deep .browse-results {
+    grid-column: 2;
+}
+
+.browse-page ::deep .browse-mobile-heading {
+    display: none;
+}
+
+.browse-page ::deep .price-filter-row {
+    grid-column: 1 / -1;
 }
 
 .browse-page ::deep .filter-panel {
@@ -49,8 +68,8 @@
 
 .browse-page ::deep .price-filter-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .625rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .875rem;
 }
 
 .browse-page ::deep .price-bound-label {
@@ -115,11 +134,14 @@
 .browse-page ::deep .sort-inputs {
     display: flex;
     gap: .5rem;
+    flex-wrap: wrap;
+    max-width: 100%;
 }
 
 .browse-page ::deep .sort-inputs select {
     width: auto;
-    min-width: 0;
+    min-width: 13rem;
+    padding-right: 3rem;
     border: 0;
     background-color: transparent;
     box-shadow: none;
@@ -164,7 +186,40 @@
 @media (max-width: 991.98px) {
     .browse-page ::deep .browse-layout {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-rows: none;
+        gap: 1rem;
+    }
+
+    .browse-page ::deep .browse-sidebar,
+    .browse-page ::deep .browse-search,
+    .browse-page ::deep .browse-results {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .browse-page ::deep .browse-desktop-heading,
+    .browse-page ::deep .browse-heading .eyebrow {
+        display: none;
+    }
+
+    .browse-page ::deep .browse-mobile-heading {
+        display: inline;
+    }
+
+    .browse-page ::deep .browse-search {
+        margin-bottom: 0;
+    }
+
+    .browse-page ::deep .browse-search > .form-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
     }
 
     .browse-page ::deep .filter-toggle {

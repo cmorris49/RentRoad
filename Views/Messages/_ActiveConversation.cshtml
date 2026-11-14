@@ -27,10 +27,19 @@
         @Html.AntiForgeryToken()
         <label for="message-content" class="visually-hidden">@Text["Messages.ComposeLabel"]</label>
         <div class="messages-compose-row">
-            <div class="messages-compose-field"><textarea id="message-content" class="form-control" rows="2" maxlength="@maximumLength" aria-describedby="message-help message-count message-feedback" data-message-input disabled></textarea><div class="messages-composer-help"><p id="message-help" class="form-text">@Text["Messages.CharacterHelp", maximumLength]</p><span id="message-count" class="form-text" data-character-count></span></div></div>
+            <div class="messages-compose-field">
+                <textarea id="message-content" class="form-control" rows="2" maxlength="@maximumLength"
+                          aria-describedby="message-feedback"
+                          data-message-input disabled></textarea>
+            </div>
             <button class="btn btn-primary" type="submit" data-send disabled>@Text["Messages.Send"]</button>
         </div>
-        <div class="messages-composer-feedback"><p id="message-feedback" role="status" aria-live="polite" data-send-status></p><p class="form-text" data-pending-help hidden>@Text["Messages.PendingHelp"]</p><button class="btn btn-sm btn-outline-primary" type="button" data-new-submission hidden>@Text["Messages.NewSubmission"]</button><p class="form-text" data-read-feedback role="status"></p></div>
+        <div class="messages-composer-feedback">
+            <p class="visually-hidden" id="message-feedback" role="status" aria-live="polite" data-send-status></p>
+            <p class="form-text" data-pending-help hidden>@Text["Messages.PendingHelp"]</p>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-new-submission hidden>@Text["Messages.NewSubmission"]</button>
+            <p class="form-text" data-read-feedback role="status"></p>
+        </div>
         <noscript><p class="form-text">@Text["Messages.JavaScriptRequired"]</p></noscript>
     </form>
 </div>
