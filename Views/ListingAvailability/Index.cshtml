@@ -113,9 +113,9 @@
                             {
                                 <details class="availability-edit" open="@form.IsSubmitted">
                                     <summary>@Text["Availability.EditBlock"]<span class="visually-hidden"> @block.BlockId</span></summary>
-                                    <partial name="_AvailabilityForm" model="form" />
+                                    @await Html.PartialAsync("_AvailabilityForm", form)
                                 </details>
-                                <partial name="_RemoveAvailability" model="form" />
+                                @await Html.PartialAsync("_RemoveAvailability", form)
                             }
                         </div>
                     </article>

@@ -114,7 +114,7 @@
                             }
                             else if (!Model.IsIncoming && rental.IsListingPublic)
                             {
-                                <partial name="_MessageOwner" model="@(new RentRoad.ViewModels.Messaging.ConversationStartInputViewModel { ListingId = rental.ListingId })" />
+                                @await Html.PartialAsync("_MessageOwner", new RentRoad.ViewModels.Messaging.ConversationStartInputViewModel { ListingId = rental.ListingId })
                             }
                             else
                             {
@@ -124,7 +124,7 @@
                             {
                                 @if (action.Item2)
                                 {
-                                    <partial name="_ActionConfirmation" model="@(new RentalManagementActionViewModel(rental.RentalRequestId, action.Item1, Model.PageNumber, Model.PageSize))" />
+                                    @await Html.PartialAsync("_ActionConfirmation", new RentalManagementActionViewModel(rental.RentalRequestId, action.Item1, Model.PageNumber, Model.PageSize))
                                 }
                             }
                         </div>
@@ -135,6 +135,6 @@
     }
     @if (Model.HasLoadedHistory)
     {
-        <partial name="_HistoryPagination" model="Model" />
+        @await Html.PartialAsync("_HistoryPagination", Model)
     }
 </div>

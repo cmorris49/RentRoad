@@ -8,6 +8,7 @@ using RentRoad.Services.Listings;
 using RentRoad.Services.Storage;
 using RentRoad.Services.Rentals;
 using RentRoad.Services.Messaging;
+using RentRoad.Services.Reviews;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,8 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IRentalRequestService, RentalRequestService>();
 builder.Services.AddScoped<IRentalManagementReadService, RentalManagementReadService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IReviewSummaryService, ReviewSummaryService>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();
 builder.Services.AddMessagingRealtime();
 builder.Services.AddScoped<IListingImageService, ListingImageService>();

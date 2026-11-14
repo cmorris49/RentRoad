@@ -85,11 +85,44 @@
 
     <partial name="_PublicListingAvailability" model="@(new PublicListingAvailabilityViewModel(Model.AvailabilityWindows, Model.AvailabilityBlocks))" />
     <partial name="_ListingScroller" model='@(new ListingScrollerViewModel("similar-listings", Text["Listing.SimilarListings"].Value, Model.SimilarListings))' />
+
+    <section class="details-section listing-reviews" aria-labelledby="reviews-heading">
+        <p class="eyebrow">@Text["ListingDetails.Reviews"]</p>
+        <h2 id="reviews-heading">@Text["ListingDetails.Reviews"]</h2>
+        @if (Model.AverageRating is double averageRating)
+        {
+            <p class="listing-reviews-summary" aria-label="@Text["ListingDetails.ReviewSummary", averageRating, Model.Reviews.Count]">
+                <span aria-hidden="true">★★★★★</span>
+                @Text["ListingDetails.ReviewSummary", averageRating, Model.Reviews.Count]
+            </p>
+            <div class="listing-reviews-list">
+                @foreach (var review in Model.Reviews)
+                {
+                    <article class="listing-review">
+                        <div class="listing-review-heading">
+                            <h3>@Text["ListingDetails.Reviewer", review.ReviewerDisplayName]</h3>
+                            <time datetime="@review.CreatedAtUtc.ToString("O")">@review.CreatedAtUtc.ToLocalTime().ToString("d")</time>
+                        </div>
+                        <p class="listing-review-rating" aria-label="@Text["ListingDetails.Rating", review.Rating]">@(new string('★', review.Rating))</p>
+                        @if (!string.IsNullOrWhiteSpace(review.Comment))
+                        {
+                            <p>@review.Comment</p>
+                        }
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="listing-reviews-empty">@Text["ListingDetails.NoReviews"]</p>
+        }
+    </section>
 </div>
 
 @section Styles {
     <link rel="stylesheet" href="~/css/public-listing-availability.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/listing-scroller.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/listing-reviews.css" asp-append-version="true" />
 }
 @section Scripts {
     <script src="~/js/listing-scroller.js" asp-append-version="true" defer></script>

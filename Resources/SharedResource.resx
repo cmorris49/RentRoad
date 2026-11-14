@@ -342,6 +342,21 @@
   <data name="Listing.SimilarListings" xml:space="preserve">
     <value>Similar Listings</value>
   </data>
+  <data name="ListingDetails.Reviews" xml:space="preserve">
+    <value>Reviews</value>
+  </data>
+  <data name="ListingDetails.ReviewSummary" xml:space="preserve">
+    <value>{0:0.0} out of 5 from {1} review(s)</value>
+  </data>
+  <data name="ListingDetails.NoReviews" xml:space="preserve">
+    <value>No reviews yet.</value>
+  </data>
+  <data name="ListingDetails.Reviewer" xml:space="preserve">
+    <value>Reviewed by {0}</value>
+  </data>
+  <data name="ListingDetails.Rating" xml:space="preserve">
+    <value>{0} out of 5</value>
+  </data>
   <data name="Listing.Untitled" xml:space="preserve">
     <value>Rental listing</value>
   </data>

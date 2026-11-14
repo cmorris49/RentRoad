@@ -96,7 +96,23 @@ public sealed record ListingDetails(
     string OwnerDisplayName,
     IReadOnlyList<ListingImageInfo> Images,
     IReadOnlyList<ListingAvailabilityPeriod> AvailabilityWindows,
-    IReadOnlyList<ListingAvailabilityPeriod> AvailabilityBlocks);
+    IReadOnlyList<ListingAvailabilityPeriod> AvailabilityBlocks,
+    IReadOnlyList<ListingReview> Reviews);
+
+/// <summary>
+/// Contains the public information shown for a completed rental review.
+/// </summary>
+/// <param name="ReviewId">The identifier used to provide stable ordering.</param>
+/// <param name="ReviewerDisplayName">The reviewer's public display name.</param>
+/// <param name="Rating">The rating from one to five.</param>
+/// <param name="Comment">The optional review comment.</param>
+/// <param name="CreatedAtUtc">The time the review was created.</param>
+public sealed record ListingReview(
+    int ReviewId,
+    string ReviewerDisplayName,
+    int Rating,
+    string? Comment,
+    DateTime CreatedAtUtc);
 
 /// <summary>
 /// Describes a stored listing image and its presentation order without exposing its original filename.

@@ -48,7 +48,13 @@
                                 <h3 id="listing-title-@listing.ListingId" class="h5">@title</h3>
                                 <partial name="_ListingStatus" model="listing.Status" />
                             </div>
-                            <p class="owner-listing-price">@(listing.DailyPrice?.FormattedAmount ?? Text["MyListings.NoPrice"].Value) @if (listing.DailyPrice is not null) { <span>@Text["Listing.PerDay"]</span> }</p>
+                            <p class="owner-listing-price">
+                                @(listing.DailyPrice?.FormattedAmount ?? Text["MyListings.NoPrice"].Value)
+                                @if (listing.DailyPrice is not null)
+                                {
+                                    <span>@Text["Listing.PerDay"]</span>
+                                }
+                            </p>
                             <p class="listing-card-meta">@(string.IsNullOrWhiteSpace(listing.PickupArea) ? Text["MyListings.NoPickupArea"].Value : listing.PickupArea)</p>
                             <div class="owner-listing-actions">
                                 <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@listing.ListingId">@(listing.CanEdit ? Text["MyListings.EditListing"].Value : Text["MyListings.ViewArchived"].Value)<span class="visually-hidden">@Text["Common.ItemReference", title]</span></a>

@@ -57,7 +57,10 @@
 
                             @if (block)
                             {
-                                <label for="editor-block-reason" class="form-label mt-2">@Text["Availability.Reason"] <span class="text-muted">@Text["Availability.OptionalPrivate"]</span></label><input id="editor-block-reason" name="Reason" maxlength="250" class="form-control" />
+                                <div class="mt-2">
+                                    <label for="editor-block-reason" class="form-label">@Text["Availability.Reason"] <span class="text-muted">@Text["Availability.OptionalPrivate"]</span></label>
+                                    <input id="editor-block-reason" name="Reason" maxlength="250" class="form-control" />
+                                </div>
                             }
                             <button type="submit" class="btn btn-outline-primary mt-3" data-editor-write disabled>@(block ? Text["Availability.AddBlock"].Value : Text["Availability.AddWindow"].Value)</button>
                         </form>
@@ -73,16 +76,56 @@
         <div class="owner-form-actions editor-preview-actions"><button class="btn btn-outline-primary" type="button" data-editor-preview="card">@Text["ListingEditor.BrowseCardPreview"]</button><button class="btn btn-outline-primary" type="button" data-editor-preview="details">@Text["ListingEditor.DetailsPreview"]</button></div>
         @if (!archived)
         {
-            <div class="editor-finish-actions"><button class="btn btn-primary" type="button" data-editor-review data-editor-write disabled>@(status == ListingStatus.Published ? Text["ListingEditor.ReviewChanges"].Value : Text["ListingEditor.UploadListing"].Value)</button><button class="btn btn-outline-primary" type="submit" form="editor-fields" data-editor-save data-editor-write disabled>@(status == ListingStatus.Published ? Text["Common.SaveChanges"].Value : Text["ListingEditor.SaveDraft"].Value)</button></div>
+            <div class="editor-finish-actions">
+                <button class="btn btn-primary" type="button" data-editor-review data-editor-write disabled>@(status == ListingStatus.Published ? Text["ListingEditor.ReviewChanges"].Value : Text["ListingEditor.UploadListing"].Value)</button>
+                <button class="btn btn-outline-primary" type="submit" form="editor-fields" data-editor-save data-editor-write disabled>@(status == ListingStatus.Published ? Text["Common.SaveChanges"].Value : Text["ListingEditor.SaveDraft"].Value)</button>
+            </div>
         }
         </div>
-        @if (!archived && listingId > 0) { <div class="editor-archive"><partial name="_ArchiveListing" model="listingId" /></div> }
+        @if (!archived && listingId > 0)
+        {
+            <div class="editor-archive">
+                <partial name="_ArchiveListing" model="listingId" />
+            </div>
+        }
     </section>
     <partial name="_EditorPreviews" />
     <template data-photo-template>
-        <article class="editor-photo"><div class="listing-card-media" data-order-surface tabindex="-1"><img class="listing-card-image" alt="" /></div><div class="editor-photo-caption"><span data-photo-label></span><span class="badge-soft" data-primary-badge>@Text["ListingImages.Primary"]</span></div><div class="editor-photo-actions"><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="primary">@Text["ListingImages.MakePrimary"]</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="up" aria-label="@Text["ListingImages.MovePhotoUp"]">↑</button><button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="down" aria-label="@Text["ListingImages.MovePhotoDown"]">↓</button></div><details class="editor-photo-remove"><summary>@Text["ListingImages.RemovePhoto"]</summary><p class="form-text">@Text["ListingImages.RemovePhotoPrompt"]</p><button type="button" class="btn btn-sm btn-outline-danger" data-photo-action="delete">@Text["Common.ConfirmRemoval"]</button></details></article>
+        <article class="editor-photo">
+            <div class="listing-card-media" data-order-surface tabindex="-1"><img class="listing-card-image" alt="" /></div>
+            <div class="editor-photo-caption"><span data-photo-label></span><span class="badge-soft" data-primary-badge>@Text["ListingImages.Primary"]</span></div>
+            <div class="editor-photo-actions">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="primary">@Text["ListingImages.MakePrimary"]</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="up" aria-label="@Text["ListingImages.MovePhotoUp"]">↑</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-photo-action="down" aria-label="@Text["ListingImages.MovePhotoDown"]">↓</button>
+            </div>
+            <details class="editor-photo-remove">
+                <summary>@Text["ListingImages.RemovePhoto"]</summary>
+                <p class="form-text">@Text["ListingImages.RemovePhotoPrompt"]</p>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-photo-action="delete">@Text["Common.ConfirmRemoval"]</button>
+            </details>
+        </article>
     </template>
     <template data-period-template>
-        <article class="editor-period"><p class="editor-period-range"></p><p class="editor-period-reason text-muted"></p><details data-period-edit><summary>@Text["Availability.EditDates"]</summary><form data-editor-period class="editor-date-form" method="post"><div class="editor-date-inputs"><div><label class="form-label">@Text["Availability.FirstDay"]<input name="StartDate" type="date" class="form-control" required /></label></div><div><label class="form-label">@Text["Availability.LastDay"]<input name="LastDay" max="9999-12-30" type="date" class="form-control" required /></label></div></div><label class="form-label mt-2" data-reason-label>@Text["Availability.ReasonOptionalPrivate"]<input name="Reason" class="form-control" maxlength="250" /></label><button class="btn btn-outline-primary mt-3" type="submit">@Text["Availability.SaveDates"]</button></form></details><details data-period-remove><summary>@Text["Availability.RemovePeriod"]</summary><p class="form-text">@Text["Availability.RemovePeriodHelp"]</p><button type="button" class="btn btn-sm btn-outline-danger" data-period-delete>@Text["Common.ConfirmRemoval"]</button></details></article>
+        <article class="editor-period">
+            <p class="editor-period-range"></p>
+            <p class="editor-period-reason text-muted"></p>
+            <details data-period-edit>
+                <summary>@Text["Availability.EditDates"]</summary>
+                <form data-editor-period class="editor-date-form" method="post">
+                    <div class="editor-date-inputs">
+                        <div><label class="form-label">@Text["Availability.FirstDay"]<input name="StartDate" type="date" class="form-control" required /></label></div>
+                        <div><label class="form-label">@Text["Availability.LastDay"]<input name="LastDay" max="9999-12-30" type="date" class="form-control" required /></label></div>
+                    </div>
+                    <label class="form-label mt-2" data-reason-label>@Text["Availability.ReasonOptionalPrivate"]<input name="Reason" class="form-control" maxlength="250" /></label>
+                    <button class="btn btn-outline-primary mt-3" type="submit">@Text["Availability.SaveDates"]</button>
+                </form>
+            </details>
+            <details data-period-remove>
+                <summary>@Text["Availability.RemovePeriod"]</summary>
+                <p class="form-text">@Text["Availability.RemovePeriodHelp"]</p>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-period-delete>@Text["Common.ConfirmRemoval"]</button>
+            </details>
+        </article>
     </template>
 </div>

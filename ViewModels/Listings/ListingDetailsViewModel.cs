@@ -19,6 +19,10 @@ public sealed record ListingDetailsViewModel(int ListingId, string? Title, strin
 
     public IReadOnlyList<ListingSummaryViewModel> SimilarListings { get; init; } = Array.Empty<ListingSummaryViewModel>();
 
+    public IReadOnlyList<ListingReviewViewModel> Reviews { get; init; } = Array.Empty<ListingReviewViewModel>();
+
+    public double? AverageRating => Reviews.Count == 0 ? null : Reviews.Average(review => review.Rating);
+
     /// <summary>
     /// Places the primary image first and retains configured display order, with a stable ID tie-breaker, for remaining photos.
     /// </summary>
@@ -33,5 +37,29 @@ public sealed record ListingDetailsViewModel(int ListingId, string? Title, strin
         listing.PickupArea, listing.Latitude, listing.Longitude, listing.CreatedAtUtc, listing.UpdatedAtUtc,
         listing.PublishedAtUtc, listing.OwnerDisplayName, listing.Images.Select(ListingImageViewModel.FromResult).ToArray(),
         listing.AvailabilityWindows.Select(ListingAvailabilityViewModel.FromResult).ToArray(),
-        listing.AvailabilityBlocks.Select(ListingAvailabilityViewModel.FromResult).ToArray());
+        listing.AvailabilityBlocks.Select(ListingAvailabilityViewModel.FromResult).ToArray())
+    {
+        Reviews = listing.Reviews.Select(ListingReviewViewModel.FromResult).ToArray()
+    };
+}
+
+/// <summary>
+/// Contains the public presentation values for one listing review.
+/// </summary>
+public sealed record ListingReviewViewModel(
+    string ReviewerDisplayName,
+    int Rating,
+    string? Comment,
+    DateTime CreatedAtUtc)
+{
+    /// <summary>
+    /// Maps a public service review projection to its presentation model.
+    /// </summary>
+    /// <param name="review">The public review projection.</param>
+    /// <returns>The mapped review presentation model.</returns>
+    public static ListingReviewViewModel FromResult(ListingReview review) => new(
+        review.ReviewerDisplayName,
+        review.Rating,
+        review.Comment,
+        review.CreatedAtUtc);
 }

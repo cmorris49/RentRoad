@@ -527,7 +527,7 @@ public sealed partial class ListingService : IListingService
     }
 
     /// <summary>
-    /// Retrieves published item details, ordered images, and date ranges using public-only projections.
+    /// Retrieves published item details, ordered images, date ranges, and completed-rental reviews using public-only projections.
     /// </summary>
     /// <param name="listingId">The identifier of the listing being processed.</param>
     /// <param name="cancellationToken">The token used to cancel the operation.</param>
@@ -692,6 +692,17 @@ public sealed partial class ListingService : IListingService
                 listing.AvailabilityBlocks.OrderBy(block => block.StartDate).ThenBy(block => block.EndDate)
                     .ThenBy(block => block.AvailabilityBlockId)
                     .Select(block => new ListingAvailabilityPeriod(block.StartDate, block.EndDate))
+                    .ToList(),
+                listing.RentalRequests
+                    .Where(request => request.Status == RentalStatus.Completed && request.Review != null)
+                    .Select(request => new ListingReview(
+                        request.Review!.ReviewId,
+                        request.Renter.DisplayName,
+                        request.Review.Rating,
+                        request.Review.Comment,
+                        request.Review.CreatedAtUtc))
+                    .OrderByDescending(review => review.CreatedAtUtc)
+                    .ThenByDescending(review => review.ReviewId)
                     .ToList()));
 
     /// <summary>

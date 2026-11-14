@@ -1,0 +1,14 @@
+.listing-reviews { margin-top: clamp(2rem, 5vw, 4rem); }
+.listing-reviews-summary { color: var(--rr-secondary); font-weight: 600; }
+.listing-reviews-summary span, .listing-review-rating { color: var(--rr-accent); letter-spacing: .12em; }
+.listing-reviews-list { display: grid; gap: 1rem; }
+.listing-review { padding: 1.25rem; border: 1px solid var(--rr-border); border-radius: var(--rr-radius); background: var(--rr-surface); }
+.listing-review-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+.listing-review-heading h3 { margin: 0; font-size: 1rem; }
+.listing-review-heading time { color: var(--rr-secondary); font-size: .9rem; }
+.listing-review-rating { margin: .75rem 0; }
+.listing-review p:last-child { margin-bottom: 0; }
+.listing-reviews-empty { color: var(--rr-secondary); }
+@media (max-width: 575.98px) {
+    .listing-review-heading { align-items: flex-start; flex-direction: column; gap: .25rem; }
+}
