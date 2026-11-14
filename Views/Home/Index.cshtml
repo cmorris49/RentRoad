@@ -29,37 +29,7 @@
             }
         </div>
     </div>
-    <div class="hero-art" aria-hidden="true">
-        <span class="hero-art-label">@Text["Home.ArtLabel"]</span>
-        <svg class="rental-illustration" viewBox="0 0 460 410" fill="none" focusable="false">
-            <circle class="illustration-halo" cx="230" cy="198" r="166" />
-            <path class="illustration-route" d="M49 295C-10 180 97 72 215 80c161 11 262 100 187 200-55 74-282 99-324-5" stroke-width="2" stroke-dasharray="5 10" />
-            <g class="illustration-tent">
-                <path class="illustration-fill-secondary" d="m75 179 91-128 93 128Z" />
-                <path class="illustration-fill-primary" d="m75 179 60-10L166 51Z" />
-                <path class="illustration-fill-background" d="m142 179 24-59 25 59Z" />
-                <path class="illustration-line" d="m62 179 104-136 104 136M62 179h208" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-            </g>
-            <g transform="rotate(10 335 155)">
-                <rect class="illustration-fill-highlight" x="277" y="104" width="104" height="22" rx="8" />
-                <path class="illustration-fill-accent" d="M301 118h66v31h-33v37h-27v-37h-6Z" />
-                <path class="illustration-fill-primary" d="M295 185h49v18h-49zM368 109h28v12h-28z" />
-                <path class="illustration-line" d="M290 113h48m-31 72h27" stroke-width="4" stroke-linecap="round" />
-            </g>
-            <g transform="rotate(-9 220 271)">
-                <path class="illustration-fill-primary" d="M114 231a17 17 0 0 1 17-17h28l12-19h74l12 19h38a17 17 0 0 1 17 17v88a17 17 0 0 1-17 17H131a17 17 0 0 1-17-17Z" />
-                <path class="illustration-fill-secondary" d="M114 248h198v59H114z" />
-                <circle class="illustration-fill-background" cx="217" cy="276" r="48" />
-                <circle class="illustration-fill-primary" cx="217" cy="276" r="35" />
-                <circle class="illustration-fill-secondary" cx="217" cy="276" r="22" />
-                <circle class="illustration-fill-background" cx="225" cy="267" r="7" />
-                <rect class="illustration-fill-background" x="137" y="227" width="22" height="10" rx="3" />
-                <circle class="illustration-fill-highlight" cx="283" cy="233" r="6" />
-            </g>
-            <path class="illustration-spark" d="M69 228v20m-10-10h20m287 51v24m-12-12h24M276 51v16m-8-8h16" stroke-width="3" stroke-linecap="round" />
-        </svg>
-        <span class="hero-art-caption">@Text["Home.ArtCaption"]</span>
-    </div>
+    <partial name="_HeroListingShowcase" model="Model.PopularListings" />
 </section>
 
 <section class="home-categories page-section" aria-labelledby="categories-heading">
@@ -96,7 +66,9 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/listing-scroller.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/hero-listing-showcase.css" asp-append-version="true" />
 }
 @section Scripts {
     <script src="~/js/listing-scroller.js" asp-append-version="true" defer></script>
+    <script src="~/js/hero-listing-showcase.js" asp-append-version="true" defer></script>
 }

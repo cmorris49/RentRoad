@@ -1,0 +1,65 @@
+@using RentRoad.ViewModels.Listings
+@model IReadOnlyList<ListingSummaryViewModel>
+@{
+    var listings = Model.Take(10).ToArray();
+}
+<section class="hero-showcase" data-hero-showcase data-count="@listings.Length"
+         aria-label="@Text["Home.Showcase.Description"]">
+    @if (listings.Length == 0)
+    {
+        <div class="hero-showcase-empty">
+            <p>@Text["Listing.NonePublished"]</p>
+            <a asp-controller="Listings" asp-action="Index">@Text["Home.BrowseRentals"] <span aria-hidden="true">→</span></a>
+        </div>
+    }
+    else
+    {
+        <div class="hero-showcase-stage" data-showcase-stage>
+            @for (var index = 0; index < listings.Length; index++)
+            {
+                var listing = listings[index];
+                var title = string.IsNullOrWhiteSpace(listing.Title) ? Text["Listing.Untitled"].Value : listing.Title;
+                var photo = listing.GalleryPhotos.FirstOrDefault();
+                var imageUrl = photo?.Url ?? (listing.CoverImage is null ? null
+                    : Url.Action("Get", "ListingImageContent", new { listingId = listing.ListingId, imageId = listing.CoverImage.ListingImageId }));
+                var visible = index < 2 || index == listings.Length - 1;
+                var position = index == 0 ? "centre" : index == 1 ? "left" : visible ? "right" : "incoming";
+                <a class="hero-showcase-card" asp-controller="Listings" asp-action="Details" asp-route-id="@listing.ListingId"
+                   data-showcase-card data-position="@position" hidden="@(!visible)" aria-hidden="@(!visible ? "true" : null)" tabindex="@(!visible ? "-1" : null)">
+                    <div class="hero-showcase-image">
+                        <span class="listing-image-fallback" data-image-fallback aria-hidden="@(imageUrl is not null ? "true" : null)">@Text[imageUrl is null ? "Gallery.Empty" : "Gallery.Unavailable"]</span>
+                        @if (imageUrl is not null)
+                        {
+                            <img src="@(visible ? imageUrl : null)" data-showcase-src="@imageUrl" data-showcase-image
+                                 alt="@(photo?.AltText ?? listing.CoverImage?.AltText ?? title)" width="400" height="300"
+                                 loading="lazy" decoding="async" />
+                        }
+                    </div>
+                    <div class="hero-showcase-body">
+                        <h2>@title</h2>
+                        <p><span class="listing-card-price">@listing.DailyPrice.FormattedAmount</span> <span class="listing-card-meta">@Text["Listing.PerDay"]</span></p>
+                    </div>
+                </a>
+            }
+        </div>
+        @if (listings.Length >= 3)
+        {
+            <div class="hero-showcase-controls" data-showcase-controls hidden>
+                <button class="hero-showcase-control" type="button" data-showcase-previous
+                        aria-label="@Text["Home.Showcase.Previous"]" title="@Text["Home.Showcase.Previous"]">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14 6-6 6 6 6" /></svg>
+                </button>
+                <button class="hero-showcase-control" type="button" data-showcase-toggle aria-pressed="false"
+                        aria-label="@Text["Home.Showcase.Pause"]" title="@Text["Home.Showcase.Pause"]"
+                        data-pause-label="@Text["Home.Showcase.Pause"]" data-play-label="@Text["Home.Showcase.Play"]">
+                    <svg viewBox="0 0 24 24" data-showcase-pause-icon aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12" /></svg>
+                    <svg viewBox="0 0 24 24" data-showcase-play-icon hidden aria-hidden="true" focusable="false"><path d="m9 5 11 7-11 7Z" /></svg>
+                </button>
+                <button class="hero-showcase-control" type="button" data-showcase-next
+                        aria-label="@Text["Home.Showcase.Next"]" title="@Text["Home.Showcase.Next"]">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m10 6 6 6-6 6" /></svg>
+                </button>
+            </div>
+        }
+    }
+</section>
