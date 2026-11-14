@@ -82,6 +82,38 @@
     margin: .35rem 0 1.5rem;
 }
 
+.details-page ::deep .listing-review-badge {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    width: fit-content;
+    margin: 0 0 1.5rem;
+    padding: .65rem .85rem;
+    border: 1px solid var(--rr-border);
+    border-radius: 999px;
+    color: var(--rr-text);
+    background: var(--rr-surface-muted);
+    font-size: .875rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.details-page ::deep .listing-review-badge:hover {
+    border-color: var(--rr-accent);
+    color: var(--rr-text);
+}
+
+.details-page ::deep .listing-review-badge:focus-visible {
+    outline: 3px solid var(--rr-focus);
+    outline-offset: 3px;
+}
+
+.details-page ::deep .listing-review-badge-stars {
+    color: var(--rr-accent);
+    letter-spacing: .08em;
+    white-space: nowrap;
+}
+
 .details-page ::deep .request-heading {
     display: flex;
     align-items: center;
@@ -122,5 +154,10 @@
 @media (max-width: 575.98px) {
     .details-page ::deep .rental-summary > .btn {
         width: 100%;
+    }
+
+    .details-page ::deep .listing-review-badge {
+        width: 100%;
+        justify-content: center;
     }
 }

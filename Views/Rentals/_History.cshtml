@@ -133,14 +133,27 @@
                                     <input type="hidden" name="RentalRequestId" value="@rental.RentalRequestId" />
                                     <input type="hidden" name="returnUrl" value="@Url.Action(Model.IsIncoming ? "Incoming" : "Mine", "Rentals", new { pageNumber = Model.PageNumber, pageSize = Model.PageSize })" />
                                     <div class="mb-2">
-                                        <label class="form-label" for="review-rating-@rental.RentalRequestId">@Text["Review.RatingLabel"]</label>
-                                        <select class="form-select" id="review-rating-@rental.RentalRequestId" name="Rating" required>
-                                            <option value="">@Text["Review.RatingPlaceholder"]</option>
-                                            @for (var rating = 5; rating >= 1; rating--)
+                                        <fieldset class="review-rating-options">
+                                            <legend class="form-label">@Text["Review.RatingLabel"]</legend>
+                                            @for (var rating = 1; rating <= 5; rating++)
                                             {
-                                                <option value="@rating">@Text["Review.RatingOption", rating]</option>
+                                                <label class="review-rating-option" for="review-rating-@rental.RentalRequestId-@rating">
+                                                    <input id="review-rating-@rental.RentalRequestId-@rating" type="radio" name="Rating" value="@rating" required />
+                                                    <span class="review-stars" aria-hidden="true">
+                                                        @for (var starPosition = 1; starPosition <= 5; starPosition++)
+                                                        {
+                                                            var starClass = starPosition == rating
+                                                                ? "review-star review-star-selected"
+                                                                : starPosition < rating
+                                                                    ? "review-star review-star-filled"
+                                                                    : "review-star review-star-empty";
+                                                            <span class="@starClass">@(starPosition <= rating ? "★" : "☆")</span>
+                                                        }
+                                                    </span>
+                                                    <span class="visually-hidden">@Text["Review.RatingOption", rating]</span>
+                                                </label>
                                             }
-                                        </select>
+                                        </fieldset>
                                     </div>
                                     <div class="mb-2">
                                         <label class="form-label" for="review-comment-@rental.RentalRequestId">@Text["Review.CommentLabel"]</label>
@@ -151,11 +164,43 @@
                             }
                             else if (!Model.IsIncoming && rental.ReviewRating is int reviewRating)
                             {
-                                <p class="form-text mb-0">@Text["Review.Submitted", reviewRating]</p>
-                                @if (!string.IsNullOrWhiteSpace(rental.ReviewComment))
-                                {
-                                    <p class="form-text mb-0">@rental.ReviewComment</p>
-                                }
+                                <form asp-controller="Reviews" asp-action="Update" method="post" class="rental-review-form">
+                                    <input type="hidden" name="RentalRequestId" value="@rental.RentalRequestId" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action("Mine", "Rentals", new { pageNumber = Model.PageNumber, pageSize = Model.PageSize })" />
+                                    <div class="mb-2">
+                                        <fieldset class="review-rating-options">
+                                            <legend class="form-label">@Text["Review.RatingLabel"]</legend>
+                                            @for (var rating = 1; rating <= 5; rating++)
+                                            {
+                                                <label class="review-rating-option" for="review-rating-@rental.RentalRequestId-@rating">
+                                                    <input id="review-rating-@rental.RentalRequestId-@rating" type="radio" name="Rating" value="@rating" checked="@(rating == reviewRating)" required />
+                                                    <span class="review-stars" aria-hidden="true">
+                                                        @for (var starPosition = 1; starPosition <= 5; starPosition++)
+                                                        {
+                                                            var starClass = starPosition == rating
+                                                                ? "review-star review-star-selected"
+                                                                : starPosition < rating
+                                                                    ? "review-star review-star-filled"
+                                                                    : "review-star review-star-empty";
+                                                            <span class="@starClass">@(starPosition <= rating ? "★" : "☆")</span>
+                                                        }
+                                                    </span>
+                                                    <span class="visually-hidden">@Text["Review.RatingOption", rating]</span>
+                                                </label>
+                                            }
+                                        </fieldset>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label" for="review-comment-@rental.RentalRequestId">@Text["Review.CommentLabel"]</label>
+                                        <textarea class="form-control" id="review-comment-@rental.RentalRequestId" name="Comment" rows="3" maxlength="2000">@rental.ReviewComment</textarea>
+                                    </div>
+                                    <button class="btn btn-primary" type="submit">@Text["Review.Edit"]</button>
+                                </form>
+                                <form asp-controller="Reviews" asp-action="Delete" method="post" class="rental-review-delete-form">
+                                    <input type="hidden" name="RentalRequestId" value="@rental.RentalRequestId" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action("Mine", "Rentals", new { pageNumber = Model.PageNumber, pageSize = Model.PageSize })" />
+                                    <button class="btn btn-outline-danger" type="submit">@Text["Review.Delete"]</button>
+                                </form>
                             }
                         </div>
                     </div>

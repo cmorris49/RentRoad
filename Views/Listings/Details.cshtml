@@ -46,6 +46,18 @@
             <section class="card rental-summary" aria-labelledby="request-heading">
                 <p class="rental-price"><span>@Model.DailyPrice.FormattedAmount</span> <span class="rental-price-unit">@Text["Listing.PerDay"]</span></p>
                 <p class="rental-currency">@Text["ListingDetails.CadPriceHelp"]</p>
+                <a class="listing-review-badge" href="#reviews-heading" aria-label="@(Model.AverageRating is double rating ? Text["ListingDetails.ReviewSummary", rating, Model.Reviews.Count] : Text["ListingDetails.NoReviews"])" aria-describedby="reviews-heading">
+                    @if (Model.AverageRating is double badgeRating)
+                    {
+                        <span class="listing-review-badge-stars" aria-hidden="true">@(new string('★', (int)Math.Round(badgeRating)))</span>
+                        <span>@Text["ListingDetails.ReviewSummary", badgeRating, Model.Reviews.Count]</span>
+                    }
+                    else
+                    {
+                        <span class="listing-review-badge-stars" aria-hidden="true">☆</span>
+                        <span>@Text["ListingDetails.NoReviews"]</span>
+                    }
+                </a>
                 <div class="request-heading"><h2 id="request-heading" class="h5">@Text["ListingDetails.RequestToRent"]</h2></div>
                 @if (Model.IsOwnedByViewer)
                 {

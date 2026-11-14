@@ -72,6 +72,71 @@ public sealed class ReviewsController : Controller
     }
 
     /// <summary>
+    /// Updates a renter's review and redirects back to the supplied local history URL.
+    /// </summary>
+    /// <param name="submission">The updated review data.</param>
+    /// <param name="returnUrl">The optional local history URL to return to.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A redirect for browser forms or a structured operation failure.</returns>
+    [Authorize]
+    [HttpPost("update")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateAsync(
+        [FromForm] ReviewSubmission submission,
+        [FromForm] string? returnUrl = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var result = await reviewService.UpdateAsync(User, submission, cancellationToken);
+        if (result.Status == ReviewServiceStatus.Success && IsLocalReturnUrl(returnUrl))
+        {
+            TempData["RentalManagementFeedback"] = SharedResource.Get("Review.UpdateSucceeded");
+            return LocalRedirect(returnUrl!);
+        }
+
+        if (result.Status == ReviewServiceStatus.Success && result.Value is not null)
+        {
+            return Json(new { review = result.Value });
+        }
+
+        return ReviewFailure(result);
+    }
+
+    /// <summary>
+    /// Deletes a renter's review and redirects back to the supplied local history URL.
+    /// </summary>
+    /// <param name="rentalRequestId">The completed rental request associated with the review.</param>
+    /// <param name="returnUrl">The optional local history URL to return to.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>A redirect for browser forms or a structured operation failure.</returns>
+    [Authorize]
+    [HttpPost("delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAsync(
+        [FromForm] int rentalRequestId,
+        [FromForm] string? returnUrl = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await reviewService.DeleteAsync(User, rentalRequestId, cancellationToken);
+        if (result.Status == ReviewServiceStatus.Success && IsLocalReturnUrl(returnUrl))
+        {
+            TempData["RentalManagementFeedback"] = SharedResource.Get("Review.DeleteSucceeded");
+            return LocalRedirect(returnUrl!);
+        }
+
+        if (result.Status == ReviewServiceStatus.Success)
+        {
+            return NoContent();
+        }
+
+        return ReviewFailure(result);
+    }
+
+    /// <summary>
     /// Returns the aggregated review summary for the requested listing.
     /// </summary>
     /// <param name="listingId">The listing identifier to summarize.</param>
@@ -91,4 +156,26 @@ public sealed class ReviewsController : Controller
         var summary = await reviewSummaryService.GetSummaryAsync(listingId, cancellationToken);
         return Json(summary);
     }
+
+    /// <summary>
+    /// Determines whether the supplied return path stays within the application.
+    /// </summary>
+    /// <param name="returnUrl">The path supplied by the browser form.</param>
+    /// <returns>True when the path is local.</returns>
+    private bool IsLocalReturnUrl(string? returnUrl) => !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl);
+
+    /// <summary>
+    /// Converts a review service failure into an HTTP response.
+    /// </summary>
+    /// <param name="result">The review operation result.</param>
+    /// <returns>The corresponding MVC response.</returns>
+    private IActionResult ReviewFailure(ReviewServiceResult result) => result.Status switch
+    {
+        ReviewServiceStatus.Unauthenticated => Challenge(),
+        ReviewServiceStatus.Forbidden => Forbid(),
+        ReviewServiceStatus.NotFound => NotFound(),
+        ReviewServiceStatus.ValidationFailed => BadRequest(result.Errors),
+        ReviewServiceStatus.Conflict => Conflict(result.Errors),
+        _ => StatusCode(StatusCodes.Status503ServiceUnavailable, result.Errors)
+    };
 }

@@ -1,3 +1,60 @@
+.review-rating-options {
+    display: flex;
+    gap: .5rem;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.review-rating-options legend {
+    float: left;
+    width: 100%;
+    margin-bottom: .35rem;
+}
+
+.review-rating-option {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.review-rating-option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.review-rating-option:focus-within .review-stars {
+    outline: 3px solid var(--rr-focus);
+    outline-offset: 3px;
+}
+
+.review-stars {
+    display: inline-flex;
+    gap: .1rem;
+    padding: .25rem;
+    color: var(--rr-muted);
+    font-size: 1.35rem;
+    line-height: 1;
+    letter-spacing: 0;
+}
+
+.review-star {
+    display: inline-block;
+    color: var(--rr-muted);
+}
+
+.review-star-filled {
+    color: var(--rr-accent);
+}
+
+.review-star-selected {
+    color: var(--rr-accent);
+    transform: scale(1.2);
+    text-shadow: 0 0 0.35rem color-mix(in srgb, var(--rr-accent) 45%, transparent);
+}
 .rental-history-page { max-width: 1200px; margin-inline: auto; overflow-wrap: anywhere; }
 .rental-history-page .page-header { margin-bottom: 1.5rem; }
 .rental-history-navigation { display: flex; flex-wrap: wrap; gap: .5rem; border-bottom: 1px solid var(--rr-border); margin-bottom: 1.5rem; padding-bottom: .75rem; }

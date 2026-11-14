@@ -43,6 +43,74 @@ public sealed class ReviewService : IReviewService
         SubmitAsync(user, submission, cancellationToken);
 
     /// <inheritdoc />
+    public async Task<ReviewServiceResult> UpdateAsync(
+        ClaimsPrincipal? user,
+        ReviewSubmission? submission,
+        CancellationToken cancellationToken = default)
+    {
+        var authorization = await GetOwnedCompletedRequestAsync(user, submission?.RentalRequestId ?? 0, cancellationToken);
+        if (!authorization.IsSuccess)
+        {
+            return authorization.Result!;
+        }
+
+        if (submission is null)
+        {
+            return ReviewServiceResult.Failure(
+                ReviewServiceStatus.ValidationFailed,
+                new ReviewError(string.Empty, "Review.DetailsRequired"));
+        }
+
+        var validationErrors = ValidateSubmission(submission);
+        if (validationErrors.Count > 0)
+        {
+            return ReviewServiceResult.Failure(ReviewServiceStatus.ValidationFailed, validationErrors.ToArray());
+        }
+
+        authorization.Request!.Review!.Rating = submission.Rating;
+        authorization.Request.Review.Comment = string.IsNullOrWhiteSpace(submission.Comment) ? null : submission.Comment.Trim();
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+            return ReviewServiceResult.Success(authorization.Request.Review);
+        }
+        catch (Exception exception) when (exception is DbException or DbUpdateException or RetryLimitExceededException)
+        {
+            logger.LogError(exception, "Review update failed for rental request {RentalRequestId}.", submission.RentalRequestId);
+            return ReviewServiceResult.Failure(ReviewServiceStatus.PersistenceFailed,
+                new ReviewError(nameof(submission.RentalRequestId), "Review.PersistenceFailed"));
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<ReviewServiceResult> DeleteAsync(
+        ClaimsPrincipal? user,
+        int rentalRequestId,
+        CancellationToken cancellationToken = default)
+    {
+        var authorization = await GetOwnedCompletedRequestAsync(user, rentalRequestId, cancellationToken);
+        if (!authorization.IsSuccess)
+        {
+            return authorization.Result!;
+        }
+
+        context.Reviews.Remove(authorization.Request!.Review!);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+            return new ReviewServiceResult(ReviewServiceStatus.Success, null, Array.Empty<ReviewError>());
+        }
+        catch (Exception exception) when (exception is DbException or DbUpdateException or RetryLimitExceededException)
+        {
+            logger.LogError(exception, "Review deletion failed for rental request {RentalRequestId}.", rentalRequestId);
+            return ReviewServiceResult.Failure(ReviewServiceStatus.PersistenceFailed,
+                new ReviewError(nameof(rentalRequestId), "Review.PersistenceFailed"));
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<ReviewServiceResult> SubmitAsync(
         ClaimsPrincipal? user,
         ReviewSubmission? submission,
@@ -180,7 +248,8 @@ public sealed class ReviewService : IReviewService
 
         return await context.Reviews
             .Include(review => review.RentalRequest)
-            .Where(review => review.RentalRequest.ListingId == listingId)
+            .Where(review => review.RentalRequest.ListingId == listingId
+                && review.RentalRequest.Status == RentalStatus.Completed)
             .OrderBy(review => review.CreatedAtUtc)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
@@ -248,5 +317,63 @@ public sealed class ReviewService : IReviewService
         }
 
         return errors;
+    }
+
+    /// <summary>
+    /// Loads and authorizes a completed rental request with its existing review.
+    /// </summary>
+    /// <param name="user">The authenticated renter.</param>
+    /// <param name="rentalRequestId">The rental request identifier.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>The authorized request or a structured failure.</returns>
+    private async Task<ReviewAuthorization> GetOwnedCompletedRequestAsync(
+        ClaimsPrincipal? user,
+        int rentalRequestId,
+        CancellationToken cancellationToken)
+    {
+        var userId = user?.Identities.FirstOrDefault(identity => identity.IsAuthenticated)?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return ReviewAuthorization.Failed(ReviewServiceResult.Failure(ReviewServiceStatus.Unauthenticated,
+                new ReviewError(nameof(ReviewSubmission.RentalRequestId), "Review.SignInRequired")));
+        }
+
+        if (rentalRequestId <= 0)
+        {
+            return ReviewAuthorization.Failed(ReviewServiceResult.Failure(ReviewServiceStatus.ValidationFailed,
+                new ReviewError(nameof(ReviewSubmission.RentalRequestId), "Review.InvalidRentalRequestId")));
+        }
+
+        var request = await context.RentalRequests.Include(item => item.Review)
+            .SingleOrDefaultAsync(item => item.RentalRequestId == rentalRequestId, cancellationToken);
+
+        if (request is null)
+        {
+            return ReviewAuthorization.Failed(ReviewServiceResult.Failure(ReviewServiceStatus.NotFound,
+                new ReviewError(nameof(ReviewSubmission.RentalRequestId), "Review.RentalRequestNotFound")));
+        }
+
+        if (!string.Equals(request.RenterId, userId, StringComparison.Ordinal))
+        {
+            return ReviewAuthorization.Failed(ReviewServiceResult.Failure(ReviewServiceStatus.Forbidden,
+                new ReviewError(nameof(ReviewSubmission.RentalRequestId), "Review.NotYourRental")));
+        }
+
+        if (request.Status != RentalStatus.Completed || request.Review is null)
+        {
+            return ReviewAuthorization.Failed(ReviewServiceResult.Failure(ReviewServiceStatus.Conflict,
+                new ReviewError(nameof(ReviewSubmission.RentalRequestId), "Review.RentalMustBeCompleted")));
+        }
+
+        return ReviewAuthorization.Succeeded(request);
+    }
+
+    private sealed record ReviewAuthorization(RentalRequest? Request, ReviewServiceResult? Result)
+    {
+        public bool IsSuccess => Request is not null;
+
+        public static ReviewAuthorization Succeeded(RentalRequest request) => new(request, null);
+
+        public static ReviewAuthorization Failed(ReviewServiceResult result) => new(null, result);
     }
 }

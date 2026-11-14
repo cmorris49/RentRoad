@@ -378,6 +378,18 @@
   <data name="Review.SubmissionSucceeded" xml:space="preserve">
     <value>Your review was submitted successfully.</value>
   </data>
+  <data name="Review.UpdateSucceeded" xml:space="preserve">
+    <value>Your review was updated successfully.</value>
+  </data>
+  <data name="Review.DeleteSucceeded" xml:space="preserve">
+    <value>Your review was deleted successfully.</value>
+  </data>
+  <data name="Review.Edit" xml:space="preserve">
+    <value>Update review</value>
+  </data>
+  <data name="Review.Delete" xml:space="preserve">
+    <value>Delete review</value>
+  </data>
   <data name="Listing.Untitled" xml:space="preserve">
     <value>Rental listing</value>
   </data>

@@ -33,6 +33,30 @@ public interface IReviewService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Updates a review while its originating rental remains completed and owned by the renter.
+    /// </summary>
+    /// <param name="user">The authenticated renter updating the review.</param>
+    /// <param name="submission">The updated rating and comment.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>The review result containing the updated review or structured errors.</returns>
+    Task<ReviewServiceResult> UpdateAsync(
+        ClaimsPrincipal? user,
+        ReviewSubmission? submission,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a review while its originating rental remains completed and owned by the renter.
+    /// </summary>
+    /// <param name="user">The authenticated renter deleting the review.</param>
+    /// <param name="rentalRequestId">The completed rental request associated with the review.</param>
+    /// <param name="cancellationToken">The token used to cancel the operation.</param>
+    /// <returns>The operation result containing any structured errors.</returns>
+    Task<ReviewServiceResult> DeleteAsync(
+        ClaimsPrincipal? user,
+        int rentalRequestId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Determines whether the authenticated renter is allowed to review the specified rental request.
     /// </summary>
     /// <param name="rentalRequestId">The rental request identifier to evaluate.</param>
