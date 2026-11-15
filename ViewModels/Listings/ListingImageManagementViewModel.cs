@@ -56,7 +56,7 @@ public sealed class ListingImageManagementViewModel : ListingImageUploadViewMode
     public string MaxImageSizeLabel => MaxImageSizeBytes >= 1024 * 1024
         ? SharedResource.Get("ListingImages.SizeMiB", MaxImageSizeBytes / (1024m * 1024m))
         : SharedResource.Get("ListingImages.SizeBytes", MaxImageSizeBytes);
-    public bool CanEdit => Status != ListingStatus.Archived;
+    public bool CanEdit => true;
     public bool CanDeleteImages => CanEdit && (Images.Count > 1 || Status is not (ListingStatus.Published or ListingStatus.Unavailable));
     public IReadOnlyList<ListingManagedImageViewModel> Images { get; }
     public IReadOnlyList<int> ImageIds { get; }

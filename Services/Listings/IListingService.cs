@@ -17,6 +17,14 @@ namespace RentRoad.Services.Listings;
 public interface IListingService
 {
     /// <summary>
+    /// Permanently deletes an owned listing only when photos and protected history are absent.
+    /// </summary>
+    /// <param name="listingId">The existing listing identifier.</param>
+    /// <param name="user">The authenticated owner principal.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The deletion result or the reason deletion is blocked.</returns>
+    Task<ListingServiceResult<bool>> DeleteAsync(int listingId, ClaimsPrincipal? user, CancellationToken cancellationToken = default);
+    /// <summary>
     /// Checks ownership for presentation using the authenticated principal without exposing Identity IDs or loading
     /// an entity graph.
     /// </summary>

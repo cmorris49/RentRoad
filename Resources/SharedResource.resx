@@ -346,7 +346,7 @@
     <value>Reviews</value>
   </data>
   <data name="ListingDetails.ReviewSummary" xml:space="preserve">
-    <value>{0:0.0} out of 5 from {1} review(s)</value>
+    <value>{0:0.#} out of 5 from {1} reviews</value>
   </data>
   <data name="ListingDetails.NoReviews" xml:space="preserve">
     <value>No reviews yet.</value>
@@ -385,7 +385,7 @@
     <value>Your review was deleted successfully.</value>
   </data>
   <data name="Review.Edit" xml:space="preserve">
-    <value>Update review</value>
+    <value>Edit Review</value>
   </data>
   <data name="Review.Delete" xml:space="preserve">
     <value>Delete review</value>
@@ -697,7 +697,7 @@
     <value>Edit your listing.</value>
   </data>
   <data name="ListingEditor.ArchivedHelp" xml:space="preserve">
-    <value>Archived listings are read-only.</value>
+    <value>This listing is archived and private. You can edit it and publish it again after review.</value>
   </data>
   <data name="ListingEditor.PublishedHelp" xml:space="preserve">
     <value>This listing is public. Saving changes and updating photos or dates updates the live listing.</value>
@@ -1602,4 +1602,43 @@
   <data name="Home.Showcase.Play" xml:space="preserve"><value>Play listing showcase</value></data>
   <data name="Home.Showcase.Previous" xml:space="preserve"><value>Previous listing</value></data>
   <data name="Home.Showcase.Next" xml:space="preserve"><value>Next listing</value></data>
+  <data name="ListingDeletion.Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="ListingDeletion.Prompt" xml:space="preserve"><value>Permanently delete “{0}”? This cannot be undone.</value></data>
+  <data name="ListingDeletion.Confirm" xml:space="preserve"><value>Delete permanently</value></data>
+  <data name="ListingDeletion.ConfirmRequired" xml:space="preserve"><value>Confirm the listing deletion before continuing.</value></data>
+  <data name="ListingDeletion.Succeeded" xml:space="preserve"><value>Your listing was permanently deleted.</value></data>
+  <data name="ListingDeletion.HistoryProtected" xml:space="preserve"><value>This listing has rental, conversation or activity history. Keep it archived to preserve those records.</value></data>
+  <data name="ListingDeletion.RemovePhotos" xml:space="preserve"><value>To delete this listing, archive it if published, then remove its photos in Edit Listing first.</value></data>
+  <data name="ListingDeletion.Unavailable" xml:space="preserve"><value>Deletion could not be completed. Refresh your listings and check for new history or photos before trying again.</value></data>
+  <data name="Review.Leave" xml:space="preserve"><value>Leave Review</value></data>
+  <data name="Review.ChooseRental" xml:space="preserve"><value>Rental to review</value></data>
+  <data name="Review.RentalChoice" xml:space="preserve"><value>Rental #{0}: {1} – {2}</value></data>
+  <data name="Review.DeletePrompt" xml:space="preserve"><value>Delete your review? You can submit a new review for this completed rental afterwards.</value></data>
+  <data name="Review.ConfirmDelete" xml:space="preserve"><value>Confirm Delete Review</value></data>
+  <data name="Review.Unavailable" xml:space="preserve"><value>Your review could not be saved. Your rating and comment are still here. Please try again.</value></data>
+  <data name="Review.InvalidInput" xml:space="preserve"><value>Check this review field and try again.</value></data>
+  <data name="Review.InvalidListingId" xml:space="preserve"><value>Choose a valid listing.</value></data>
+  <data name="Review.InvalidRating" xml:space="preserve"><value>Choose a rating from 1 to 5 stars.</value></data>
+  <data name="Review.CommentTooLong" xml:space="preserve"><value>Keep your review comment to 2,000 characters or fewer.</value></data>
+  <data name="Review.InvalidRentalRequestId" xml:space="preserve"><value>Choose a valid completed rental.</value></data>
+  <data name="Review.DetailsRequired" xml:space="preserve"><value>Enter your review details.</value></data>
+  <data name="Review.NotYourRental" xml:space="preserve"><value>You can only review your own completed rentals for this listing.</value></data>
+  <data name="Review.RentalMustBeCompleted" xml:space="preserve"><value>This rental must be completed and have the appropriate review before you can perform this action.</value></data>
+  <data name="Review.AlreadyExists" xml:space="preserve"><value>You already reviewed this rental. Use Edit Review to update it.</value></data>
+  <data name="Review.RentalRequestNotFound" xml:space="preserve"><value>This rental could not be found.</value></data>
+  <data name="Review.SignInRequired" xml:space="preserve"><value>Sign in to review your completed rental.</value></data>
+  <data name="Review.PersistenceFailed" xml:space="preserve"><value>Your review could not be saved. Please try again.</value></data>
+  <data name="ListingDetails.ReviewSummarySingle" xml:space="preserve"><value>{0:0.#} out of 5 from 1 review</value></data>
+  <data name="Identity.ExternalNotConfigured" xml:space="preserve"><value>External authentication services are not configured yet</value></data>
+  <data name="Identity.LoginHeading" xml:space="preserve"><value>Log in</value></data>
+  <data name="Identity.LocalLogin" xml:space="preserve"><value>Use your RentRoad account.</value></data>
+  <data name="Identity.RememberMe" xml:space="preserve"><value>Remember me</value></data>
+  <data name="Identity.ForgotPassword" xml:space="preserve"><value>Forgot your password?</value></data>
+  <data name="Identity.RegisterLink" xml:space="preserve"><value>Register as a new user</value></data>
+  <data name="Identity.ResendConfirmation" xml:space="preserve"><value>Resend email confirmation</value></data>
+  <data name="Identity.OtherLogin" xml:space="preserve"><value>Use another service to log in.</value></data>
+  <data name="Identity.LoginButton" xml:space="preserve"><value>Log in</value></data>
+  <data name="Common.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="MyListings.Publish" xml:space="preserve"><value>Publish</value></data>
+  <data name="Review.RatingOptionSingle" xml:space="preserve"><value>1 star</value></data>
 </root>

@@ -11,7 +11,7 @@ namespace RentRoad.Controllers;
 /// </summary>
 [Authorize]
 [Route("my/listings")]
-public sealed class MyListingsController : Controller
+public sealed partial class MyListingsController : Controller
 {
     private readonly IListingService listings;
 

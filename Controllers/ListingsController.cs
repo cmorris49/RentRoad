@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RentRoad.Services.Listings;
+using RentRoad.Services.Reviews;
 using RentRoad.Services.Messaging;
 using RentRoad.ViewModels.Listings;
 
@@ -14,16 +15,22 @@ public sealed class ListingsController : Controller
 {
     private readonly IListingService listings;
     private readonly IMessagingService messaging;
+    private readonly IReviewService? reviews;
 
     /// <summary>
     /// Initializes public browsing with the existing listing service.
     /// </summary>
     /// <param name="listings">The service used to retrieve and manage listing information.</param>
     /// <param name="messaging">The service used to authorize and access conversations and messages.</param>
-    public ListingsController(IListingService listings, IMessagingService messaging)
+    /// <param name="reviews">The registered review eligibility service; optional for callers that do not request authenticated review eligibility.</param>
+    public ListingsController(
+        IListingService listings,
+        IMessagingService messaging,
+        IReviewService? reviews = null)
     {
         this.listings = listings;
         this.messaging = messaging;
+        this.reviews = reviews;
     }
 
     /// <summary>
@@ -129,6 +136,8 @@ public sealed class ListingsController : Controller
             "Details",
             ListingDetailsViewModel.FromResult(result.Value!) with
             {
+                EligibleReviewRentals = reviews is null ? Array.Empty<ReviewRentalChoice>()
+                    : await reviews.GetEligibleRentalsAsync(id, User, cancellationToken),
                 ReturnConversationId = returnConversationId,
                 IsOwnedByViewer = await listings.IsOwnedByAsync(id, User, cancellationToken),
                 SimilarListings = similar.Select(ListingSummaryViewModel.FromResult).ToArray()

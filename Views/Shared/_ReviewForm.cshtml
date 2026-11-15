@@ -1,0 +1,55 @@
+@using RentRoad.ViewModels.Reviews
+@model ReviewFormViewModel
+<section id="@Model.PanelId" class="review-panel" data-review-panel hidden="@(!Model.Open)" aria-label="@Text[Model.IsEditing ? "Review.Edit" : "Review.Leave"]">
+    <h3 class="h5">@Text[Model.IsEditing ? "Review.Edit" : "Review.Leave"]</h3>
+    <form asp-controller="Reviews" asp-action="@(Model.IsEditing ? "Update" : "Create")" method="post" data-review-form data-failure-message="@Text["Review.Unavailable"]">
+        <input type="hidden" name="ListingId" value="@Model.ListingId" />
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <div asp-validation-summary="All" class="text-danger" role="alert" data-review-errors></div>
+        @if (Model.Choices.Count > 1)
+        {
+            <label for="@Model.PanelId-rental" class="form-label">@Text["Review.ChooseRental"]</label>
+            <select id="@Model.PanelId-rental" name="RentalRequestId" class="form-select" required>
+                @foreach (var choice in Model.Choices)
+                {
+                    <option value="@choice.RentalRequestId" selected="@(choice.RentalRequestId == Model.RentalRequestId)">@Text["Review.RentalChoice", choice.RentalRequestId, choice.StartDate.ToString("d"), choice.EndDate.AddDays(-1).ToString("d")]</option>
+                }
+            </select>
+        }
+        else
+        {
+            <input type="hidden" name="RentalRequestId" value="@Model.RentalRequestId" />
+        }
+        <fieldset class="review-rating" data-review-rating>
+            <legend class="form-label">@Text["Review.RatingLabel"]</legend>
+            @for (var rating = 1; rating <= 5; rating++)
+            {
+                <label class="review-rating-star" data-rating-value="@rating" for="@Model.PanelId-star-@rating">
+                    <input class="visually-hidden" id="@Model.PanelId-star-@rating" type="radio" name="Rating" value="@rating" checked="@(Model.Rating == rating)" required />
+                    <span aria-hidden="true">★</span>
+                    <span class="visually-hidden">@Text[rating == 1 ? "Review.RatingOptionSingle" : "Review.RatingOption", rating]</span>
+                </label>
+            }
+        </fieldset>
+        <span asp-validation-for="Rating" class="text-danger"></span>
+        <label for="@Model.PanelId-comment" class="form-label">@Text["Review.CommentLabel"]</label>
+        <textarea id="@Model.PanelId-comment" name="Comment" class="form-control" rows="3" maxlength="2000">@Model.Comment</textarea>
+        <span asp-validation-for="Comment" class="text-danger"></span>
+        <div class="review-form-actions">
+            <button class="btn btn-primary" type="submit">@Text[Model.IsEditing ? "Review.Edit" : "Review.Submit"]</button>
+            <a href="@Model.ReturnUrl" class="btn btn-outline-primary" data-review-cancel>@Text["Common.Cancel"]</a>
+        </div>
+    </form>
+    @if (Model.IsEditing)
+    {
+        <details class="review-delete">
+            <summary class="btn btn-outline-danger">@Text["Review.Delete"]</summary>
+            <form asp-controller="Reviews" asp-action="Delete" method="post" data-review-delete>
+                <p>@Text["Review.DeletePrompt"]</p>
+                <input type="hidden" name="rentalRequestId" value="@Model.RentalRequestId" />
+                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                <button class="btn btn-outline-danger" type="submit">@Text["Review.ConfirmDelete"]</button>
+            </form>
+        </details>
+    }
+</section>

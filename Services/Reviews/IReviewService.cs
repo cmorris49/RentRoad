@@ -9,6 +9,38 @@ namespace RentRoad.Services.Reviews;
 public interface IReviewService
 {
     /// <summary>
+    /// Checks public visibility before exposing a listing's review summary.
+    /// </summary>
+    /// <param name="listingId">The selected listing.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Whether the listing is Published.</returns>
+    Task<bool> IsPublishedAsync(int listingId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves only the authenticated renter's eligible unreviewed Completed rentals for a public listing.
+    /// </summary>
+    /// <param name="listingId">The public listing.</param>
+    /// <param name="user">The authenticated principal.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The eligible rental choices.</returns>
+    Task<IReadOnlyList<ReviewRentalChoice>> GetEligibleRentalsAsync(
+        int listingId,
+        ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves editable review fields only for an authenticated renter's Completed rental.
+    /// </summary>
+    /// <param name="rentalRequestId">The selected rental.</param>
+    /// <param name="user">The authenticated principal.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The safe editor data, or null for missing or unauthorized rentals.</returns>
+    Task<ReviewEditorData?> GetEditorAsync(
+        int rentalRequestId,
+        ClaimsPrincipal? user,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Stores a renter review for a completed rental request when authorization and business rules allow it.
     /// </summary>
     /// <param name="user">The authenticated user submitting the review.</param>

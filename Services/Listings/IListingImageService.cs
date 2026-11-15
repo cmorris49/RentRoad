@@ -9,7 +9,7 @@ namespace RentRoad.Services.Listings;
 /// </summary>
 /// <remarks>
 /// Callers pass the trusted Identity principal. Returned entities are detached service data, not MVC form models.
-/// Save pending listing changes and finish caller transactions before mutations. Archived listings are read-only.
+/// Save pending listing changes and finish caller transactions before mutations. Archived listings remain editable by their owner.
 /// CleanupPending on deletion includes a value confirming metadata removal; it must not be reported as a complete rollback.
 /// </remarks>
 public interface IListingImageService

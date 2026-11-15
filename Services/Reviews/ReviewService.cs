@@ -13,7 +13,7 @@ namespace RentRoad.Services.Reviews;
 /// <summary>
 /// Creates renter reviews for completed rentals and provides aggregate review summaries.
 /// </summary>
-public sealed class ReviewService : IReviewService
+public sealed partial class ReviewService : IReviewService
 {
     private readonly ApplicationDbContext context;
     private readonly TimeProvider timeProvider;
@@ -48,36 +48,43 @@ public sealed class ReviewService : IReviewService
         ReviewSubmission? submission,
         CancellationToken cancellationToken = default)
     {
-        var authorization = await GetOwnedCompletedRequestAsync(user, submission?.RentalRequestId ?? 0, cancellationToken);
-        if (!authorization.IsSuccess)
-        {
-            return authorization.Result!;
-        }
-
-        if (submission is null)
-        {
-            return ReviewServiceResult.Failure(
-                ReviewServiceStatus.ValidationFailed,
-                new ReviewError(string.Empty, "Review.DetailsRequired"));
-        }
-
-        var validationErrors = ValidateSubmission(submission);
-        if (validationErrors.Count > 0)
-        {
-            return ReviewServiceResult.Failure(ReviewServiceStatus.ValidationFailed, validationErrors.ToArray());
-        }
-
-        authorization.Request!.Review!.Rating = submission.Rating;
-        authorization.Request.Review.Comment = string.IsNullOrWhiteSpace(submission.Comment) ? null : submission.Comment.Trim();
-
         try
         {
+            var authorization = await GetOwnedCompletedRequestAsync(user, submission?.RentalRequestId ?? 0, cancellationToken);
+
+            if (!authorization.IsSuccess)
+            {
+                return authorization.Result!;
+            }
+
+            if (submission is null)
+            {
+                return ReviewServiceResult.Failure(
+                    ReviewServiceStatus.ValidationFailed,
+                    new ReviewError(string.Empty, "Review.DetailsRequired"));
+            }
+
+            var validationErrors = ValidateSubmission(submission);
+
+            if (validationErrors.Count > 0)
+            {
+                return ReviewServiceResult.Failure(ReviewServiceStatus.ValidationFailed, validationErrors.ToArray());
+            }
+
+            if (submission.ListingId.HasValue && submission.ListingId != authorization.Request!.ListingId)
+            {
+                return ReviewServiceResult.Failure(ReviewServiceStatus.Forbidden, new ReviewError("ListingId", "Review.NotYourRental"));
+            }
+
+            authorization.Request!.Review!.Rating = submission.Rating;
+            authorization.Request.Review.Comment = string.IsNullOrWhiteSpace(submission.Comment) ? null : submission.Comment.Trim();
+
             await context.SaveChangesAsync(cancellationToken);
             return ReviewServiceResult.Success(authorization.Request.Review);
         }
         catch (Exception exception) when (exception is DbException or DbUpdateException or RetryLimitExceededException)
         {
-            logger.LogError(exception, "Review update failed for rental request {RentalRequestId}.", submission.RentalRequestId);
+            logger.LogError(exception, "Review update failed for rental request {RentalRequestId}.", submission?.RentalRequestId);
             return ReviewServiceResult.Failure(ReviewServiceStatus.PersistenceFailed,
                 new ReviewError(nameof(submission.RentalRequestId), "Review.PersistenceFailed"));
         }
@@ -89,16 +96,17 @@ public sealed class ReviewService : IReviewService
         int rentalRequestId,
         CancellationToken cancellationToken = default)
     {
-        var authorization = await GetOwnedCompletedRequestAsync(user, rentalRequestId, cancellationToken);
-        if (!authorization.IsSuccess)
-        {
-            return authorization.Result!;
-        }
-
-        context.Reviews.Remove(authorization.Request!.Review!);
-
         try
         {
+            var authorization = await GetOwnedCompletedRequestAsync(user, rentalRequestId, cancellationToken);
+
+            if (!authorization.IsSuccess)
+            {
+                return authorization.Result!;
+            }
+
+            context.Reviews.Remove(authorization.Request!.Review!);
+
             await context.SaveChangesAsync(cancellationToken);
             return new ReviewServiceResult(ReviewServiceStatus.Success, null, Array.Empty<ReviewError>());
         }
@@ -143,6 +151,7 @@ public sealed class ReviewService : IReviewService
         {
             var request = await context.RentalRequests
                 .Include(request => request.Review)
+                .Include(request => request.Listing)
                 .SingleOrDefaultAsync(request => request.RentalRequestId == submission.RentalRequestId, cancellationToken);
 
             if (request is null)
@@ -152,7 +161,8 @@ public sealed class ReviewService : IReviewService
                     new ReviewError(nameof(submission.RentalRequestId), "Review.RentalRequestNotFound"));
             }
 
-            if (!string.Equals(request.RenterId, userId, StringComparison.Ordinal))
+            if (!string.Equals(request.RenterId, userId, StringComparison.Ordinal) || request.Listing.OwnerId == userId
+                || submission.ListingId.HasValue && request.ListingId != submission.ListingId.Value)
             {
                 return ReviewServiceResult.Failure(
                     ReviewServiceStatus.Forbidden,
@@ -205,27 +215,8 @@ public sealed class ReviewService : IReviewService
         ClaimsPrincipal? user,
         CancellationToken cancellationToken = default)
     {
-        if (rentalRequestId <= 0)
-        {
-            return false;
-        }
-
-        var userId = user?.Identities.FirstOrDefault(identity => identity.IsAuthenticated)?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return false;
-        }
-
-        var request = await context.RentalRequests
-            .Include(request => request.Review)
-            .SingleOrDefaultAsync(request => request.RentalRequestId == rentalRequestId, cancellationToken);
-
-        if (request is null || !string.Equals(request.RenterId, userId, StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        return request.Status == RentalStatus.Completed && request.Review is null;
+        var editor = await GetEditorAsync(rentalRequestId, user, cancellationToken);
+        return editor is not null && editor.Rating is null;
     }
 
     /// <inheritdoc />
@@ -306,6 +297,11 @@ public sealed class ReviewService : IReviewService
             errors.Add(new ReviewError(nameof(submission.RentalRequestId), "Review.InvalidRentalRequestId"));
         }
 
+        if (submission.ListingId is <= 0)
+        {
+            errors.Add(new ReviewError(nameof(submission.ListingId), "Review.InvalidListingId"));
+        }
+
         if (submission.Rating is < 1 or > 5)
         {
             errors.Add(new ReviewError(nameof(submission.Rating), "Review.InvalidRating"));
@@ -344,7 +340,7 @@ public sealed class ReviewService : IReviewService
                 new ReviewError(nameof(ReviewSubmission.RentalRequestId), "Review.InvalidRentalRequestId")));
         }
 
-        var request = await context.RentalRequests.Include(item => item.Review)
+        var request = await context.RentalRequests.Include(item => item.Review).Include(item => item.Listing)
             .SingleOrDefaultAsync(item => item.RentalRequestId == rentalRequestId, cancellationToken);
 
         if (request is null)
@@ -353,7 +349,7 @@ public sealed class ReviewService : IReviewService
                 new ReviewError(nameof(ReviewSubmission.RentalRequestId), "Review.RentalRequestNotFound")));
         }
 
-        if (!string.Equals(request.RenterId, userId, StringComparison.Ordinal))
+        if (!string.Equals(request.RenterId, userId, StringComparison.Ordinal) || request.Listing.OwnerId == userId)
         {
             return ReviewAuthorization.Failed(ReviewServiceResult.Failure(ReviewServiceStatus.Forbidden,
                 new ReviewError(nameof(ReviewSubmission.RentalRequestId), "Review.NotYourRental")));
@@ -372,8 +368,18 @@ public sealed class ReviewService : IReviewService
     {
         public bool IsSuccess => Request is not null;
 
+        /// <summary>
+        /// Wraps an authorized completed rental.
+        /// </summary>
+        /// <param name="request">The authorized rental.</param>
+        /// <returns>The successful authorization.</returns>
         public static ReviewAuthorization Succeeded(RentalRequest request) => new(request, null);
 
+        /// <summary>
+        /// Wraps a structured authorization failure.
+        /// </summary>
+        /// <param name="result">The failure result.</param>
+        /// <returns>The failed authorization.</returns>
         public static ReviewAuthorization Failed(ReviewServiceResult result) => new(null, result);
     }
 }

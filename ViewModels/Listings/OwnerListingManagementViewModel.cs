@@ -27,7 +27,9 @@ public sealed record OwnerListingSummaryViewModel(int ListingId, string? Title, 
 {
     public ListingImageViewModel? CoverImage { get; init; }
 
-    public bool CanEdit => Status != ListingStatus.Archived;
+    public bool CanEdit => true;
+    public string? DeletionRestriction { get; init; }
+    public bool CanDelete => DeletionRestriction is null;
 
     /// <summary>
     /// Maps only listing-management display fields while reusing exact CAD price presentation.
@@ -36,6 +38,9 @@ public sealed record OwnerListingSummaryViewModel(int ListingId, string? Title, 
         listing.PickupArea, listing.DailyPriceCents.HasValue ? new ListingPriceViewModel(listing.DailyPriceCents.Value) : null,
         listing.Status, listing.CreatedAtUtc, listing.UpdatedAtUtc, listing.PublishedAtUtc)
         {
+            DeletionRestriction = listing.RentalRequests.Count > 0 || listing.Conversations.Count > 0 || listing.Activities.Count > 0
+                ? SharedResource.Get("ListingDeletion.HistoryProtected") : listing.Images.Count > 0
+                    ? SharedResource.Get("ListingDeletion.RemovePhotos") : null,
             CoverImage = listing.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.DisplayOrder)
                 .ThenBy(image => image.ListingImageId).Select(image => new ListingImageViewModel(image.ListingImageId,
                     image.ContentType, image.AltText, image.DisplayOrder, image.IsPrimary)).FirstOrDefault()

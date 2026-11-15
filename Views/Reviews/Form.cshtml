@@ -1,0 +1,12 @@
+@model RentRoad.ViewModels.Reviews.ReviewFormViewModel
+@{
+    ViewData["Title"] = Text[Model.IsEditing ? "Review.Edit" : "Review.Leave"];
+}
+<h1>@ViewData["Title"]</h1>
+<partial name="_ReviewForm" model="Model" />
+@section Styles {
+    <link rel="stylesheet" href="~/css/review-forms.css" asp-append-version="true" />
+}
+@section Scripts {
+    <script src="~/js/review-forms.js" asp-append-version="true" defer></script>
+}

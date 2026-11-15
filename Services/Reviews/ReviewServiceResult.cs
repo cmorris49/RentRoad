@@ -42,9 +42,9 @@ public sealed record ReviewServiceResult(
     IReadOnlyList<ReviewError> Errors)
 {
     /// <summary>
-    /// Indicates whether the operation succeeded and returned a persisted review.
+    /// Indicates whether the operation succeeded, including deletion without a returned review.
     /// </summary>
-    public bool IsSuccess => Status == ReviewServiceStatus.Success && Value is not null;
+    public bool IsSuccess => Status == ReviewServiceStatus.Success;
 
     /// <summary>
     /// Creates a successful review result with the stored review entity.

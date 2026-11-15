@@ -535,7 +535,7 @@ public sealed partial class ListingService
     }
 
     /// <summary>
-    /// Reuses listing ownership checks and prevents availability edits to archived listings.
+    /// Reuses listing ownership checks for private and public availability management.
     /// </summary>
     /// <param name="listingId">The identifier of the listing being processed.</param>
     /// <param name="user">The Identity principal supplied by the application boundary.</param>
@@ -548,7 +548,7 @@ public sealed partial class ListingService
     {
         var owned = await GetOwnedListingAsync(listingId, user, cancellationToken);
 
-        return owned.IsSuccess && owned.Value!.Status == ListingStatus.Archived ? ArchivedFailure() : owned;
+        return owned;
     }
 
     /// <summary>
@@ -616,7 +616,7 @@ public sealed partial class ListingService
             }
         }
 
-        if (status != ListingStatus.Draft && windows.Count == 0)
+        if (status is ListingStatus.Published or ListingStatus.Unavailable && windows.Count == 0)
         {
             return ListingServiceResult<bool>.Failure(
                 ListingServiceStatus.ValidationFailed,

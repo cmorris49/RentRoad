@@ -211,11 +211,6 @@ public sealed partial class ListingService : IListingService
 
         var listing = owned.Value!;
 
-        if (listing.Status == ListingStatus.Archived)
-        {
-            return ArchivedFailure();
-        }
-
         if (details is null)
         {
             return ListingServiceResult<Listing>.Failure(
@@ -234,7 +229,7 @@ public sealed partial class ListingService : IListingService
         };
 
         ApplyEditableDetails(details, candidate);
-        var errors = listing.Status == ListingStatus.Draft
+        var errors = listing.Status is ListingStatus.Draft or ListingStatus.Archived
             ? ValidateDraft(candidate, windows)
             : await GetPublicationErrorsAsync(candidate, windows, cancellationToken);
 
@@ -291,12 +286,7 @@ public sealed partial class ListingService : IListingService
             return owned;
         }
 
-        if (owned.Value!.Status == ListingStatus.Archived)
-        {
-            return ArchivedFailure();
-        }
-
-        var errors = await GetPublicationErrorsAsync(owned.Value, null, cancellationToken);
+        var errors = await GetPublicationErrorsAsync(owned.Value!, null, cancellationToken);
 
         return errors.Count == 0
             ? owned
@@ -320,21 +310,16 @@ public sealed partial class ListingService : IListingService
     {
         var owned = await GetOwnedListingAsync(listingId, user, cancellationToken);
 
-        if (!owned.IsSuccess || owned.Value!.Status == ListingStatus.Archived)
+        if (!owned.IsSuccess)
         {
             return ListingServiceResult<bool>.Failure(
-                owned.IsSuccess ? ListingServiceStatus.InvalidState : owned.Status,
-                new ListingValidationError(
-                    string.Empty,
-                    owned.IsSuccess
-                        ? SharedResource.Get("ListingEditor.ArchivedHelp")
-                        : SharedResource.Get("ListingValidation.TheListingIsNotAvailableToThisAccount")));
+                owned.Status, owned.Errors.ToArray());
         }
 
         var candidate = new Listing
         {
             ListingId = listingId,
-            OwnerId = owned.Value.OwnerId,
+            OwnerId = owned.Value!.OwnerId,
             Status = owned.Value.Status
         };
 
@@ -443,6 +428,9 @@ public sealed partial class ListingService : IListingService
             .Include(listing => listing.Images)
             .Include(listing => listing.AvailabilityWindows)
             .Include(listing => listing.AvailabilityBlocks)
+            .Include(listing => listing.RentalRequests)
+            .Include(listing => listing.Conversations)
+            .Include(listing => listing.Activities)
             .AsSplitQuery()
             .OrderByDescending(listing => listing.UpdatedAtUtc)
             .ThenByDescending(listing => listing.ListingId)
@@ -1029,14 +1017,4 @@ public sealed partial class ListingService : IListingService
             && image.SizeBytes > 0
             && image.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>
-    /// Explains why an archived listing cannot be edited or republished.
-    /// </summary>
-    /// <returns>The operation result containing the returned value or structured errors.</returns>
-    private static ListingServiceResult<Listing> ArchivedFailure() =>
-        ListingServiceResult<Listing>.Failure(
-            ListingServiceStatus.InvalidState,
-            new ListingValidationError(
-                nameof(Listing.Status),
-                SharedResource.Get("ListingValidation.ArchivedListingsCannotBeEditedOrPublished")));
 }

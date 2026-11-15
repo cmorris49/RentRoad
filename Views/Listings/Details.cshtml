@@ -1,5 +1,6 @@
 @using Microsoft.AspNetCore.Identity
 @using RentRoad.ViewModels.Listings
+@using RentRoad.ViewModels.Reviews
 @inject SignInManager<ApplicationUser> SignInManager
 @model ListingDetailsViewModel
 @{
@@ -46,11 +47,11 @@
             <section class="card rental-summary" aria-labelledby="request-heading">
                 <p class="rental-price"><span>@Model.DailyPrice.FormattedAmount</span> <span class="rental-price-unit">@Text["Listing.PerDay"]</span></p>
                 <p class="rental-currency">@Text["ListingDetails.CadPriceHelp"]</p>
-                <a class="listing-review-badge" href="#reviews-heading" aria-label="@(Model.AverageRating is double rating ? Text["ListingDetails.ReviewSummary", rating, Model.Reviews.Count] : Text["ListingDetails.NoReviews"])" aria-describedby="reviews-heading">
+                <a class="listing-review-badge" href="#reviews-heading" aria-label="@Model.ReviewSummary" aria-describedby="reviews-heading">
                     @if (Model.AverageRating is double badgeRating)
                     {
                         <span class="listing-review-badge-stars" aria-hidden="true">@(new string('★', (int)Math.Round(badgeRating)))</span>
-                        <span>@Text["ListingDetails.ReviewSummary", badgeRating, Model.Reviews.Count]</span>
+                        <span>@Model.ReviewSummary</span>
                     }
                     else
                     {
@@ -100,12 +101,31 @@
 
     <section class="details-section listing-reviews" aria-labelledby="reviews-heading">
         <p class="eyebrow">@Text["ListingDetails.Reviews"]</p>
-        <h2 id="reviews-heading">@Text["ListingDetails.Reviews"]</h2>
+        @if (TempData["ReviewFeedback"] is string reviewFeedback)
+        {
+            <p class="alert alert-success" role="status">@reviewFeedback</p>
+        }
+        <div class="listing-reviews-heading">
+            <h2 id="reviews-heading">@Text["ListingDetails.Reviews"]</h2>
+            @if (Model.EligibleReviewRentals.Count > 0)
+            {
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Reviews" asp-action="Edit"
+                   asp-route-rentalRequestId="@Model.EligibleReviewRentals[0].RentalRequestId"
+                   asp-route-returnUrl="@(Url.Action("Details", "Listings", new { id = Model.ListingId }) + "#reviews-heading")"
+                   data-review-toggle aria-expanded="false" aria-controls="review-details">@Text["Review.Leave"]</a>
+            }
+        </div>
+        @if (Model.EligibleReviewRentals.Count > 0)
+        {
+            <partial name="_ReviewForm" model='@(new ReviewFormViewModel { RentalRequestId = Model.EligibleReviewRentals[0].RentalRequestId,
+                ListingId = Model.ListingId, Choices = Model.EligibleReviewRentals, PanelId = "review-details",
+                ReturnUrl = Url.Action("Details", "Listings", new { id = Model.ListingId }) + "#reviews-heading" })' />
+        }
         @if (Model.AverageRating is double averageRating)
         {
-            <p class="listing-reviews-summary" aria-label="@Text["ListingDetails.ReviewSummary", averageRating, Model.Reviews.Count]">
+            <p class="listing-reviews-summary" aria-label="@Model.ReviewSummary">
                 <span aria-hidden="true">★★★★★</span>
-                @Text["ListingDetails.ReviewSummary", averageRating, Model.Reviews.Count]
+                @Model.ReviewSummary
             </p>
             <div class="listing-reviews-list">
                 @foreach (var review in Model.Reviews)
@@ -132,11 +152,13 @@
 </div>
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/review-forms.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/public-listing-availability.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/listing-scroller.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/listing-reviews.css" asp-append-version="true" />
 }
 @section Scripts {
+    <script src="~/js/review-forms.js" asp-append-version="true" defer></script>
     <script src="~/js/listing-scroller.js" asp-append-version="true" defer></script>
     <script src="~/js/listing-images.js" asp-append-version="true" defer></script>
 }

@@ -81,13 +81,6 @@ public sealed class ListingImageService : IListingImageService
             return ListingServiceResult<ListingImage>.Failure(owned.Status, owned.Errors.ToArray());
         }
 
-        if (owned.Value!.Status == ListingStatus.Archived)
-        {
-            return Failure<ListingImage>(
-                ListingServiceStatus.InvalidState,
-                SharedResource.Get("ImageFeedback.ArchivedListingsCannotBeEdited"));
-        }
-
         var candidate = new ListingImage
         {
             ListingId = listingId,
@@ -613,7 +606,7 @@ public sealed class ListingImageService : IListingImageService
     private sealed record ImageReference(string ContainerName, string BlobName, string OwnerId, ListingStatus Status);
 
     /// <summary>
-    /// Shares owner and archived-state checks across serializable metadata mutations without invoking blob storage
+    /// Shares owner checks across serializable metadata mutations without invoking blob storage
     /// in retries.
     /// </summary>
     /// <typeparam name="T">The operation's result value type.</typeparam>
@@ -643,19 +636,12 @@ public sealed class ListingImageService : IListingImageService
                         return ListingServiceResult<T>.Failure(owned.Status, owned.Errors.ToArray());
                     }
 
-                    if (owned.Value!.Status == ListingStatus.Archived)
-                    {
-                        return Failure<T>(
-                            ListingServiceStatus.InvalidState,
-                            SharedResource.Get("ImageFeedback.ArchivedListingsCannotBeEdited"));
-                    }
-
                     var images = await database.ListingImages.Where(image => image.ListingId == listingId)
                         .OrderBy(image => image.DisplayOrder)
                         .ThenBy(image => image.ListingImageId)
                         .ToListAsync(token);
 
-                    return await operation(database, owned.Value, images, token);
+                    return await operation(database, owned.Value!, images, token);
                 },
                 cancellationToken);
         }

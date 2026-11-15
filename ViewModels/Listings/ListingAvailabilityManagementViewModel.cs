@@ -113,7 +113,7 @@ public sealed class ListingAvailabilityManagementViewModel : ListingAvailability
     public int ListingId { get; }
     public string? ListingTitle { get; }
     public ListingStatus Status { get; }
-    public bool CanEdit => Status != ListingStatus.Archived;
+    public bool CanEdit => true;
     public IReadOnlyList<OwnerAvailabilityWindowViewModel> AvailabilityWindows { get; }
     public IReadOnlyList<OwnerAvailabilityBlockViewModel> AvailabilityBlocks { get; }
     public IReadOnlyList<ListingAvailabilityWindowInputViewModel> Windows { get; }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RentRoad.Services.Reviews;
+using RentRoad.ViewModels.Reviews;
 
 namespace RentRoad.Controllers;
 
@@ -28,91 +29,70 @@ public sealed class ReviewsController : Controller
     }
 
     /// <summary>
-    /// Submits a review for a completed rental request using the authenticated identity.
+    /// Opens an authorized standalone editor as a progressive fallback for inline review panels.
     /// </summary>
-    /// <param name="submission">The submitted review data.</param>
-    /// <param name="returnUrl">The optional local history URL to return to after a browser form submission.</param>
-    /// <param name="cancellationToken">The token used to cancel the operation.</param>
-    /// <returns>A JSON result for successful review creation or a validation problem otherwise.</returns>
+    /// <param name="rentalRequestId">The renter's Completed rental.</param>
+    /// <param name="returnUrl">The optional local return location.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The safe editor or a privacy-preserving not-found response.</returns>
+    [Authorize]
+    [HttpGet("{rentalRequestId:int}/edit")]
+    public async Task<IActionResult> EditAsync(
+        int rentalRequestId,
+        string? returnUrl = null,
+        CancellationToken cancellationToken = default)
+    {
+        var editor = await reviewService.GetEditorAsync(rentalRequestId, User, cancellationToken);
+
+        return editor is null ? NotFound() : View("Form", new ReviewFormViewModel
+        {
+            RentalRequestId = editor.RentalRequestId,
+            ListingId = editor.ListingId,
+            Rating = editor.Rating,
+            Comment = editor.Comment,
+            IsEditing = editor.Rating.HasValue,
+            Open = true,
+            ReturnUrl = LocalReturn(returnUrl)
+        });
+    }
+
+    /// <summary>
+    /// Creates a renter-authorized review with antiforgery protection and preserved validation input.
+    /// </summary>
+    /// <param name="submission">The explicitly editable review fields and optional listing context.</param>
+    /// <param name="returnUrl">The optional local return location.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A safe JSON result, redirect or populated validation form.</returns>
     [Authorize]
     [HttpPost("create")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateAsync(
+    public Task<IActionResult> CreateAsync(
         [FromForm] ReviewSubmission submission,
         [FromForm] string? returnUrl = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
-
-        var result = await reviewService.CreateAsync(User, submission, cancellationToken);
-
-        if (result.IsSuccess && result.Value is not null)
-        {
-            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                TempData["RentalManagementFeedback"] = SharedResource.Get("Review.SubmissionSucceeded");
-                return LocalRedirect(returnUrl);
-            }
-
-            return Json(new { review = result.Value });
-        }
-
-        return result.Status switch
-        {
-            ReviewServiceStatus.Unauthenticated => Challenge(),
-            ReviewServiceStatus.Forbidden => Forbid(),
-            ReviewServiceStatus.NotFound => NotFound(),
-            ReviewServiceStatus.ValidationFailed => BadRequest(result.Errors),
-            ReviewServiceStatus.Conflict => Conflict(result.Errors),
-            _ => StatusCode(StatusCodes.Status503ServiceUnavailable, result.Errors)
-        };
-    }
+        CancellationToken cancellationToken = default) => SaveAsync(submission, returnUrl, false, cancellationToken);
 
     /// <summary>
-    /// Updates a renter's review and redirects back to the supplied local history URL.
+    /// Updates only the authenticated renter's existing review.
     /// </summary>
-    /// <param name="submission">The updated review data.</param>
-    /// <param name="returnUrl">The optional local history URL to return to.</param>
-    /// <param name="cancellationToken">The token used to cancel the operation.</param>
-    /// <returns>A redirect for browser forms or a structured operation failure.</returns>
+    /// <param name="submission">The editable fields and optional listing context.</param>
+    /// <param name="returnUrl">The optional local return location.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A safe JSON result, redirect or populated validation form.</returns>
     [Authorize]
     [HttpPost("update")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateAsync(
+    public Task<IActionResult> UpdateAsync(
         [FromForm] ReviewSubmission submission,
         [FromForm] string? returnUrl = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
-
-        var result = await reviewService.UpdateAsync(User, submission, cancellationToken);
-        if (result.Status == ReviewServiceStatus.Success && IsLocalReturnUrl(returnUrl))
-        {
-            TempData["RentalManagementFeedback"] = SharedResource.Get("Review.UpdateSucceeded");
-            return LocalRedirect(returnUrl!);
-        }
-
-        if (result.Status == ReviewServiceStatus.Success && result.Value is not null)
-        {
-            return Json(new { review = result.Value });
-        }
-
-        return ReviewFailure(result);
-    }
+        CancellationToken cancellationToken = default) => SaveAsync(submission, returnUrl, true, cancellationToken);
 
     /// <summary>
-    /// Deletes a renter's review and redirects back to the supplied local history URL.
+    /// Deletes only the renter's review; confirmations are collected in the UI and authorization remains server-side.
     /// </summary>
-    /// <param name="rentalRequestId">The completed rental request associated with the review.</param>
-    /// <param name="returnUrl">The optional local history URL to return to.</param>
-    /// <param name="cancellationToken">The token used to cancel the operation.</param>
-    /// <returns>A redirect for browser forms or a structured operation failure.</returns>
+    /// <param name="rentalRequestId">The completed rental associated with the review.</param>
+    /// <param name="returnUrl">The optional local return location.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A redirect or meaningful HTTP failure.</returns>
     [Authorize]
     [HttpPost("delete")]
     [ValidateAntiForgeryToken]
@@ -122,60 +102,157 @@ public sealed class ReviewsController : Controller
         CancellationToken cancellationToken = default)
     {
         var result = await reviewService.DeleteAsync(User, rentalRequestId, cancellationToken);
-        if (result.Status == ReviewServiceStatus.Success && IsLocalReturnUrl(returnUrl))
+
+        if (result.IsSuccess)
         {
+            if (string.IsNullOrWhiteSpace(returnUrl))
+            {
+                return NoContent();
+            }
+
             TempData["RentalManagementFeedback"] = SharedResource.Get("Review.DeleteSucceeded");
-            return LocalRedirect(returnUrl!);
+            return LocalRedirect(LocalReturn(returnUrl));
         }
 
-        if (result.Status == ReviewServiceStatus.Success)
-        {
-            return NoContent();
-        }
-
-        return ReviewFailure(result);
+        return Failure(result, new ReviewSubmission(rentalRequestId, 0, null), returnUrl, true);
     }
 
     /// <summary>
-    /// Returns the aggregated review summary for the requested listing.
+    /// Exposes existing deterministic summary data only for published listings; this does not invoke AI.
     /// </summary>
-    /// <param name="listingId">The listing identifier to summarize.</param>
-    /// <param name="cancellationToken">The token used to cancel the operation.</param>
-    /// <returns>The listing summary as JSON.</returns>
+    /// <param name="listingId">The public listing identifier.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The public summary or an opaque not-found response.</returns>
     [AllowAnonymous]
     [HttpGet("summary")]
-    public async Task<IActionResult> SummaryAsync(
-        [FromQuery] int listingId,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> SummaryAsync([FromQuery] int listingId, CancellationToken cancellationToken = default)
     {
         if (listingId <= 0)
         {
             return BadRequest();
         }
 
-        var summary = await reviewSummaryService.GetSummaryAsync(listingId, cancellationToken);
-        return Json(summary);
+        if (!await reviewService.IsPublishedAsync(listingId, cancellationToken))
+        {
+            return NotFound();
+        }
+
+        return Json(await reviewSummaryService.GetSummaryAsync(listingId, cancellationToken));
     }
 
     /// <summary>
-    /// Determines whether the supplied return path stays within the application.
+    /// Delegates review persistence and keeps entity navigation graphs out of all JSON responses.
     /// </summary>
-    /// <param name="returnUrl">The path supplied by the browser form.</param>
-    /// <returns>True when the path is local.</returns>
-    private bool IsLocalReturnUrl(string? returnUrl) => !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl);
+    /// <param name="submission">The submitted review fields.</param>
+    /// <param name="returnUrl">The optional local return location.</param>
+    /// <param name="editing">Whether to update an existing review.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The MVC result with safe review scalars only.</returns>
+    private async Task<IActionResult> SaveAsync(
+        ReviewSubmission submission,
+        string? returnUrl,
+        bool editing,
+        CancellationToken cancellationToken)
+    {
+        var result = ModelState.IsValid
+            ? editing ? await reviewService.UpdateAsync(User, submission, cancellationToken)
+                : await reviewService.CreateAsync(User, submission, cancellationToken)
+            : new ReviewServiceResult(ReviewServiceStatus.ValidationFailed, null,
+                ModelState.SelectMany(pair => pair.Value!.Errors.Select(error => new ReviewError(pair.Key, "Review.InvalidInput"))).ToArray());
+
+        if (!result.IsSuccess || result.Value is null)
+        {
+            return Failure(result, submission, returnUrl, editing);
+        }
+
+        var message = SharedResource.Get(editing ? "Review.UpdateSucceeded" : "Review.SubmissionSucceeded");
+        TempData["RentalManagementFeedback"] = message;
+        TempData["ReviewFeedback"] = message;
+        var destination = LocalReturn(returnUrl);
+        var review = result.Value;
+
+        if (WantsJson || string.IsNullOrWhiteSpace(returnUrl))
+        {
+            return Json(new
+            {
+                review = new { review.ReviewId, review.RentalRequestId, review.Rating, review.Comment, review.CreatedAtUtc },
+                redirectUrl = destination
+            });
+        }
+
+        return LocalRedirect(destination);
+    }
 
     /// <summary>
-    /// Converts a review service failure into an HTTP response.
+    /// Returns terminal privacy failures or a populated form/structured JSON error list.
     /// </summary>
-    /// <param name="result">The review operation result.</param>
-    /// <returns>The corresponding MVC response.</returns>
-    private IActionResult ReviewFailure(ReviewServiceResult result) => result.Status switch
+    /// <param name="result">The service outcome.</param>
+    /// <param name="submission">The submitted values to retain.</param>
+    /// <param name="returnUrl">The optional local return location.</param>
+    /// <param name="editing">Whether the failed operation was an edit.</param>
+    /// <returns>The failure response with meaningful localized text.</returns>
+    private IActionResult Failure(
+        ReviewServiceResult result,
+        ReviewSubmission submission,
+        string? returnUrl,
+        bool editing)
     {
-        ReviewServiceStatus.Unauthenticated => Challenge(),
-        ReviewServiceStatus.Forbidden => Forbid(),
-        ReviewServiceStatus.NotFound => NotFound(),
-        ReviewServiceStatus.ValidationFailed => BadRequest(result.Errors),
-        ReviewServiceStatus.Conflict => Conflict(result.Errors),
-        _ => StatusCode(StatusCodes.Status503ServiceUnavailable, result.Errors)
-    };
+        var status = result.Status switch
+        {
+            ReviewServiceStatus.Unauthenticated => 401,
+            ReviewServiceStatus.Forbidden => 403,
+            ReviewServiceStatus.NotFound => 404,
+            ReviewServiceStatus.ValidationFailed => 400,
+            ReviewServiceStatus.Conflict or ReviewServiceStatus.ConcurrencyFailed => 409,
+            _ => 503
+        };
+
+        if (WantsJson)
+        {
+            return StatusCode(status, new { errors = result.Errors.Select(error => new { error.Field, error.ResourceKey, error.Message }) });
+        }
+
+        if (status == 401)
+        {
+            return Challenge();
+        }
+
+        if (status == 403)
+        {
+            return Forbid();
+        }
+
+        if (status == 404)
+        {
+            return NotFound();
+        }
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(error.Field, error.Message);
+        }
+
+        var view = View("Form", new ReviewFormViewModel
+        {
+            RentalRequestId = submission.RentalRequestId,
+            ListingId = submission.ListingId,
+            Rating = submission.Rating,
+            Comment = submission.Comment,
+            IsEditing = editing,
+            Open = true,
+            ReturnUrl = LocalReturn(returnUrl)
+        });
+        view.StatusCode = status;
+        return view;
+    }
+
+    private bool WantsJson => Request.Headers.Accept.Any(value => value?.Contains("application/json", StringComparison.OrdinalIgnoreCase) == true);
+
+    /// <summary>
+    /// Restricts return navigation to local routes and defaults to the renter's history.
+    /// </summary>
+    /// <param name="returnUrl">The proposed return path.</param>
+    /// <returns>A safe local path.</returns>
+    private string LocalReturn(string? returnUrl) => !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl : "/rentals/mine";
 }

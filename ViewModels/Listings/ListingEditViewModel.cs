@@ -36,5 +36,5 @@ public sealed class ListingEditViewModel : ListingFormViewModel
 /// </summary>
 public sealed record ListingPublicationViewModel(ListingStatus Status, bool? IsValid, IReadOnlyList<ListingValidationError> Errors)
 {
-    public bool CanEdit => Status != ListingStatus.Archived;
+    public bool CanEdit => true;
 }

@@ -1,5 +1,7 @@
 using RentRoad.Models.Enums;
 using RentRoad.Services.Listings;
+using RentRoad.Services.Reviews;
+using RentRoad.ViewModels.Reviews;
 
 namespace RentRoad.ViewModels.Listings;
 
@@ -20,6 +22,9 @@ public sealed record ListingDetailsViewModel(int ListingId, string? Title, strin
     public IReadOnlyList<ListingSummaryViewModel> SimilarListings { get; init; } = Array.Empty<ListingSummaryViewModel>();
 
     public IReadOnlyList<ListingReviewViewModel> Reviews { get; init; } = Array.Empty<ListingReviewViewModel>();
+
+    public IReadOnlyList<ReviewRentalChoice> EligibleReviewRentals { get; init; } = Array.Empty<ReviewRentalChoice>();
+    public string ReviewSummary => ReviewDisplayText.Summary(AverageRating, Reviews.Count);
 
     public double? AverageRating => Reviews.Count == 0 ? null : Reviews.Average(review => review.Rating);
 

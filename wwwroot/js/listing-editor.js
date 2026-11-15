@@ -20,7 +20,6 @@
         const errors = root.querySelector("[data-editor-errors]");
         const upload = root.querySelector("[data-editor-upload]");
         const fileInput = upload?.querySelector('[name="File"]');
-        const archived = root.dataset.listingStatus === "Archived";
         let state = null;
         let busy = false;
         let ready = false;
@@ -119,12 +118,11 @@
          */
         function updateControls() {
             for (const button of root.querySelectorAll("[data-editor-write]")) {
-                button.disabled = !ready || busy || archived || state?.status === "Archived";
+                button.disabled = !ready || busy;
             }
 
             if (upload) {
-                upload.querySelector('button[type="submit"]').disabled = !ready || busy || archived
-                    || state?.status === "Archived"
+                upload.querySelector('button[type="submit"]').disabled = !ready || busy
                     || !uploadQueue?.hasPending();
             }
 
@@ -437,9 +435,7 @@
 
                 card.dataset.orderId = String(photo.id);
 
-                if (!archived && state.status !== "Archived") {
-                    card.dataset.orderEditable = "";
-                }
+                card.dataset.orderEditable = "";
 
                 const image = card.querySelector("img");
                 const fallback = document.createElement("span");
@@ -479,11 +475,6 @@
                     if (button.dataset.photoAction === "down") {
                         button.hidden = index === state.images.length - 1;
                     }
-                }
-
-                if (archived) {
-                    card.querySelector(".editor-photo-actions").remove();
-                    card.querySelector("details").remove();
                 }
 
                 collection.append(card);
@@ -565,12 +556,6 @@
                     }
 
                     restorePeriod(form, retained, changedKey);
-
-                    if (archived) {
-                        for (const details of row.querySelectorAll("details")) {
-                            details.remove();
-                        }
-                    }
 
                     list.append(row);
                 }
@@ -970,7 +955,7 @@
                 .some(input => input.type !== "hidden"
                     && input.value !== input.defaultValue);
 
-            if (!archived && (busy || signature() !== savedSignature || uploadQueue?.hasPending() || pendingDates)) {
+            if (busy || signature() !== savedSignature || uploadQueue?.hasPending() || pendingDates) {
                 event.preventDefault();
                 event.returnValue = "";
             }
@@ -1081,7 +1066,7 @@
             window.RentRoadImageOrdering.connect(
                 root.querySelector("[data-editor-photos]"),
                 {
-                    canMove: () => ready && !busy && !archived && state?.status !== "Archived",
+                    canMove: () => ready && !busy,
                     save: (ids, moving) => perform(() => savePhotoOrder(ids, moving))
                 });
             ready = true;
