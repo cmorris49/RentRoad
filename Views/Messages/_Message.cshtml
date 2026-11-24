@@ -1,8 +1,17 @@
 @model MessageViewModel
 <li class="message-row @(Model.IsMine ? "message-row-mine" : "message-row-received")" data-message-id="@Model.MessageId" data-mine="@(Model.IsMine ? "true" : "false")" data-read="@(Model.IsRead ? "true" : "false")">
     <article class="message-bubble">
-        <p class="message-sender">@(Model.IsMine ? Text["Messages.You"].Value : Model.SenderDisplayName)</p>
-        <p class="message-content">@Model.Content</p>
+        @if (Model.RentalEvent is { } rentalEvent)
+        {
+            <p class="message-sender">@rentalEvent.Heading</p>
+            <p class="message-content" data-rental-event-body>@rentalEvent.Body</p>
+            <a class="message-action" href="@Url.Content("~/" + rentalEvent.ActionPath)">@rentalEvent.ActionLabel</a>
+        }
+        else
+        {
+            <p class="message-sender">@(Model.IsMine ? Text["Messages.You"].Value : Model.SenderDisplayName)</p>
+            <p class="message-content">@Model.Content</p>
+        }
         <footer class="message-meta">
             <time datetime="@Model.SentAtUtc.ToString("O", CultureInfo.InvariantCulture)" data-message-time>@Model.SentAtUtc.ToString("g", CultureInfo.CurrentCulture) @Text["Messages.Utc"]</time>
             @if (Model.IsMine)

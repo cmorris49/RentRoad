@@ -63,7 +63,7 @@ public sealed class RentalRequestsController : Controller
             return Forbid();
         }
 
-        return FormView(new(listing.Value!), StatusCodes.Status200OK);
+        return FormView(new(listing.Value!) { ClientRequestId = Guid.NewGuid() }, StatusCodes.Status200OK);
     }
 
     /// <summary>
@@ -108,7 +108,8 @@ public sealed class RentalRequestsController : Controller
         {
             TempData["RentalRequestFeedbackListingId"] = listingId;
             TempData["RentalRequestFeedback"] =
-                SharedResource.Get(result.AlreadyPending ? "RentalRequest.AlreadyPending" : "RentalRequest.Submitted");
+                SharedResource.Get(result.AlreadyPending ? "RentalRequest.AlreadyPending"
+                    : result.AlreadyApplied ? "RentalEvent.AlreadySubmitted" : "RentalRequest.Submitted");
             return RedirectToAction("Details", "Listings", new { id = listingId });
         }
 

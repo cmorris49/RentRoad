@@ -8,7 +8,7 @@ namespace RentRoad.Services.Messaging;
 public interface IMessageRealtimeNotifier
 {
     /// <summary>
-    /// Accepts a trusted server-side SendAsync result, skips failed/idempotent outcomes, and never changes the
+    /// Accepts a trusted chat or rental-event save result, skips failed/idempotent outcomes, and never changes the
     /// saved-message outcome on delivery failure.
     /// </summary>
     /// <param name="user">The Identity principal supplied by the application boundary.</param>

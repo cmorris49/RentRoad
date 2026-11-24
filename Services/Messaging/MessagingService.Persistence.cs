@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using RentRoad.Data;
 using RentRoad.Models;
+using RentRoad.Models.Enums;
 
 namespace RentRoad.Services.Messaging;
 
@@ -197,18 +198,20 @@ public sealed partial class MessagingService
             .Where(conversation => conversation.RenterId == actorId || conversation.Listing.OwnerId == actorId);
 
     /// <summary>
-    /// Scopes received unread messages to authorized conversations without counting the actor's outgoing messages.
+    /// Scopes unread chat and rental events to their authorized recipient rather than the initiating participant.
     /// </summary>
     /// <param name="database">The database context used for this operation.</param>
     /// <param name="actorId">The authenticated actor's account identifier.</param>
     /// <returns>The query describing the selected scope or projection.</returns>
     private static IQueryable<Message> ReceivedUnread(ApplicationDbContext database, string actorId) =>
         database.Messages.AsNoTracking()
-            .Where(message => message.ReadAtUtc == null && message.SenderId != actorId
+            .Where(message => message.ReadAtUtc == null && (message.SenderId != null ? message.SenderId != actorId
+                : message.RentalEventType == RentalMessageEventType.RequestApproved
+                    ? message.Conversation.RenterId == actorId : message.Conversation.Listing.OwnerId == actorId)
                 && (message.Conversation.RenterId == actorId || message.Conversation.Listing.OwnerId == actorId));
 
     /// <summary>
-    /// Projects public sender display and exact text while keeping the other participant's submission token private.
+    /// Projects user-authored text or trusted rental terms with participant-specific unread state and private retry tokens.
     /// </summary>
     /// <param name="actorId">The authenticated actor's account identifier.</param>
     /// <returns>The expression projecting safe message data for the actor.</returns>
@@ -217,11 +220,20 @@ public sealed partial class MessagingService
             message.MessageId,
             message.ConversationId,
             message.Content,
-            message.Sender.DisplayName,
+            message.Sender == null ? string.Empty : message.Sender.DisplayName,
             message.SenderId == actorId,
             message.SentAtUtc,
-            message.ReadAtUtc,
-            message.SenderId == actorId ? message.ClientMessageId : null);
+            message.RentalRequestId != null
+                && (message.RentalEventType == RentalMessageEventType.RequestSubmitted
+                    ? message.Conversation.RenterId == actorId : message.Conversation.Listing.OwnerId == actorId)
+                ? message.SentAtUtc : message.ReadAtUtc,
+            message.SenderId == actorId ? message.ClientMessageId : null)
+        {
+            RentalEvent = message.RentalRequest == null ? null : new RentalRequestMessage(
+                message.RentalRequest.RentalRequestId, message.Content, message.RentalRequest.StartDate,
+                message.RentalRequest.EndDate, message.RentalRequest.TotalPriceCents, message.RentalRequest.Status,
+                message.Conversation.Listing.OwnerId == actorId, message.RentalEventType)
+        };
 
     /// <summary>
     /// Looks up only this authenticated sender's exact retry scope, independently of current listing visibility.
@@ -255,7 +267,7 @@ public sealed partial class MessagingService
     /// <param name="actorId">The authenticated actor's account identifier.</param>
     /// <param name="cancellationToken">The token used to cancel the operation.</param>
     /// <returns>A task returning whether the selected conversation exists for the actor after lock acquisition.</returns>
-    private static async Task<bool> LockConversationAsync(
+    internal static async Task<bool> LockConversationAsync(
         ApplicationDbContext database,
         int conversationId,
         string actorId,
@@ -299,7 +311,7 @@ public sealed partial class MessagingService
     /// <param name="actorId">The authenticated actor's account identifier.</param>
     /// <param name="cancellationToken">The token used to cancel the operation.</param>
     /// <returns>A task representing completion of lock acquisition within the current transaction.</returns>
-    private static async Task LockPairAsync(
+    internal static async Task LockPairAsync(
         ApplicationDbContext database,
         int listingId,
         string actorId,

@@ -105,3 +105,5 @@
     .rental-record-facts { gap: .75rem; }
     .rental-history-page-indicator { order: -1; flex-basis: 100%; }
 }
+
+.rental-record:target { outline: 3px solid var(--rr-primary); outline-offset: 3px; scroll-margin-top: 6rem; }

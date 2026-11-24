@@ -9,6 +9,9 @@ namespace RentRoad.Services.Rentals;
 /// <param name="PageSize">The number of records requested per page.</param>
 public sealed record RentalHistoryParameters(int PageNumber = 1, int PageSize = 20)
 {
+    /// <summary>Optionally focuses one authorized rental independently of its normal history page.</summary>
+    public int? RequestId { get; init; }
+
     public const int DEFAULT_PAGE_SIZE = 20;
     public const int MAX_PAGE_SIZE = 100;
 }

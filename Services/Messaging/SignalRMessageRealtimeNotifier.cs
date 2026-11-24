@@ -43,7 +43,8 @@ public sealed class SignalRMessageRealtimeNotifier : IMessageRealtimeNotifier
         MessagingResult<MessageItem>? submission,
         CancellationToken cancellationToken = default)
     {
-        if (submission is not { IsSuccess: true, AlreadyApplied: false, Value: { IsMine: true } saved }
+        if (submission is not { IsSuccess: true, AlreadyApplied: false, Value: { } saved }
+            || !saved.IsMine && saved.RentalEvent is null
             || saved.ConversationId <= 0
             || saved.MessageId <= 0)
         {

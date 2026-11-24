@@ -4,6 +4,7 @@ namespace RentRoad.Services.Rentals;
 /// Accepts only a listing and half-open calendar period; optional informational times default to midnight and do
 /// not affect pricing.
 /// </summary>
+/// <param name="ClientRequestId">The stable original form submission token, when supplied.</param>
 /// <param name="ListingId">The identifier of the listing being processed.</param>
 /// <param name="StartDate">The inclusive start date of the rental or availability period.</param>
 /// <param name="EndDate">The exclusive end date of the rental or availability period.</param>
@@ -14,4 +15,5 @@ public sealed record RentalRequestCreate(
     DateOnly StartDate,
     DateOnly EndDate,
     TimeOnly PickupTime = default,
-    TimeOnly ReturnTime = default);
+    TimeOnly ReturnTime = default,
+    Guid? ClientRequestId = null);

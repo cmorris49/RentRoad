@@ -26,6 +26,7 @@
             <p id="rental-date-help" class="text-muted">@Text["RentalRequestUi.UtcHelp"]</p>
             <form asp-controller="RentalRequests" asp-action="Create" asp-route-listingId="@listing.ListingId" method="post"
                   data-rental-request data-daily-cents="@listing.DailyPrice.Cents.ToString(CultureInfo.InvariantCulture)" data-minimum-first-day="@minimum">
+                <input asp-for="ClientRequestId" type="hidden" />
                 <div asp-validation-summary="All" class="alert alert-danger" role="alert" tabindex="-1" data-request-errors></div>
                 <div class="rental-date-fields">
                     <div>

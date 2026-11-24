@@ -33,15 +33,19 @@ public sealed class ConversationContextViewModel
     }
 }
 
-/// <summary>Provides persisted plain text, public sender display and read state; only the sender receives its retry token.</summary>
+/// <summary>Provides persisted chat or a trusted rental event with participant-specific presentation and read state.</summary>
 public sealed record MessageViewModel(int MessageId, int ConversationId, string Content, string SenderDisplayName, bool IsMine,
     DateTime SentAtUtc, DateTime? ReadAtUtc, Guid? ClientMessageId)
 {
     public bool IsRead => ReadAtUtc.HasValue;
+    public RentalEventViewModel? RentalEvent { get; init; }
 
     /// <summary>Preserves exact service-projected message values without interpreting markup or exposing sender account keys.</summary>
     public static MessageViewModel FromResult(MessageItem message) => new(message.MessageId, message.ConversationId, message.Content,
-        message.SenderDisplayName, message.IsMine, message.SentAtUtc, message.ReadAtUtc, message.ClientMessageId);
+        message.SenderDisplayName, message.IsMine, message.SentAtUtc, message.ReadAtUtc, message.ClientMessageId)
+        {
+            RentalEvent = message.RentalEvent is null ? null : new(message.RentalEvent)
+        };
 }
 
 /// <summary>Retains bounded ascending message display order and the service's directional keyset cursor.</summary>

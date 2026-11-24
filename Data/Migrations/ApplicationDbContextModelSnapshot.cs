@@ -495,8 +495,15 @@ namespace RentRoad.Data.Migrations
                     b.Property<DateTime?>("ReadAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("RentalEventType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("RentalRequestId")
+                        .HasColumnType("int");
+
                     b.Property<string>("SenderId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("SentAtUtc")
@@ -510,11 +517,20 @@ namespace RentRoad.Data.Migrations
 
                     b.HasIndex("ConversationId", "SentAtUtc");
 
+                    b.HasIndex("RentalRequestId", "RentalEventType")
+                        .IsUnique()
+                        .HasFilter("[RentalRequestId] IS NOT NULL");
+
                     b.HasIndex("ConversationId", "SenderId", "ClientMessageId")
                         .IsUnique()
                         .HasFilter("[ClientMessageId] IS NOT NULL");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", t =>
+                        {
+                            t.HasCheckConstraint("CK_Messages_Authorship", "([RentalRequestId] IS NULL AND [SenderId] IS NOT NULL) OR ([RentalRequestId] IS NOT NULL AND [SenderId] IS NULL AND [ClientMessageId] IS NULL)");
+
+                            t.HasCheckConstraint("CK_Messages_RentalEventType", "[RentalEventType] IN (0, 1) AND ([RentalRequestId] IS NOT NULL OR [RentalEventType] = 0)");
+                        });
                 });
 
             modelBuilder.Entity("RentRoad.Models.RentalRequest", b =>
@@ -524,6 +540,9 @@ namespace RentRoad.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RentalRequestId"));
+
+                    b.Property<Guid?>("ClientRequestId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("CompletedAtUtc")
                         .HasColumnType("datetime2");
@@ -565,6 +584,10 @@ namespace RentRoad.Data.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("RentalRequestId");
+
+                    b.HasIndex("RenterId", "ClientRequestId")
+                        .IsUnique()
+                        .HasFilter("[ClientRequestId] IS NOT NULL");
 
                     b.HasIndex("RenterId", "Status");
 
@@ -774,13 +797,19 @@ namespace RentRoad.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("RentRoad.Models.RentalRequest", "RentalRequest")
+                        .WithMany()
+                        .HasForeignKey("RentalRequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("RentRoad.Models.ApplicationUser", "Sender")
                         .WithMany("Messages")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Conversation");
+
+                    b.Navigation("RentalRequest");
 
                     b.Navigation("Sender");
                 });

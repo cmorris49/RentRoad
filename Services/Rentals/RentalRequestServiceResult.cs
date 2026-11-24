@@ -51,6 +51,9 @@ public sealed record RentalRequestServiceResult(
         init;
     }
 
+    /// <summary>Retains the newly saved event for dispatch only after its transaction commits.</summary>
+    internal RentRoad.Services.Messaging.MessageItem? NotificationMessage { get; init; }
+
     public bool IsSuccess => Status == RentalRequestServiceStatus.Success;
 
     /// <summary>

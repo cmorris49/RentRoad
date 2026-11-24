@@ -11,8 +11,8 @@ namespace RentRoad.Services.Messaging;
 public sealed partial class MessagingService
 {
     /// <summary>
-    /// Reads delivery routing from persisted relationships only for this authenticated sender, refusing uncommitted
-    /// caller work.
+    /// Reads committed delivery routing for the authenticated chat sender or verified rental-event initiator,
+    /// refusing uncommitted caller work.
     /// </summary>
     /// <param name="conversationId">The conversation identifier, when supplied.</param>
     /// <param name="messageId">The identifier of the persisted message.</param>
@@ -40,7 +40,11 @@ public sealed partial class MessagingService
                     .Where(conversation => conversation.ConversationId == conversationId)
                     .Join(
                     committed.Messages.AsNoTracking()
-                        .Where(message => message.MessageId == messageId && message.SenderId == actorId),
+                        .Where(message => message.MessageId == messageId && (message.SenderId == actorId
+                            || message.RentalRequestId != null
+                            && (message.RentalEventType == RentalMessageEventType.RequestSubmitted
+                                ? message.RentalRequest!.RenterId == actorId
+                                : message.RentalRequest!.Listing.OwnerId == actorId))),
                     conversation => conversation.ConversationId,
                     message => message.ConversationId,
                     (conversation, message) => new MessageNotificationRoute(
@@ -227,6 +231,9 @@ public sealed partial class MessagingService
                                 .Select(image => image.AltText)
                                 .FirstOrDefault()
                             : null,
+                        LatestRentalEventType = conversation.Messages.OrderByDescending(message => message.MessageId)
+                            .Select(message => message.RentalRequestId != null
+                                ? (RentalMessageEventType?)message.RentalEventType : null).FirstOrDefault(),
                         Preview = conversation.Messages.OrderByDescending(message => message.MessageId)
                             .Select(message => message.Content.Length > PREVIEW_LENGTH ? message.Content.Substring(
                                     0,
@@ -236,7 +243,10 @@ public sealed partial class MessagingService
                             .Select(message => (DateTime?)message.SentAtUtc)
                             .FirstOrDefault()
                             ?? conversation.CreatedAtUtc,
-                        Unread = conversation.Messages.Count(message => message.SenderId != actorId && message.ReadAtUtc == null)
+                        Unread = conversation.Messages.Count(message => message.ReadAtUtc == null
+                            && (message.SenderId != null ? message.SenderId != actorId
+                                : message.RentalEventType == RentalMessageEventType.RequestApproved
+                                    ? conversation.RenterId == actorId : conversation.Listing.OwnerId == actorId))
                     })
                     .OrderByDescending(row => row.Activity)
                     .ThenByDescending(row => row.ConversationId)
@@ -253,7 +263,9 @@ public sealed partial class MessagingService
                             row.DisplayName,
                             row.ImageId.HasValue ? new(row.ImageId.Value, row.ImageAlt) : null,
                             row.CreatedAtUtc),
-                        row.Preview,
+                        row.LatestRentalEventType.HasValue
+                            ? SharedResource.Get(row.LatestRentalEventType == RentalMessageEventType.RequestApproved
+                                ? "RentalEvent.ApprovalPreview" : "RentalEvent.Heading") : row.Preview,
                         row.Activity,
                         row.Unread))
                     .ToArray();

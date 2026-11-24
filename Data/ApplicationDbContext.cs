@@ -190,6 +190,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<RentalRequest>(entity =>
         {
             entity.HasKey(request => request.RentalRequestId);
+            entity.HasIndex(request => new { request.RenterId, request.ClientRequestId }).IsUnique()
+                .HasFilter("[ClientRequestId] IS NOT NULL");
             entity.ToTable(table =>
             {
                 table.HasCheckConstraint("CK_RentalRequests_DateRange", "[StartDate] < [EndDate]");
@@ -247,6 +249,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Message>(entity =>
         {
             entity.HasKey(message => message.MessageId);
+            entity.ToTable(table => table.HasCheckConstraint("CK_Messages_Authorship",
+                "([RentalRequestId] IS NULL AND [SenderId] IS NOT NULL) OR ([RentalRequestId] IS NOT NULL AND [SenderId] IS NULL AND [ClientMessageId] IS NULL)"));
+            entity.ToTable(table => table.HasCheckConstraint("CK_Messages_RentalEventType",
+                "[RentalEventType] IN (0, 1) AND ([RentalRequestId] IS NOT NULL OR [RentalEventType] = 0)"));
+            entity.Property(message => message.RentalEventType).HasDefaultValue(RentalMessageEventType.RequestSubmitted);
+            entity.HasIndex(message => new { message.RentalRequestId, message.RentalEventType }).IsUnique()
+                .HasFilter("[RentalRequestId] IS NOT NULL");
+            entity.HasOne(message => message.RentalRequest).WithMany()
+                .HasForeignKey(message => message.RentalRequestId)
+                .OnDelete(DeleteBehavior.Restrict);
             entity.Property(message => message.Content).HasMaxLength(2000).IsRequired();
             entity.Property(message => message.SentAtUtc).IsRequired();
             entity.HasIndex(message => new { message.ConversationId, message.SentAtUtc });

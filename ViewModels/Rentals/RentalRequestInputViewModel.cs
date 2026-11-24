@@ -4,10 +4,13 @@ using RentRoad.Services.Rentals;
 
 namespace RentRoad.ViewModels.Rentals;
 
-/// <summary>Accepts only inclusive rental dates and optional informational times, excluding identity, status and financial terms.</summary>
-[Bind("FirstDay,LastDay,PickupTime,ReturnTime")]
+/// <summary>Accepts inclusive dates, optional informational times and a retry token, excluding identity, status and financial terms.</summary>
+[Bind("FirstDay,LastDay,PickupTime,ReturnTime,ClientRequestId")]
 public class RentalRequestInputViewModel : IValidatableObject
 {
+    /// <summary>Retains the original form token across resubmissions without trusting rental terms or identities.</summary>
+    public Guid? ClientRequestId { get; set; }
+
     [Required(ErrorMessageResourceType = typeof(SharedResource), ErrorMessageResourceName = nameof(SharedResource.FirstDayRequired))]
     [Display(Name = nameof(SharedResource.FirstDayLabel), ResourceType = typeof(SharedResource))]
     [DataType(DataType.Date)]
@@ -36,6 +39,7 @@ public class RentalRequestInputViewModel : IValidatableObject
     /// <summary>Preserves submitted calendar/time values when enriching the form with trusted listing information.</summary>
     protected RentalRequestInputViewModel(RentalRequestInputViewModel input)
     {
+        ClientRequestId = input.ClientRequestId;
         FirstDay = input.FirstDay;
         LastDay = input.LastDay;
         PickupTime = input.PickupTime;
@@ -58,6 +62,6 @@ public class RentalRequestInputViewModel : IValidatableObject
     {
         if (!RentalDays.HasValue)
             throw new InvalidOperationException("Validate the inclusive rental dates before mapping a request.");
-        return new(listingId, FirstDay!.Value, LastDay!.Value.AddDays(1), PickupTime.GetValueOrDefault(), ReturnTime.GetValueOrDefault());
+        return new(listingId, FirstDay!.Value, LastDay!.Value.AddDays(1), PickupTime.GetValueOrDefault(), ReturnTime.GetValueOrDefault(), ClientRequestId);
     }
 }

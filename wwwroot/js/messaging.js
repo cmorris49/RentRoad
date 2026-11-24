@@ -646,12 +646,39 @@
 
             status.setAttribute("data-read-status", "");
             meta.append(time, status);
-            bubble.append(sender, content, meta);
+            if (message.rentalEvent) {
+                this.appendRentalEvent(bubble, message.rentalEvent);
+                bubble.append(meta);
+            } else {
+                bubble.append(sender, content, meta);
+            }
             row.append(bubble);
             this.localizeTimes(row);
             this.updateReadNode(message, row);
 
             return row;
+        }
+
+        /**
+         * Renders only the server-projected rental event using text nodes and an application-local action.
+         * @param {HTMLElement} bubble - The event container.
+         * @param {object} event - Trusted event presentation returned by authorized history.
+         * @returns {void} Does not return a value.
+         */
+        appendRentalEvent(bubble, event) {
+            const sender = document.createElement("p");
+            const content = document.createElement("p");
+            const link = document.createElement("a");
+
+            sender.className = "message-sender";
+            sender.textContent = event.heading;
+            content.className = "message-content";
+            content.setAttribute("data-rental-event-body", "");
+            content.textContent = event.body;
+            link.className = "message-action";
+            link.textContent = event.actionLabel;
+            link.href = (this.config.applicationRoot || "/") + event.actionPath;
+            bubble.append(sender, content, link);
         }
 
         /**
@@ -663,6 +690,13 @@
          */
         updateReadNode(message, node = this.nodes.get(message.messageId)) {
             node.dataset.read = String(message.isRead);
+            if (message.rentalEvent) {
+                const content = node.querySelector("[data-rental-event-body]");
+
+                if (content) {
+                    content.textContent = message.rentalEvent.body;
+                }
+            }
             const status = node.querySelector("[data-read-status]");
 
             if (!status) return;

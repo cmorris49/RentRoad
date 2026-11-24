@@ -8,6 +8,7 @@ using RentRoad.Data;
 using RentRoad.Models;
 using RentRoad.Models.Enums;
 using RentRoad.Services.Listings;
+using RentRoad.Services.Messaging;
 
 namespace RentRoad.Services.Rentals;
 
@@ -16,6 +17,7 @@ namespace RentRoad.Services.Rentals;
 /// </summary>
 public sealed partial class RentalRequestService : IRentalRequestService
 {
+    private readonly IMessageRealtimeNotifier? notifier;
     private readonly ApplicationDbContext context;
     private readonly TimeProvider timeProvider;
     private readonly ILogger<RentalRequestService> logger;
@@ -25,20 +27,23 @@ public sealed partial class RentalRequestService : IRentalRequestService
     /// </summary>
     /// <param name="context">The existing scoped database context.</param>
     /// <param name="timeProvider">The clock used to obtain UTC timestamps and calendar dates.</param>
+    /// <param name="notifier">The optional post-commit messaging notifier.</param>
     /// <param name="logger">The logger used to record operational failures.</param>
     public RentalRequestService(
         ApplicationDbContext context,
         TimeProvider timeProvider,
-        ILogger<RentalRequestService> logger)
+        ILogger<RentalRequestService> logger,
+        IMessageRealtimeNotifier? notifier = null)
     {
+        this.notifier = notifier;
         this.context = context;
         this.timeProvider = timeProvider;
         this.logger = logger;
     }
 
     /// <summary>
-    /// Validates committed listing terms and inserts at most one identical pending submission within a serializable
-    /// unit of work.
+    /// Atomically saves verified rental terms and one trusted message per new request, recognizing identical
+    /// pending submissions within a serializable unit of work and notifying participants only after commit.
     /// </summary>
     /// <param name="user">The Identity principal supplied by the application boundary.</param>
     /// <param name="details">The listing and half-open rental period submitted for the request.</param>
@@ -88,7 +93,7 @@ public sealed partial class RentalRequestService : IRentalRequestService
 
         try
         {
-            return await context.Database.CreateExecutionStrategy().ExecuteAsync(
+            var committed = await context.Database.CreateExecutionStrategy().ExecuteAsync(
                 async token =>
                 {
                     await using var writeContext = CreateWriteContext();
@@ -105,6 +110,9 @@ public sealed partial class RentalRequestService : IRentalRequestService
                     return result;
                 },
                 cancellationToken);
+
+            await NotifyRequestAsync(user, committed);
+            return committed;
         }
         catch (Exception exception) when (exception is DbException or DbUpdateException or RetryLimitExceededException)
         {
@@ -195,6 +203,13 @@ public sealed partial class RentalRequestService : IRentalRequestService
 
         renterId = storedRenterId;
         await ListingTransactionLock.AcquireAsync(database, details.ListingId, cancellationToken);
+        var previous = await FindRequestRetryAsync(database, renterId, details, cancellationToken);
+
+        if (previous is not null)
+        {
+            return previous;
+        }
+
         var listing = await database.Listings.AsNoTracking().Where(item => item.ListingId == details.ListingId)
             .Select(item => new
             {
@@ -275,6 +290,7 @@ public sealed partial class RentalRequestService : IRentalRequestService
 
         var request = new RentalRequest
         {
+            ClientRequestId = details.ClientRequestId is { } token && token != Guid.Empty ? token : null,
             ListingId = details.ListingId,
             RenterId = renterId,
             StartDate = details.StartDate,
@@ -288,8 +304,8 @@ public sealed partial class RentalRequestService : IRentalRequestService
         };
 
         database.RentalRequests.Add(request);
-        await database.SaveChangesAsync(cancellationToken);
-        return RentalRequestServiceResult.Success(request);
+        var notification = await AddRequestMessageAsync(database, request, cancellationToken);
+        return RentalRequestServiceResult.Success(request) with { NotificationMessage = notification };
     }
 
     /// <summary>

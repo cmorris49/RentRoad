@@ -15,6 +15,9 @@ public class RentalRequest
 {
     public int RentalRequestId { get; set; }
 
+    /// <summary>Identifies the original form submission across retries and subsequent owner decisions.</summary>
+    public Guid? ClientRequestId { get; set; }
+
     public int ListingId { get; set; }
 
     [Required]

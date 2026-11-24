@@ -30,6 +30,7 @@ public sealed class RentalsController : Controller
     /// <summary>
     /// Displays My Rentals using only the current renter's paginated history.
     /// </summary>
+    /// <param name="requestId">The optional rental to focus after participant authorization.</param>
     /// <param name="pageNumber">The requested one-based page number.</param>
     /// <param name="pageSize">The requested number of records per page.</param>
     /// <param name="cancellationToken">The token used to cancel the operation.</param>
@@ -38,14 +39,16 @@ public sealed class RentalsController : Controller
     public async Task<IActionResult> MineAsync(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = RentalHistoryParameters.DEFAULT_PAGE_SIZE,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default,
+        [FromQuery] int? requestId = null) =>
         !ModelState.IsValid
             ? InvalidPagination()
-            : HistoryView(await history.GetMineAsync(User, new(pageNumber, pageSize), cancellationToken), false);
+            : HistoryView(await history.GetMineAsync(User, new(pageNumber, pageSize) { RequestId = requestId }, cancellationToken), false);
 
     /// <summary>
     /// Displays Incoming Requests using only requests for the current owner's listings.
     /// </summary>
+    /// <param name="requestId">The optional rental to focus after participant authorization.</param>
     /// <param name="pageNumber">The requested one-based page number.</param>
     /// <param name="pageSize">The requested number of records per page.</param>
     /// <param name="cancellationToken">The token used to cancel the operation.</param>
@@ -54,10 +57,11 @@ public sealed class RentalsController : Controller
     public async Task<IActionResult> IncomingAsync(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = RentalHistoryParameters.DEFAULT_PAGE_SIZE,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default,
+        [FromQuery] int? requestId = null) =>
         !ModelState.IsValid
             ? InvalidPagination()
-            : HistoryView(await history.GetIncomingAsync(User, new(pageNumber, pageSize), cancellationToken), true);
+            : HistoryView(await history.GetIncomingAsync(User, new(pageNumber, pageSize) { RequestId = requestId }, cancellationToken), true);
 
     /// <summary>
     /// Delegates owner approval, including transactional availability revalidation, to the existing service.

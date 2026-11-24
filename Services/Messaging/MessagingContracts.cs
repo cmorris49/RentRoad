@@ -68,8 +68,8 @@ public sealed record ConversationDetails(
 }
 
 /// <summary>
-/// Describes a saved plain-text message using public sender display information; retry tokens are visible only to
-/// their sender.
+/// Describes saved chat text or a trusted rental event; user sender information and retry tokens remain scoped to
+/// their authorized presentation.
 /// </summary>
 /// <param name="MessageId">The identifier of the persisted message.</param>
 /// <param name="ConversationId">The conversation identifier, when supplied.</param>
@@ -87,7 +87,16 @@ public sealed record MessageItem(
     bool IsMine,
     DateTime SentAtUtc,
     DateTime? ReadAtUtc,
-    Guid? ClientMessageId);
+    Guid? ClientMessageId)
+{
+    /// <summary>Contains trusted rental data only for a server-created request event.</summary>
+    public RentalRequestMessage? RentalEvent { get; init; }
+}
+
+/// <summary>Projects verified rental terms and current status for participant-specific event presentation.</summary>
+public sealed record RentalRequestMessage(int RentalRequestId, string ListingTitle, DateOnly StartDate,
+    DateOnly EndDate, long TotalPriceCents, RentalStatus Status, bool IsOwner,
+    RentalMessageEventType EventType = RentalMessageEventType.RequestSubmitted);
 
 /// <summary>
 /// Returns messages ascending by ID; NextCursor continues in the requested older/newer direction when HasMore is true.

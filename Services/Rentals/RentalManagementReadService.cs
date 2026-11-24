@@ -81,7 +81,7 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
             return Failure(RentalRequestServiceStatus.Unauthenticated, "RentalRequest.SignInToManage");
         }
 
-        if (parameters.PageNumber < 1 || parameters.PageSize < 1
+        if (parameters.RequestId <= 0 || parameters.PageNumber < 1 || parameters.PageSize < 1
             || parameters.PageSize > RentalHistoryParameters.MAX_PAGE_SIZE
             || ((long)parameters.PageNumber - 1) * parameters.PageSize > int.MaxValue)
         {
@@ -92,10 +92,21 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
         {
             var query = context.RentalRequests.AsNoTracking().Where(request => incoming
                     ? request.Listing.OwnerId == actorId : request.RenterId == actorId);
+            if (parameters.RequestId is { } requestId)
+            {
+                query = query.Where(request => request.RentalRequestId == requestId);
+
+                if (!await query.AnyAsync(cancellationToken))
+                {
+                    return Failure(RentalRequestServiceStatus.NotFound, "RentalEvent.NotFound");
+                }
+            }
+
+            var pageNumber = parameters.RequestId.HasValue ? 1 : parameters.PageNumber;
             var total = await query.CountAsync(cancellationToken);
             var rows = await query.OrderByDescending(request => request.CreatedAtUtc)
                 .ThenByDescending(request => request.RentalRequestId)
-                .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                .Skip((pageNumber - 1) * parameters.PageSize)
                 .Take(parameters.PageSize)
                 .Select(request => new
                 {
@@ -171,7 +182,7 @@ public sealed class RentalManagementReadService : IRentalManagementReadService
 
             return new(
                 RentalRequestServiceStatus.Success,
-                new(items, total, parameters.PageNumber, parameters.PageSize),
+                new(items, total, pageNumber, parameters.PageSize),
                 Array.Empty<RentalRequestError>());
         }
         catch (Exception exception) when (exception is DbException or RetryLimitExceededException)

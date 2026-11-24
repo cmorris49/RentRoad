@@ -56,7 +56,7 @@
         <div class="rental-history-records">
             @foreach (var rental in Model.Rentals)
             {
-                <article class="card rental-record" aria-labelledby="rental-title-@rental.RentalRequestId" data-rental-record="@rental.RentalRequestId">
+                <article id="rental-@rental.RentalRequestId" tabindex="-1" class="card rental-record" aria-labelledby="rental-title-@rental.RentalRequestId" data-rental-record="@rental.RentalRequestId">
                     <div class="rental-record-image">
                         <span class="rental-record-fallback" data-image-fallback aria-hidden="@(rental.PrimaryImage is not null ? "true" : null)">@Text[rental.PrimaryImage is null ? "Gallery.Empty" : "Gallery.Unavailable"]</span>
                         @if (rental.PrimaryImage is { } photo)

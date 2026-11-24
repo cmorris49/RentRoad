@@ -1641,4 +1641,20 @@
   <data name="Common.Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="MyListings.Publish" xml:space="preserve"><value>Publish</value></data>
   <data name="Review.RatingOptionSingle" xml:space="preserve"><value>1 star</value></data>
+  <data name="RentalEvent.Heading" xml:space="preserve"><value>System · Rental request</value></data>
+  <data name="RentalEvent.OwnerSummary" xml:space="preserve"><value>A rental request for {0} was submitted with Pending status.</value></data>
+  <data name="RentalEvent.RenterPending" xml:space="preserve"><value>Your rental request for {0} has been received and is awaiting the owner's response.</value></data>
+  <data name="RentalEvent.RenterReceived" xml:space="preserve"><value>Your rental request for {0} was received.</value></data>
+  <data name="RentalEvent.CurrentStatus" xml:space="preserve"><value>Current request status</value></data>
+  <data name="RentalEvent.RequestedTotal" xml:space="preserve"><value>Requested total (CAD)</value></data>
+  <data name="RentalEvent.ReviewRequest" xml:space="preserve"><value>Review Request</value></data>
+  <data name="RentalEvent.ViewMyRental" xml:space="preserve"><value>View My Rental</value></data>
+  <data name="RentalEvent.NotFound" xml:space="preserve"><value>This rental request could not be found.</value></data>
+  <data name="RentalEvent.AlreadySubmitted" xml:space="preserve"><value>This rental request was already submitted. Open My Rentals to see its current status.</value></data>
+  <data name="RentalEvent.RetryMismatch" xml:space="preserve"><value>This submission was already used for different rental terms. Open a new request form to submit another request.</value></data>
+  <data name="RentalEvent.AutomaticSender" xml:space="preserve"><value>RentRoad · Automatic message</value></data>
+  <data name="RentalEvent.OwnerApproved" xml:space="preserve"><value>The rental request for {0} has been approved.</value></data>
+  <data name="RentalEvent.RenterApproved" xml:space="preserve"><value>Your rental request for {0} has been approved!</value></data>
+  <data name="RentalEvent.ApprovedTotal" xml:space="preserve"><value>Approved total (CAD)</value></data>
+  <data name="RentalEvent.ApprovalPreview" xml:space="preserve"><value>Rental request approved</value></data>
 </root>

@@ -99,7 +99,7 @@ public sealed partial class RentalRequestService
 
         try
         {
-            return await context.Database.CreateExecutionStrategy().ExecuteAsync(
+            var committed = await context.Database.CreateExecutionStrategy().ExecuteAsync(
                 async token =>
                 {
                     await using var database = CreateWriteContext();
@@ -135,6 +135,9 @@ public sealed partial class RentalRequestService
                     return result;
                 },
                 cancellationToken);
+
+            await NotifyRequestAsync(user, committed);
+            return committed;
         }
         catch (Exception exception) when (exception is DbException or DbUpdateException or RetryLimitExceededException)
         {
@@ -165,8 +168,8 @@ public sealed partial class RentalRequestService
                 && (target == RentalStatus.Cancelled ? request.RenterId == actorId : request.Listing.OwnerId == actorId));
 
     /// <summary>
-    /// Checks legal transitions and date/availability rules, then conditionally updates only status and the
-    /// applicable timestamp.
+    /// Validates and applies a conditional lifecycle update, saving an approval event in the same transaction
+    /// only when a pending request newly becomes approved.
     /// </summary>
     /// <param name="database">The database context used for this operation.</param>
     /// <param name="request">The stored rental request whose terms and status are checked.</param>
@@ -276,6 +279,14 @@ public sealed partial class RentalRequestService
         else if (target == RentalStatus.Completed)
         {
             request.CompletedAtUtc = now;
+        }
+
+        if (target == RentalStatus.Approved)
+        {
+            var notification = await AddRentalMessageAsync(
+                database, request, RentalMessageEventType.RequestApproved, now, cancellationToken);
+
+            return RentalRequestServiceResult.Success(request) with { NotificationMessage = notification };
         }
 
         return RentalRequestServiceResult.Success(request);

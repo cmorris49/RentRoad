@@ -88,3 +88,8 @@
     .messages-keyboard-open .messages-chat-header { padding-block: .35rem; }
 }
 @media (prefers-reduced-motion: reduce) { .messages-history, .messages-inbox-scroll { scroll-behavior: auto; } }
+
+.message-action {
+    display: inline-block;
+    margin-bottom: .4rem;
+}
