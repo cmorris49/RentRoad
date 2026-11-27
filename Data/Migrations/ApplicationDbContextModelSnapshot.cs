@@ -473,6 +473,57 @@ namespace RentRoad.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("RentRoad.Models.ListingReviewSummary", b =>
+                {
+                    b.Property<int>("ListingId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("AttemptWindowStartedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("AttemptsInWindow")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ContentFingerprint")
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<DateTime?>("GeneratedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("GenerationExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("GenerationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Model")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<DateTime?>("NextAttemptAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SummarizedReviewCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SummaryText")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("ListingId");
+
+                    b.ToTable("ListingReviewSummaries", t =>
+                        {
+                            t.HasCheckConstraint("CK_ListingReviewSummaries_Claim", "([GenerationId] IS NULL AND [GenerationExpiresAtUtc] IS NULL) OR ([GenerationId] IS NOT NULL AND [GenerationExpiresAtUtc] IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_ListingReviewSummaries_Content", "([SummaryText] IS NULL AND [ContentFingerprint] IS NULL AND [Model] IS NULL AND [GeneratedAtUtc] IS NULL AND [SummarizedReviewCount] = 0) OR ([SummaryText] IS NOT NULL AND [ContentFingerprint] IS NOT NULL AND [Model] IS NOT NULL AND [GeneratedAtUtc] IS NOT NULL AND [SummarizedReviewCount] > 0)");
+
+                            t.HasCheckConstraint("CK_ListingReviewSummaries_Counts", "[SummarizedReviewCount] >= 0 AND [AttemptsInWindow] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("RentRoad.Models.Message", b =>
                 {
                     b.Property<int>("MessageId")
@@ -787,6 +838,15 @@ namespace RentRoad.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Listing");
+                });
+
+            modelBuilder.Entity("RentRoad.Models.ListingReviewSummary", b =>
+                {
+                    b.HasOne("RentRoad.Models.Listing", null)
+                        .WithOne()
+                        .HasForeignKey("RentRoad.Models.ListingReviewSummary", "ListingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RentRoad.Models.Message", b =>

@@ -24,6 +24,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Review> Reviews => Set<Review>();
 
+    public DbSet<ListingReviewSummary> ListingReviewSummaries => Set<ListingReviewSummary>();
+
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
 
     /// <summary>
@@ -43,6 +45,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         ConfigureConversation(modelBuilder);
         ConfigureMessage(modelBuilder);
         ConfigureReview(modelBuilder);
+        ConfigureListingReviewSummary(modelBuilder);
         ConfigureUserActivity(modelBuilder);
         ConfigureUtcTimestamps(modelBuilder);
     }
@@ -295,6 +298,33 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithOne(request => request.Review)
                 .HasForeignKey<Review>(review => review.RentalRequestId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    /// <summary>
+    /// Configures the derived summary cache without cascading changes to historical listing data.
+    /// </summary>
+    /// <param name="modelBuilder">The builder used to configure the entity model.</param>
+    private static void ConfigureListingReviewSummary(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ListingReviewSummary>(entity =>
+        {
+            entity.HasKey(summary => summary.ListingId);
+            entity.Property(summary => summary.ListingId).ValueGeneratedNever();
+            entity.Property(summary => summary.SummaryText).HasMaxLength(1000);
+            entity.Property(summary => summary.ContentFingerprint).HasMaxLength(64).IsUnicode(false);
+            entity.Property(summary => summary.Model).HasMaxLength(120);
+            entity.HasOne<Listing>().WithOne().HasForeignKey<ListingReviewSummary>(summary => summary.ListingId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table =>
+            {
+                table.HasCheckConstraint("CK_ListingReviewSummaries_Counts",
+                    "[SummarizedReviewCount] >= 0 AND [AttemptsInWindow] >= 0");
+                table.HasCheckConstraint("CK_ListingReviewSummaries_Content",
+                    "([SummaryText] IS NULL AND [ContentFingerprint] IS NULL AND [Model] IS NULL AND [GeneratedAtUtc] IS NULL AND [SummarizedReviewCount] = 0) OR ([SummaryText] IS NOT NULL AND [ContentFingerprint] IS NOT NULL AND [Model] IS NOT NULL AND [GeneratedAtUtc] IS NOT NULL AND [SummarizedReviewCount] > 0)");
+                table.HasCheckConstraint("CK_ListingReviewSummaries_Claim",
+                    "([GenerationId] IS NULL AND [GenerationExpiresAtUtc] IS NULL) OR ([GenerationId] IS NOT NULL AND [GenerationExpiresAtUtc] IS NOT NULL)");
+            });
         });
     }
 

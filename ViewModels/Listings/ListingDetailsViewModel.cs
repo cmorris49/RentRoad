@@ -16,6 +16,8 @@ public sealed record ListingDetailsViewModel(int ListingId, string? Title, strin
 {
     public bool IsOwnedByViewer { get; init; }
 
+    public ReviewSummary? AiReviewSummary { get; init; }
+
     /// <summary>Contains only an existing participant-authorized conversation matching this public listing.</summary>
     public int? ReturnConversationId { get; init; }
 

@@ -1,0 +1,33 @@
+@model RentRoad.ViewModels.Listings.ListingDetailsViewModel
+@using RentRoad.Services.Reviews
+@{
+    var summary = Model.AiReviewSummary;
+    var feedback = TempData["ReviewSummaryFeedback"] as string;
+}
+@if (summary?.IsAiGenerated == true || (Model.IsOwnedByViewer && summary is not null))
+{
+    <section class="ai-review-summary" id="ai-review-summary" aria-labelledby="ai-review-summary-heading">
+        <h3 id="ai-review-summary-heading">@Text["AiReviewSummary.Heading"]</h3>
+        @if (feedback is not null && Model.IsOwnedByViewer)
+        {
+            <p class="ai-review-summary-feedback" role="status">@feedback</p>
+        }
+        @if (summary?.IsAiGenerated == true)
+        {
+            <p class="ai-review-summary-text">@summary.SummaryText</p>
+            <p class="ai-review-summary-meta">@Text["AiReviewSummary.Generated", summary.SummarizedReviewCount]</p>
+            <a href="#original-reviews">@Text["AiReviewSummary.Originals"]</a>
+        }
+        else if (Model.IsOwnedByViewer && summary is not null)
+        {
+            <p>@Text[$"AiReviewSummary.{summary.State}"]</p>
+            @if (summary.CanGenerate)
+            {
+                <form asp-controller="Reviews" asp-action="GenerateSummary" asp-route-listingId="@Model.ListingId" method="post">
+                    <p class="ai-review-summary-meta" id="ai-review-disclosure">@Text["AiReviewSummary.OwnerDisclosure"]</p>
+                    <button class="btn btn-outline-primary btn-sm" type="submit" aria-describedby="ai-review-disclosure">@Text["AiReviewSummary.Generate"]</button>
+                </form>
+            }
+        }
+    </section>
+}

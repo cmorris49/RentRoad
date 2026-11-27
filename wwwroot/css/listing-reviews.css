@@ -12,3 +12,43 @@
 @media (max-width: 575.98px) {
     .listing-review-heading { align-items: flex-start; flex-direction: column; gap: .25rem; }
 }
+.ai-review-summary {
+    scroll-margin-top: 5rem;
+    margin-block: 1rem 1.5rem;
+    padding: 1rem;
+    border-inline-start: 3px solid var(--rr-accent);
+    background: var(--rr-surface);
+    color: var(--rr-text);
+    overflow-wrap: anywhere;
+}
+
+.ai-review-summary h3 {
+    font-size: 1.1rem;
+    margin-block: 0 .75rem;
+}
+
+.ai-review-summary-meta {
+    color: var(--rr-secondary);
+    font-size: .875rem;
+    margin-block: .75rem;
+}
+
+.ai-review-summary-feedback {
+    font-weight: 600;
+}
+
+.ai-review-summary form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+}
+
+.ai-review-summary form p {
+    flex: 1 1 20rem;
+    margin: 0;
+}
+
+.ai-review-summary form button {
+    flex-shrink: 0;
+}

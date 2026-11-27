@@ -16,6 +16,7 @@ public sealed class ListingsController : Controller
     private readonly IListingService listings;
     private readonly IMessagingService messaging;
     private readonly IReviewService? reviews;
+    private readonly IReviewSummaryService? reviewSummaries;
 
     /// <summary>
     /// Initializes public browsing with the existing listing service.
@@ -23,14 +24,17 @@ public sealed class ListingsController : Controller
     /// <param name="listings">The service used to retrieve and manage listing information.</param>
     /// <param name="messaging">The service used to authorize and access conversations and messages.</param>
     /// <param name="reviews">The registered review eligibility service; optional for callers that do not request authenticated review eligibility.</param>
+    /// <param name="reviewSummaries">The optional cache-only AI summary reader.</param>
     public ListingsController(
         IListingService listings,
         IMessagingService messaging,
-        IReviewService? reviews = null)
+        IReviewService? reviews = null,
+        IReviewSummaryService? reviewSummaries = null)
     {
         this.listings = listings;
         this.messaging = messaging;
         this.reviews = reviews;
+        this.reviewSummaries = reviewSummaries;
     }
 
     /// <summary>
@@ -138,6 +142,8 @@ public sealed class ListingsController : Controller
             {
                 EligibleReviewRentals = reviews is null ? Array.Empty<ReviewRentalChoice>()
                     : await reviews.GetEligibleRentalsAsync(id, User, cancellationToken),
+                AiReviewSummary = reviewSummaries is null ? null
+                    : await reviewSummaries.GetSummaryAsync(id, cancellationToken),
                 ReturnConversationId = returnConversationId,
                 IsOwnedByViewer = await listings.IsOwnedByAsync(id, User, cancellationToken),
                 SimilarListings = similar.Select(ListingSummaryViewModel.FromResult).ToArray()

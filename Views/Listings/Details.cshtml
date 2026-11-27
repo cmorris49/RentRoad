@@ -121,13 +121,14 @@
                 ListingId = Model.ListingId, Choices = Model.EligibleReviewRentals, PanelId = "review-details",
                 ReturnUrl = Url.Action("Details", "Listings", new { id = Model.ListingId }) + "#reviews-heading" })' />
         }
+        <partial name="_AiReviewSummary" model="Model" />
         @if (Model.AverageRating is double averageRating)
         {
             <p class="listing-reviews-summary" aria-label="@Model.ReviewSummary">
                 <span aria-hidden="true">★★★★★</span>
                 @Model.ReviewSummary
             </p>
-            <div class="listing-reviews-list">
+            <div class="listing-reviews-list" id="original-reviews">
                 @foreach (var review in Model.Reviews)
                 {
                     <article class="listing-review">

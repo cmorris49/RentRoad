@@ -1657,4 +1657,52 @@
   <data name="RentalEvent.RenterApproved" xml:space="preserve"><value>Your rental request for {0} has been approved!</value></data>
   <data name="RentalEvent.ApprovedTotal" xml:space="preserve"><value>Approved total (CAD)</value></data>
   <data name="RentalEvent.ApprovalPreview" xml:space="preserve"><value>Rental request approved</value></data>
+  <data name="AiReviewSummary.Heading" xml:space="preserve">
+    <value>AI Review Summary</value>
+  </data>
+  <data name="AiReviewSummary.Generated" xml:space="preserve">
+    <value>AI-generated from {0} reviews. Check the original feedback; AI can make mistakes.</value>
+  </data>
+  <data name="AiReviewSummary.Originals" xml:space="preserve">
+    <value>Read original reviews</value>
+  </data>
+  <data name="AiReviewSummary.Generate" xml:space="preserve">
+    <value>Generate summary</value>
+  </data>
+  <data name="AiReviewSummary.OwnerDisclosure" xml:space="preserve">
+    <value>Generation sends limited public ratings and comments to Google Gemini. Avoid personal details in reviews.</value>
+  </data>
+  <data name="AiReviewSummary.Current" xml:space="preserve">
+    <value>The current AI review summary is ready. Unchanged reviews reuse the saved result.</value>
+  </data>
+  <data name="AiReviewSummary.NotGenerated" xml:space="preserve">
+    <value>No current AI summary is available. You can generate one from the written reviews.</value>
+  </data>
+  <data name="AiReviewSummary.InsufficientReviews" xml:space="preserve">
+    <value>There are not enough meaningful written reviews for an AI summary yet.</value>
+  </data>
+  <data name="AiReviewSummary.NotConfigured" xml:space="preserve">
+    <value>AI review summaries are not available yet. Original reviews remain below.</value>
+  </data>
+  <data name="AiReviewSummary.Busy" xml:space="preserve">
+    <value>A summary is already being generated, or generation is busy. Please check again shortly.</value>
+  </data>
+  <data name="AiReviewSummary.RateLimited" xml:space="preserve">
+    <value>The generation limit has been reached. Please try again later.</value>
+  </data>
+  <data name="AiReviewSummary.Unavailable" xml:space="preserve">
+    <value>The AI summary is temporarily unavailable. Original reviews remain below.</value>
+  </data>
+  <data name="AiReviewSummary.InvalidResponse" xml:space="preserve">
+    <value>The generated summary could not be validated. Original reviews remain below.</value>
+  </data>
+  <data name="AiReviewSummary.ReviewsChanged" xml:space="preserve">
+    <value>The reviews changed during generation. The result was discarded. Please try again later.</value>
+  </data>
+  <data name="AiReviewSummary.PrivacyHeading" xml:space="preserve">
+    <value>AI review summaries</value>
+  </data>
+  <data name="AiReviewSummary.PrivacyDisclosure" xml:space="preserve">
+    <value>When an authorized listing owner requests an AI summary, RentRoad sends a limited selection of publicly visible review ratings and comments to Google Gemini. Account identifiers, reviewer profiles and private rental messages are excluded. Common contact details are filtered, but review text may still contain personal information. Please avoid including personal details in reviews. Generated summaries are labelled as AI-generated and may contain errors; the original reviews remain available.</value>
+  </data>
 </root>

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RentRoad.Services.Reviews;
 using RentRoad.ViewModels.Reviews;
 
@@ -118,7 +119,7 @@ public sealed class ReviewsController : Controller
     }
 
     /// <summary>
-    /// Exposes existing deterministic summary data only for published listings; this does not invoke AI.
+    /// Reads cached AI summary data only for published listings without contacting Gemini.
     /// </summary>
     /// <param name="listingId">The public listing identifier.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
@@ -137,7 +138,36 @@ public sealed class ReviewsController : Controller
             return NotFound();
         }
 
-        return Json(await reviewSummaryService.GetSummaryAsync(listingId, cancellationToken));
+        var summary = await reviewSummaryService.GetSummaryAsync(listingId, cancellationToken);
+        return summary.State == ReviewSummaryState.NotFound ? NotFound() : Json(summary);
+    }
+
+    /// <summary>
+    /// Generates a bounded summary only for the authenticated owner using an antiforgery-protected POST.
+    /// </summary>
+    /// <param name="listingId">The public listing selected by the route.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>A privacy-preserving failure or a redirect with concise requester feedback.</returns>
+    [Authorize]
+    [HttpPost("summary/{listingId:int}/generate")]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting(ReviewSummaryServiceCollectionExtensions.GENERATION_POLICY)]
+    public async Task<IActionResult> GenerateSummaryAsync(int listingId, CancellationToken cancellationToken = default)
+    {
+        var result = await reviewSummaryService.GenerateAsync(listingId, User, cancellationToken);
+
+        if (result.State == ReviewSummaryState.NotFound)
+        {
+            return NotFound();
+        }
+
+        if (result.State == ReviewSummaryState.Forbidden)
+        {
+            return Forbid();
+        }
+
+        TempData["ReviewSummaryFeedback"] = SharedResource.Get($"AiReviewSummary.{result.State}");
+        return RedirectToAction("Details", "Listings", new { id = listingId }, "ai-review-summary");
     }
 
     /// <summary>

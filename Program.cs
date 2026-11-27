@@ -31,7 +31,7 @@ builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IRentalRequestService, RentalRequestService>();
 builder.Services.AddScoped<IRentalManagementReadService, RentalManagementReadService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<IReviewSummaryService, ReviewSummaryService>();
+builder.Services.AddReviewSummaries(builder.Configuration);
 builder.Services.AddScoped<IMessagingService, MessagingService>();
 builder.Services.AddMessagingRealtime();
 builder.Services.AddScoped<IListingImageService, ListingImageService>();
@@ -61,6 +61,7 @@ app.UseRequestLocalization();
 
 app.UseMiddleware<MessagingHubOriginMiddleware>();
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapStaticAssets();

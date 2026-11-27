@@ -13,4 +13,12 @@ public sealed record ReviewSummary(
     double AverageRating,
     int ReviewCount,
     string SummaryText,
-    DateTime GeneratedAtUtc);
+    DateTime GeneratedAtUtc)
+{
+    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+    public ReviewSummaryState State { get; init; } = ReviewSummaryState.Deterministic;
+    public bool IsAiGenerated => State == ReviewSummaryState.Current;
+    public string? Model { get; init; }
+    public int SummarizedReviewCount { get; init; }
+    public bool CanGenerate { get; init; }
+}
